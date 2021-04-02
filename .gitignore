@@ -1,6 +1,9 @@
 *.o
 *.d
 *.crf
-h750/*.htm
-h750/*.map
-h750/*.lnp
+*.axf
+MDK-ARM/h750/*.htm
+MDK-ARM/h750/*.map
+MDK-ARM/h750/*.lnp
+MDK-ARM/h750/*.dep
+MDK-ARM/h750/*.hex
