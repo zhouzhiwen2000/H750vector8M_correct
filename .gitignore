@@ -2,8 +2,10 @@
 *.d
 *.crf
 *.axf
+*.ZhouZhiwen
 MDK-ARM/h750/*.htm
 MDK-ARM/h750/*.map
 MDK-ARM/h750/*.lnp
 MDK-ARM/h750/*.dep
 MDK-ARM/h750/*.hex
+
