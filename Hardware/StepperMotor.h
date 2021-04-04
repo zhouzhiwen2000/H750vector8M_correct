@@ -6,8 +6,10 @@
  extern "C" {//functions&variables exported to C
 #endif
 	 void stepper_ISR(void);
-	 void set_stepper(int time,int steps);
-	 void set_stepper_abs(int steps);
+	 void set_stepper(int steps);
+	 void set_speed(int speed);
+	 int get_speed(void);
+	 int get_steps(void);
 #ifdef __cplusplus
 }
 

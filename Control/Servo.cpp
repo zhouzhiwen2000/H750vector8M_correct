@@ -21,9 +21,9 @@ class action_servo
 };
 
 action_servo * Current=0;
-action_servo * Last=0;
 _act * ptr_test;
 uint32_t time_start;
+int stepper_lastvalue=0;
 void Servo_Server()
 {
 	if(Current!=0)
@@ -42,7 +42,7 @@ void Servo_Server()
 					if(action.id!=0xFFF0)
 						WritePos(action.id,action.value,Current->time,0);
 					else
-						set_stepper(Current->time,action.value);
+						set_stepper(action.value);
 					Current->acts.erase(Current->acts.begin());
 				}
 //				WritePos(Current->id,Current->value,Current->time,0);
@@ -63,11 +63,15 @@ void Servo_Add_Action(uint32_t id,uint32_t value,uint32_t time)
 	New->acts.push_back(action1);
 	New->time=time;
 	New->Next=0;
-	if(Last==0) Last=New;//queue is empty now
-	else
+	if(action1.id==0xFFF0)
 	{
-		Last->Next=New;
-		Last=New;
+		if(Current==0)
+		{
+			stepper_lastvalue=get_steps();//update steps
+		}
+		int stepper_time=value*2.0*get_speed()/10;//in ms
+		New->time=stepper_time;
+		stepper_lastvalue=value;
 	}
 	if(Current==0)//initial steps
 	{
@@ -78,7 +82,9 @@ void Servo_Add_Action(uint32_t id,uint32_t value,uint32_t time)
 			if(action.id!=0xFFF0)
 				WritePos(action.id,action.value,Current->time,0);
 			else
-				set_stepper(Current->time,action.value);
+			{
+				set_stepper(action.value);
+			}
 			Current->acts.erase(Current->acts.begin());
 		}
 //		WritePos(Current->id,Current->value,Current->time,0);
@@ -93,12 +99,26 @@ void Servo_Add_Action_bunch(std::vector<_act>  acts,uint32_t time)
 	New->acts=acts;
 	New->time=time;
 	New->Next=0;
-	if(Last==0) Last=New;//queue is empty now
-	else
+	
+	std::vector<_act>::iterator it = acts.begin();
+	for(; it != acts.end(); ++it)
 	{
-		Last->Next=New;
-		Last=New;
+		_act & act=*it;
+		if(act.id==0xFFF0)
+		{
+			if(Current==0)
+			{
+					stepper_lastvalue=get_steps();//update steps
+			}
+			int stepper_time=act.value*2.0*get_speed()/10;//in ms
+			if(stepper_time>time)
+			{
+				New->time=stepper_time;
+			}
+			stepper_lastvalue=act.value;
+		}
 	}
+	
 	if(Current==0)//initial steps
 	{
 		Current=New;
@@ -109,7 +129,7 @@ void Servo_Add_Action_bunch(std::vector<_act>  acts,uint32_t time)
 			if(action.id!=0xFFF0)
 				WritePos(action.id,action.value,Current->time,0);
 			else
-				set_stepper(Current->time,action.value);
+				set_stepper(action.value);
 			Current->acts.erase(Current->acts.begin());
 		}
 		time_start=HAL_GetTick();

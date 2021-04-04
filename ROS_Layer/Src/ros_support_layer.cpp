@@ -62,7 +62,7 @@ void setup(void)
     nh.advertise(current_pos);
     nh.subscribe(display_sub);
     nh.subscribe(xy_sub);
-		set_stepper(50000,-10000);
+		set_stepper(-10000);
     Servo_Add_Action(0,0,5000);//simply wait
 		Servo_TransPos();
 //		Servo_Grab();
@@ -209,7 +209,7 @@ void callback_display(const std_msgs::String& msg)
 }	
 void callback_xy(const geometry_msgs::Point& msg)
 {
-	set_stepper_abs(msg.y);//25-900 
+	set_stepper(msg.y);//25-900 
 	WritePos(100,1024-msg.x,100,50);//200-370 259middle
 }
 

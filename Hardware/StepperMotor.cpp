@@ -7,7 +7,7 @@ extern "C" {//functions&variables imported from C
 
 }
 using namespace std;
-int current_speed=1;//1 for 0.1ms per halfstep
+int current_speed=15;//1 for 0.1ms per halfstep
 int current_halfstep_left=0;
 int current_halfstep_total=0;
 int clear_count=0;
@@ -56,7 +56,7 @@ void stepper_ISR(void)
 				current_halfstep_total=0;
 				clear_count=0;
 				clear_flag=false;
-				set_stepper(500,200);
+				set_stepper(200);
 			}
 			else
 			{
@@ -67,18 +67,24 @@ void stepper_ISR(void)
 	}
 }
 
-void set_stepper(int time,int steps)
+void set_stepper(int steps)
 {
-	current_speed=time*10/(abs(2*steps-current_halfstep_total));
-	current_speed-=1;
-	if(current_speed<1)current_speed=1;
 	current_halfstep_left=(2*steps-current_halfstep_total);
 }
 
-void set_stepper_abs(int steps)
+void set_speed(int speed)
 {
-	current_speed=25;
-	current_halfstep_left=(2*steps-current_halfstep_total);
+	current_speed=speed;
+}
+
+int get_speed(void)
+{
+	return current_speed;
+}
+
+int get_steps(void)
+{
+	return current_halfstep_total/2;
 }
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
