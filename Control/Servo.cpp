@@ -21,6 +21,7 @@ class action_servo
 };
 
 action_servo * Current=0;
+action_servo * Last=0;
 _act * ptr_test;
 uint32_t time_start;
 int stepper_lastvalue=0;
@@ -69,9 +70,15 @@ void Servo_Add_Action(uint32_t id,uint32_t value,uint32_t time)
 		{
 			stepper_lastvalue=get_steps();//update steps
 		}
-		int stepper_time=fabs(value-stepper_lastvalue)*2.0*get_speed()/10;//in ms
+		int stepper_time=fabs((int)value-(int)stepper_lastvalue)*2.0*get_speed()/10;//in ms
 		New->time=stepper_time;
 		stepper_lastvalue=value;
+	}
+	if(Last==0) Last=New;//queue is empty now
+	else
+	{
+		Last->Next=New;
+		Last=New;
 	}
 	if(Current==0)//initial steps
 	{
@@ -118,7 +125,12 @@ void Servo_Add_Action_bunch(std::vector<_act>  acts,uint32_t time)
 			stepper_lastvalue=act.value;
 		}
 	}
-	
+	if(Last==0) Last=New;//queue is empty now
+	else
+	{
+		Last->Next=New;
+		Last=New;
+	}
 	if(Current==0)//initial steps
 	{
 		Current=New;
@@ -139,7 +151,7 @@ void Servo_Add_Action_bunch(std::vector<_act>  acts,uint32_t time)
 void Servo_TransPos()//grab&to Middle
 {
 	Servo_Add_Action(2,266,1000);
-	Servo_Add_Action(3,1023,1000);
+	Servo_Add_Action(3,1020,1000);
 }
 
 void All_Middle()//grab&to Middle
@@ -153,7 +165,7 @@ void All_Middle()//grab&to Middle
 void Servo_PutLeft()
 {
 	Servo_Add_Action(2,266,1000);
-	Servo_Add_Action(3,1023,1000);//transion
+	Servo_Add_Action(3,1020,1000);//transion
   Servo_Add_Action(0xFFF0,50,3000);
 	Servo_Add_Action(100,840,500);
 	Servo_Add_Action(1,336,1500);
@@ -165,7 +177,7 @@ void Servo_PutLeft()
 void Servo_PutMiddle()
 {
 	Servo_Add_Action(2,266,1000);
-	Servo_Add_Action(3,1023,1000);//transion
+	Servo_Add_Action(3,1020,1000);//transion
   Servo_Add_Action(0xFFF0,800,3000);
 	Servo_Add_Action(100,765,500);
 	Servo_Add_Action(1,529,1500);
@@ -177,7 +189,7 @@ void Servo_PutMiddle()
 void Servo_PutRight()
 {
 	Servo_Add_Action(2,266,1000);
-	Servo_Add_Action(3,1023,1000);//transion
+	Servo_Add_Action(3,1020,1000);//transion
   Servo_Add_Action(0xFFF0,50,3000);
 	Servo_Add_Action(100,666,500);
 	Servo_Add_Action(1,720,1500);
@@ -189,7 +201,7 @@ void Servo_PutRight()
 void Servo_GrabLeft()
 {
 	Servo_Add_Action(2,266,1000);
-	Servo_Add_Action(3,1023,1000);//transion
+	Servo_Add_Action(3,1020,1000);//transion
   Servo_Add_Action(0xFFF0,50,3000);
 	Servo_Add_Action(101,765,500);
 	Servo_Add_Action(100,840,500);
@@ -202,7 +214,7 @@ void Servo_GrabLeft()
 void Servo_GrabMiddle()
 {
 	Servo_Add_Action(2,266,1000);
-	Servo_Add_Action(3,1023,1000);//transion
+	Servo_Add_Action(3,1020,1000);//transion
   Servo_Add_Action(0xFFF0,800,3000);
 	Servo_Add_Action(101,765,500);
 	Servo_Add_Action(100,765,500);
@@ -215,7 +227,7 @@ void Servo_GrabMiddle()
 void Servo_GrabRight()
 {
 	Servo_Add_Action(2,266,1000);
-	Servo_Add_Action(3,1023,1000);//transion
+	Servo_Add_Action(3,1020,1000);//transion
   Servo_Add_Action(0xFFF0,50,3000);
 	Servo_Add_Action(101,765,500);
 	Servo_Add_Action(100,666,500);
@@ -232,7 +244,7 @@ void Servo_GrabRight()
 void Servo_Grab_Upper()//done
 {
 	Servo_Add_Action(2,266,1000);
-	Servo_Add_Action(3,1023,1000);//transion
+	Servo_Add_Action(3,1020,1000);//transion
   Servo_Add_Action(0xFFF0,900,5000);
 	Servo_Add_Action(101,765,500);
 	Servo_Add_Action(100,765,500);
@@ -240,13 +252,13 @@ void Servo_Grab_Upper()//done
 	Servo_Add_Action(3,1023,1000);	
 	Servo_Add_Action(2,674,1000);
 	Servo_Add_Action(101,580,1000);
-	Servo_TransPos();
+//	Servo_TransPos();
 }
 
 void Servo_Grab_Pose_Lower()//done
 {
 	Servo_Add_Action(2,266,1000);
-	Servo_Add_Action(3,1023,1000);//transion
+	Servo_Add_Action(3,1020,1000);//transion
   Servo_Add_Action(0xFFF0,50,5000);
 	Servo_Add_Action(101,765,500);
 	Servo_Add_Action(100,765,500);
@@ -258,7 +270,7 @@ void Servo_Grab_Pose_Lower()//done
 }
 void Servo_Grab_Pose2_Lower()//done
 {
-	Servo_Add_Action(2,970,1000);
+	Servo_Add_Action(2,955,1000);//was 970
 //	Servo_Add_Action(101,580,1000);
 }
 void Servo_Grab()//done
@@ -269,7 +281,7 @@ void Servo_Grab()//done
 void Servo_Put_Upper()
 {
 	Servo_Add_Action(2,266,1000);
-	Servo_Add_Action(3,1023,1000);//transion
+	Servo_Add_Action(3,1020,1000);//transion
   Servo_Add_Action(0xFFF0,700,3000);
 	Servo_Add_Action(100,765,500);
 	Servo_Add_Action(1,529,1500);
@@ -279,13 +291,13 @@ void Servo_Put_Upper()
   Servo_Add_Action(0xFFF0,50,3000);
 	Servo_Add_Action(2,500,1000);	
 //	Servo_Add_Action(3,940,500);
-	Servo_TransPos();
+//	Servo_TransPos();
 }
 
 void Servo_Put_Lower()
 {
 	Servo_Add_Action(2,266,1000);
-	Servo_Add_Action(3,1023,1000);//transion
+	Servo_Add_Action(3,1020,1000);//transion
   Servo_Add_Action(0xFFF0,700,3000);
 	Servo_Add_Action(100,765,500);
 	Servo_Add_Action(1,529,1500);
@@ -295,17 +307,37 @@ void Servo_Put_Lower()
   Servo_Add_Action(0xFFF0,50,3000);
 	Servo_Add_Action(2,990,500);	
 	Servo_Add_Action(3,880,500);
-	Servo_TransPos();
+//	Servo_TransPos();
 	
 }
 void Servo_Camera()//done
 {
 	Servo_Add_Action(2,266,1000);
-	Servo_Add_Action(3,1023,1000);//transion
-  Servo_Add_Action(0xFFF0,50,3000);
+	Servo_Add_Action(3,1020,1000);//transion
+  Servo_Add_Action(0xFFF0,100,3000);
 	Servo_Add_Action(101,765,500);
 	Servo_Add_Action(100,765,500);
 	Servo_Add_Action(1,529,1500);
-	Servo_Add_Action(3,1023,1000);	
+	Servo_Add_Action(3,1020,100);	
 	Servo_Add_Action(2,460,500);
+}
+
+void Servo_Camera1()//done
+{
+	Servo_Add_Action(2,266,1000);
+	Servo_Add_Action(3,1020,1000);//transion
+  Servo_Add_Action(0xFFF0,100,3000);
+	Servo_Add_Action(101,765,500);
+	Servo_Add_Action(100,765,500);
+	Servo_Add_Action(1,529,1500);
+	Servo_Add_Action(3,1005,1000);
+	Servo_Add_Action(2,460,500);
+}
+void Servo_Camera2()//done
+{
+	Servo_Add_Action(2,330,1000);
+	Servo_Add_Action(3,1020,1000);//transion
+  Servo_Add_Action(0xFFF0,100,3000);
+	Servo_Add_Action(101,765,500);
+	Servo_Add_Action(100,765,500);
 }

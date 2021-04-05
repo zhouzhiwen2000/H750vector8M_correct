@@ -21,6 +21,8 @@ void Servo_Put_Lower();
 void Servo_Grab_Pose2_Lower();
 void All_Middle();
 void Servo_Camera();
+void Servo_Camera1();
+void Servo_Camera2();
 #ifdef __cplusplus
 }
 #endif

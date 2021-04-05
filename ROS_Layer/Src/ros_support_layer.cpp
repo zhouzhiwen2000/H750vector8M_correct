@@ -63,16 +63,25 @@ void setup(void)
     nh.subscribe(display_sub);
     nh.subscribe(xy_sub);
 		set_stepper(-10000);
-    Servo_Add_Action(0,0,5000);//simply wait
-		Servo_TransPos();
+    Servo_Add_Action(0,0,1000);//simply wait
+//		Servo_TransPos();
 //		Servo_Grab();
 //		Servo_Put_Lower();
 //		Servo_Grab();		
 //		Servo_Put_Upper();
 //	  Servo_Grab_Pose_Lower();
+//		Servo_Add_Action(0,0,3000);
 //	  Servo_Grab_Pose2_Lower();
 //	  Servo_Grab();
 //	  All_Middle();
+//	  Servo_PutLeft();
+//		Servo_PutMiddle();
+//		Servo_PutRight();
+//		Servo_Camera1();
+//		Servo_Camera2();
+		Servo_Camera();
+		Servo_Grab_Pose_Lower();
+		Servo_Grab_Pose2_Lower();
 		Screen_printString("helloWorld!");
 }
 
@@ -199,6 +208,12 @@ void callback_servo(const std_msgs::UInt8& msg)
 			break;
 		case 0x0E:
 		  All_Middle();
+			break;
+		case 0x0F:
+		  Servo_Camera1();
+			break;
+		case 0x10:
+		  Servo_Camera2();
 			break;		
 		
 	}
