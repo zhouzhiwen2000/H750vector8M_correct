@@ -224,7 +224,20 @@ void callback_display(const std_msgs::String& msg)
 }	
 void callback_xy(const geometry_msgs::Point& msg)
 {
-	set_stepper(msg.y);//25-900 
-	WritePos(100,1024-msg.x,100,50);//200-370 259middle
+	if(Is_Servo_Idle())
+	{
+		if(msg.y!=0)
+		{
+			set_stepper(msg.y);//25-900 
+			update_Servo_state(0xFFF0,msg.y);
+		}
+		if(msg.x!=0)
+		{
+			WritePos(100,1024-msg.x,100,50);//200-370 259middle
+			update_Servo_state(100,msg.y);
+		}	
+	  
+
+	}
 }
 

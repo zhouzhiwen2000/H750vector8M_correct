@@ -23,6 +23,8 @@ void All_Middle();
 void Servo_Camera();
 void Servo_Camera1();
 void Servo_Camera2();
+bool Is_Servo_Idle();
+void update_Servo_state(uint32_t id,int value);
 #ifdef __cplusplus
 }
 #endif
