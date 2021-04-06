@@ -25,6 +25,8 @@ action_servo * Last=0;
 _act * ptr_test;
 uint32_t time_start;
 int stepper_lastvalue=0;
+double servo_speed=1;
+uint32_t servo_lastvalue[10]={0};
 void Servo_Server()
 {
 	if(Current!=0)
@@ -53,7 +55,7 @@ void Servo_Server()
 	}
 }
 
-void Servo_Add_Action(uint32_t id,uint32_t value,uint32_t time)
+void Servo_Add_Action(uint32_t id,uint32_t value,int32_t time)
 {
 	action_servo * New=new action_servo() ;
 //	New->id=id;
@@ -74,6 +76,14 @@ void Servo_Add_Action(uint32_t id,uint32_t value,uint32_t time)
 		New->time=stepper_time;
 		stepper_lastvalue=value;
 	}
+	
+	if(time==-1)
+	{
+		int servo_time=fabs((int)value-(int)servo_lastvalue[id])/servo_speed;//in ms
+		New->time=servo_time;
+		servo_lastvalue[id]=value;
+	}
+	
 	if(Last==0) Last=New;//queue is empty now
 	else
 	{

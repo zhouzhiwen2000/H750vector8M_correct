@@ -4,7 +4,7 @@
 extern "C" {
 #endif
 void Servo_Server();
-void Servo_Add_Action(uint32_t id,uint32_t value,uint32_t time);
+void Servo_Add_Action(uint32_t id,uint32_t value,int32_t time);
 void Servo_InitPos();
 void Servo_TransPos();
 void Servo_PutLeft();

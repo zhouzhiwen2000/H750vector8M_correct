@@ -33,13 +33,13 @@ void Control()
 //    Move_Z=0;//necessary
 //		Target_A=1;
     if(Run_Flag==1&&relative==1)
-		{
-			if(pending_flag==1)
-			{
-				Kinematic_Analysis_Relative(Move_X,Move_Y,Move_Z);
-				pending_flag=0;
-			}
-		}
+    {
+        if(pending_flag==1)
+        {
+            Kinematic_Analysis_Relative(Move_X,Move_Y,Move_Z);
+            pending_flag=0;
+        }
+    }
     else
         Kinematic_Analysis(Move_X,Move_Y,Move_Z);
     if(delay_flag==1)
@@ -76,7 +76,7 @@ void Control()
         Motor_D=Incremental_PI_D(Encoder_D,-Motor_D);         //===ËÙ¶È±Õ»·¿ØÖÆ¼ÆËãµç»úD×îÖÕPWM
     }
     Xianfu_Pwm(8400);                 //===PWMÏŞ·ù
-		Set_Pwm(Motor_A,Motor_B,Motor_C,Motor_D);     //===¸³Öµ¸øPWM¼Ä´æÆ÷
+    Set_Pwm(Motor_A,Motor_B,Motor_C,Motor_D);     //===¸³Öµ¸øPWM¼Ä´æÆ÷
 }
 
 /**************************************************************************
@@ -409,30 +409,30 @@ void Count_Velocity(void) //ÓÃÓÚ¿ØÖÆÎ»ÖÃÄ£Ê½ÏÂµÄËÙ¶È ¾ø¶ÔÎ»ÖÃÄ£Ê½ÏÂ£¬ÈôÔÚÖ´ĞĞÍê³
 {
     static double Divider;
     double Bias_X,Bias_Y,Bias_Z;
-		if(relative==0)
+    if(relative==0)
     {
-			Bias_X=(Move_X-Last_Target_X);  //ÇóXÖáÎ»ÒÆÁ¿
-			Bias_Y=(Move_Y-Last_Target_Y);	//ÇóYÖáÎ»ÒÆÁ¿
-			Bias_Z=(Move_Z-Last_Target_Z);	//ÇóZÖáÎ»ÒÆÁ¿
-		}
-		else
-		{
-			Bias_X=Move_X;  //ÇóXÖáÎ»ÒÆÁ¿
-			Bias_Y=Move_Y;	//ÇóYÖáÎ»ÒÆÁ¿
-			Bias_Z=Move_Z;	//ÇóZÖáÎ»ÒÆÁ¿
-		}
-	
+        Bias_X=(Move_X-Last_Target_X);  //ÇóXÖáÎ»ÒÆÁ¿
+        Bias_Y=(Move_Y-Last_Target_Y);	//ÇóYÖáÎ»ÒÆÁ¿
+        Bias_Z=(Move_Z-Last_Target_Z);	//ÇóZÖáÎ»ÒÆÁ¿
+    }
+    else
+    {
+        Bias_X=Move_X;  //ÇóXÖáÎ»ÒÆÁ¿
+        Bias_Y=Move_Y;	//ÇóYÖáÎ»ÒÆÁ¿
+        Bias_Z=Move_Z;	//ÇóZÖáÎ»ÒÆÁ¿
+    }
+
     if(Bias_X!=0||Bias_Y!=0||Bias_Z!=0)Divider=sqrt(Bias_X*Bias_X+Bias_Y*Bias_Y+Bias_Z*Bias_Z);
     if(Bias_X!=0||Bias_Y!=0||Bias_Z!=0) Kinematic_Analysis2(Bias_X,Bias_Y,Bias_Z);
 
     Xianfu_Velocity(RC_Velocity*myabs(Rate_A)/Divider,RC_Velocity*myabs(Rate_B)/Divider,RC_Velocity*myabs(Rate_C)/Divider,RC_Velocity*myabs(Rate_D)/Divider);//·½ÏòÏŞËÙ£¬ÄÜÏŞÖÆ×ÜËÙ¶È²»³¬¹ıRC_Velocity
     /*¶ÔBias_X£¬Y,Z½øĞĞKinematic_AnalysisÔÙ³ıÒÔBiasµÄÄ£È»ºó³ËÒÔRC_VelocityÏàµ±Óë¶Ô·½ÏòÎªĞĞ½ø·½Ïò£¨Bias_X·½Ïò£©£¬´óĞ¡ÎªRC_VelocityµÄÊ¸Á¿½øĞĞKinematic_Analysis£©¡£*/
     if(relative==0)
-		{
-			Last_Target_X=Move_X;   //±£´æXÖáÉÏÒ»´ÎµÄÎ»ÖÃĞÅÏ¢£¬±ãÓÚµ÷ÓÃ
-			Last_Target_Y=Move_Y;   //±£´æYÖáÉÏÒ»´ÎµÄÎ»ÖÃĞÅÏ¢£¬±ãÓÚµ÷ÓÃ
-			Last_Target_Z=Move_Z;   //±£´æZÖáÉÏÒ»´ÎµÄÎ»ÖÃĞÅÏ¢£¬±ãÓÚµ÷ÓÃ
-		}
+    {
+        Last_Target_X=Move_X;   //±£´æXÖáÉÏÒ»´ÎµÄÎ»ÖÃĞÅÏ¢£¬±ãÓÚµ÷ÓÃ
+        Last_Target_Y=Move_Y;   //±£´æYÖáÉÏÒ»´ÎµÄÎ»ÖÃĞÅÏ¢£¬±ãÓÚµ÷ÓÃ
+        Last_Target_Z=Move_Z;   //±£´æZÖáÉÏÒ»´ÎµÄÎ»ÖÃĞÅÏ¢£¬±ãÓÚµ÷ÓÃ
+    }
 }
 
 /**************************************************************************
