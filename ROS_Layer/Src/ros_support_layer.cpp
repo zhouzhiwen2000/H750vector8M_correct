@@ -64,7 +64,7 @@ void setup(void)
     nh.subscribe(xy_sub);
 		set_stepper(-10000);
     Servo_Add_Action(0,0,1000);//simply wait
-//		Servo_TransPos();
+		Servo_TransPos();
 //		Servo_Grab();
 //		Servo_Put_Lower();
 //		Servo_Grab();		
@@ -79,9 +79,9 @@ void setup(void)
 //		Servo_PutRight();
 //		Servo_Camera1();
 //		Servo_Camera2();
-		Servo_Camera();
-		Servo_Grab_Pose_Lower();
-		Servo_Grab_Pose2_Lower();
+//		Servo_Camera();
+//		Servo_Grab_Pose_Lower();
+//		Servo_Grab_Pose2_Lower();
 		Screen_printString("helloWorld!");
 }
 
