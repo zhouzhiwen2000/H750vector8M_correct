@@ -44,8 +44,9 @@ ros::Subscriber<geometry_msgs::Point> xy_sub("/car/xy", &callback_xy);
 ros::Subscriber<std_msgs::String> display_sub("/car/display", &callback_display);
 ros::Subscriber<geometry_msgs::Point> servo_speed_sub("/car/servo_speed", &callback_servo_speed);
 geometry_msgs::Point pos_msg;
+std_msgs::Bool idle;
 ros::Publisher current_pos("cur_pos", &pos_msg);
-ros::Publisher servo_status("/servo_status", &pos_msg);
+ros::Publisher servo_status("/servo_status", &idle);
 
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart) {
     nh.getHardware()->flush();
@@ -93,14 +94,16 @@ void setup(void)
 //		Servo_Grab_Pose2_Lower();
 		Screen_printString("helloWorld!");
 }
-
-void loop(void)
+void publish_servo_status()
 {
-	  std_msgs::Bool idle;
 		idle.data=Is_Servo_Idle();
 		servo_status.publish(&idle);
+}
+void loop(void)
+{
+
     nh.spinOnce();
-	
+		publish_servo_status();
 //		publish_pos();
 		
     //HAL_Delay(1000);
@@ -234,6 +237,7 @@ void callback_servo(const std_msgs::UInt8& msg)
 			break;		
 		
 	}
+	publish_servo_status();
 }
 void callback_display(const std_msgs::String& msg)
 {
@@ -241,20 +245,18 @@ void callback_display(const std_msgs::String& msg)
 }	
 void callback_xy(const geometry_msgs::Point& msg)
 {
-	if(Is_Servo_Idle())
-	{
 		if(msg.y!=0)
 		{
-			set_stepper(msg.y);//25-900 
-			update_Servo_state(0xFFF0,msg.y);
+//			set_stepper(msg.y);//25-900 
+//			update_Servo_state(0xFFF0,msg.y);
+				Servo_Add_Action(0xFFF0,msg.y,-1);
 		}
 		if(msg.x!=0)
 		{
-			WritePos(100,1024-msg.x,100,50);//200-370 259middle
-			update_Servo_state(100,msg.y);
-		}	
-	  
-
-	}
+//			WritePos(100,1024-msg.x,100,50);//200-370 259middle
+//			update_Servo_state(100,msg.y);
+				Servo_Add_Action(100,1024-msg.x,-1);
+		}
+	publish_servo_status();
 }
 
