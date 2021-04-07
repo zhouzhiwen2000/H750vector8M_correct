@@ -12,13 +12,7 @@ int current_halfstep_left=0;
 int current_halfstep_total=0;
 int clear_count=0;
 bool clear_flag=false;
-//typedef struct
-//{
-//	int speed;
-//	int step_left;
-//}
-//stepper_act;
-//vector <stepper_act> stepper_buffer;
+
 
 void stepper_ISR(void)
 {
@@ -65,14 +59,6 @@ void stepper_ISR(void)
             }
         }
     }
-//    if(HAL_GPIO_ReadPin(SW_GPIO_Port,SW_Pin)==0)
-//    {
-//        current_halfstep_left=0;
-//        current_halfstep_total=0;
-//        clear_count=0;
-//        clear_flag=false;
-//        set_stepper(200);
-//    }
 }
 
 void set_stepper(int steps)
