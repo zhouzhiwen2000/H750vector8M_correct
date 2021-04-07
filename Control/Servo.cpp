@@ -265,14 +265,14 @@ void Servo_GrabRight()
 
 
 
-/******************To be done********************/
+
 void Servo_Grab_Upper()//done
 {
     Servo_Add_Action(2,266,-1);
     Servo_Add_Action(3,1020,-1);//transion
-    Servo_Add_Action(0xFFF0,900,-1);
+//    Servo_Add_Action(0xFFF0,900,-1);
     Servo_Add_Action(101,765,-1);
-    Servo_Add_Action(100,765,-1);
+//    Servo_Add_Action(100,765,-1);
     Servo_Add_Action(1,529,-1);
     Servo_Add_Action(3,1023,-1);
     Servo_Add_Action(2,674,-1);
@@ -284,9 +284,9 @@ void Servo_Grab_Pose_Lower()//done
 {
     Servo_Add_Action(2,266,-1);
     Servo_Add_Action(3,1020,-1);//transion
-    Servo_Add_Action(0xFFF0,50,-1);
+//    Servo_Add_Action(0xFFF0,50,-1);
     Servo_Add_Action(101,765,-1);
-    Servo_Add_Action(100,765,-1);
+//    Servo_Add_Action(100,765,-1);
     Servo_Add_Action(1,529,-1);
     Servo_Add_Action(3,865,-1);
     Servo_Add_Action(2,945,-1);
@@ -307,8 +307,8 @@ void Servo_Put_Upper()
 {
     Servo_Add_Action(2,266,-1);
     Servo_Add_Action(3,1020,-1);//transion
-    Servo_Add_Action(0xFFF0,700,-1);
-    Servo_Add_Action(100,765,-1);
+//    Servo_Add_Action(0xFFF0,700,-1);
+//    Servo_Add_Action(100,765,-1);
     Servo_Add_Action(1,529,-1);
     Servo_Add_Action(3,977,-1);
     Servo_Add_Action(2,885,-1);
@@ -323,8 +323,8 @@ void Servo_Put_Lower()
 {
     Servo_Add_Action(2,266,-1);
     Servo_Add_Action(3,1020,-1);//transion
-    Servo_Add_Action(0xFFF0,700,-1);
-    Servo_Add_Action(100,765,-1);
+//    Servo_Add_Action(0xFFF0,700,-1);
+//    Servo_Add_Action(100,765,-1);
     Servo_Add_Action(1,529,-1);
     Servo_Add_Action(3,799,-1);
     Servo_Add_Action(2,1021,-1);
@@ -339,9 +339,9 @@ void Servo_Camera()//done
 {
     Servo_Add_Action(2,266,-1);
     Servo_Add_Action(3,1020,-1);//transion
-    Servo_Add_Action(0xFFF0,100,-1);
+//    Servo_Add_Action(0xFFF0,100,-1);
     Servo_Add_Action(101,765,-1);
-    Servo_Add_Action(100,765,-1);
+//    Servo_Add_Action(100,765,-1);
     Servo_Add_Action(1,529,-1);
     Servo_Add_Action(3,1020,-1);
     Servo_Add_Action(2,460,-1);
@@ -351,9 +351,9 @@ void Servo_Camera1()//done
 {
     Servo_Add_Action(2,266,-1);
     Servo_Add_Action(3,1020,-1);//transion
-    Servo_Add_Action(0xFFF0,100,-1);
+//    Servo_Add_Action(0xFFF0,100,-1);
     Servo_Add_Action(101,765,-1);
-    Servo_Add_Action(100,765,-1);
+//    Servo_Add_Action(100,765,-1);
     Servo_Add_Action(1,529,-1);
     Servo_Add_Action(3,1005,-1);
     Servo_Add_Action(2,460,-1);
@@ -362,9 +362,9 @@ void Servo_Camera2()//done
 {
     Servo_Add_Action(2,330,-1);
     Servo_Add_Action(3,1020,-1);//transion
-    Servo_Add_Action(0xFFF0,100,-1);
+//    Servo_Add_Action(0xFFF0,100,-1);
     Servo_Add_Action(101,765,-1);
-    Servo_Add_Action(100,765,-1);
+//    Servo_Add_Action(100,765,-1);
 }
 bool Is_Servo_Idle()
 {
