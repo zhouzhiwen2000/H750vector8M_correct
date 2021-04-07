@@ -184,13 +184,13 @@ void callback_servo(const std_msgs::UInt8& msg)
 	switch(msg.data)
 	{
 		case 0x00:
-			Servo_PutLeft();
+			Servo_PutRight();
 			break;
 		case 0x01:
 			Servo_PutMiddle();
 			break;		
 		case 0x02:
-			Servo_PutRight();
+			Servo_PutLeft();
 			break;		
 		case 0x03:
 			Servo_GrabLeft();

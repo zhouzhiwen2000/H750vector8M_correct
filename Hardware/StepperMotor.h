@@ -7,7 +7,7 @@
 #endif
 	 void stepper_ISR(void);
 	 void set_stepper(int steps);
-	 void set_speed(int speed);
+	 void set_speed(int speed);//实际上是时间，越大越慢
 	 int get_speed(void);
 	 int get_steps(void);
 #ifdef __cplusplus

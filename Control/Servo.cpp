@@ -25,7 +25,7 @@ action_servo * Last=0;
 _act * ptr_test;
 uint32_t time_start;
 int stepper_lastvalue=0;
-double servo_speed[10]={0.5,0.5,0.3,0.3,0.3,0.5,0.5,0.5,0.5,0.5};
+double servo_speed[10]={0.5,0.5,0.3,0.3,0.3,0.5,0.5,0.5,0.5,0.5};//{none,1,2,3,4,100,101,none....}
 int servo_lastvalue[10]= {0};
 uint32_t get_array_seq(uint32_t id)
 {
@@ -193,14 +193,14 @@ void All_Middle()//grab&to Middle
 void Servo_PutLeft()
 {
     Servo_Add_Action(2,266,-1);
-    Servo_Add_Action(3,1020,-1);//transion
-    Servo_Add_Action(0xFFF0,50,-1);
-    Servo_Add_Action(100,840,-1);
+    Servo_Add_Action(3,1020,-1);
+    Servo_Add_Action(0xFFF0,50,-1);//stepper 25-900
+    Servo_Add_Action(100,840,-1);//left/right
     Servo_Add_Action(1,336,-1);
-    Servo_Add_Action(3,985,-1);
+    Servo_Add_Action(3,985,-1);//3-4-2
     Servo_Add_Action(2,22,-1);
-    Servo_Add_Action(101,765,-1);
-    Servo_TransPos();
+    Servo_Add_Action(101,765,-1);//claw
+    Servo_TransPos();//default status
 }
 void Servo_PutMiddle()
 {
