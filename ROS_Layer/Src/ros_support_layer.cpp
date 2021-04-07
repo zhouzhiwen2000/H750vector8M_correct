@@ -4,6 +4,7 @@
 #include "Screen_drv.h"
 #include <std_msgs/Float64.h>
 #include <std_msgs/UInt8.h>
+#include <std_msgs/Bool.h>
 #include <std_msgs/String.h>
 #include "Servo.h"
 #include "StepperMotor.h"
@@ -26,6 +27,7 @@ extern "C" {
 void callback_pos(const geometry_msgs::Point& msg);
 void callback_speed(const geometry_msgs::Point& msg);
 void callback_speedlimit(const std_msgs::Float64& msg);
+void callback_servo_speed(const geometry_msgs::Point& msg);
 void callback_mode(const std_msgs::UInt8& msg);
 void callback_servo(const std_msgs::UInt8& msg);
 void callback_xy(const geometry_msgs::Point& msg);
@@ -40,8 +42,10 @@ ros::Subscriber<std_msgs::UInt8> carmode_sub("/car/mode", &callback_mode);
 ros::Subscriber<std_msgs::UInt8> servo_sub("/car/servo", &callback_servo);
 ros::Subscriber<geometry_msgs::Point> xy_sub("/car/xy", &callback_xy);
 ros::Subscriber<std_msgs::String> display_sub("/car/display", &callback_display);
+ros::Subscriber<geometry_msgs::Point> servo_speed_sub("/car/servo_speed", &callback_servo_speed);
 geometry_msgs::Point pos_msg;
 ros::Publisher current_pos("cur_pos", &pos_msg);
+ros::Publisher servo_status("/servo_status", &pos_msg);
 
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart) {
     nh.getHardware()->flush();
@@ -59,12 +63,17 @@ void setup(void)
     nh.subscribe(carspeedlimit_sub);
     nh.subscribe(carmode_sub);
     nh.subscribe(servo_sub);	
-    nh.advertise(current_pos);
+    nh.advertise(servo_status);
     nh.subscribe(display_sub);
     nh.subscribe(xy_sub);
+	  nh.subscribe(servo_speed_sub);
 		set_stepper(-10000);
     Servo_Add_Action(0,0,1000);//simply wait
 		Servo_TransPos();
+		Servo_Grab_Upper();
+		Servo_TransPos();
+		Servo_Grab_Upper();
+	  Servo_TransPos();
 //		Servo_Grab();
 //		Servo_Put_Lower();
 //		Servo_Grab();		
@@ -87,8 +96,11 @@ void setup(void)
 
 void loop(void)
 {
-
+	  std_msgs::Bool idle;
+		idle.data=Is_Servo_Idle();
+		servo_status.publish(&idle);
     nh.spinOnce();
+	
 //		publish_pos();
 		
     //HAL_Delay(1000);
@@ -126,6 +138,11 @@ void callback_pos(const geometry_msgs::Point& msg)//cm
 void callback_speedlimit(const std_msgs::Float64& msg)//cm/s
 {
     RC_Velocity=msg.data*8.556169931964706;
+}
+
+void callback_servo_speed(const geometry_msgs::Point& msg)//cm/s
+{
+    change_servo_speed(msg.x,msg.y);
 }
 
 void callback_mode(const std_msgs::UInt8& msg)//pos_mode 0:absolute 1:relative

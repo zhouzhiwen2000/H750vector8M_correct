@@ -25,6 +25,7 @@ void Servo_Camera1();
 void Servo_Camera2();
 bool Is_Servo_Idle();
 void update_Servo_state(uint32_t id,int value);
+void change_servo_speed(uint32_t id, double speed);
 #ifdef __cplusplus
 }
 #endif

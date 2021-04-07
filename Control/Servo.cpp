@@ -25,11 +25,11 @@ action_servo * Last=0;
 _act * ptr_test;
 uint32_t time_start;
 int stepper_lastvalue=0;
-double servo_speed=1;
+double servo_speed[10]={0.5,0.5,0.3,0.3,0.3,0.5,0.5,0.5,0.5,0.5};
 int servo_lastvalue[10]= {0};
 uint32_t get_array_seq(uint32_t id)
 {
-	if(id>=100)id=id-96;
+	if(id>=100)id=id-95;
 	return id;
 }
 void Servo_Server()
@@ -85,8 +85,8 @@ void Servo_Add_Action(uint32_t id,uint32_t value,int32_t time)
     {
         if(time==-1)
         {
-            int servo_time=fabs((int)value-(int)servo_lastvalue[get_array_seq(id)])/servo_speed;//in ms
-            New->time=servo_time;
+            int servo_time=fabs((int)value-(int)servo_lastvalue[get_array_seq(id)])/servo_speed[get_array_seq(id)];//in ms
+            New->time=servo_time+1;
         }
         servo_lastvalue[get_array_seq(id)]=value;
     }
@@ -144,7 +144,7 @@ void Servo_Add_Action_bunch(std::vector<_act>  acts,int32_t time)
         {
             if(time==-1)
             {
-                int servo_time=fabs((int)act.value-(int)servo_lastvalue[get_array_seq(act.id)])/servo_speed;//in ms
+                int servo_time=fabs((int)act.value-(int)servo_lastvalue[get_array_seq(act.id)])/servo_speed[get_array_seq(act.id)];//in ms
                 New->time=servo_time;
             }
             servo_lastvalue[get_array_seq(act.id)]=act.value;
@@ -175,8 +175,11 @@ void Servo_Add_Action_bunch(std::vector<_act>  acts,int32_t time)
 
 void Servo_TransPos()//grab&to Middle
 {
+	  Servo_Add_Action(1,529,-1);
     Servo_Add_Action(2,266,-1);
-    Servo_Add_Action(3,1020,-1);
+    Servo_Add_Action(3,1000,-1);
+	  Servo_Add_Action(4,720,-1);
+		Servo_Add_Action(100,765,-1);
 }
 
 void All_Middle()//grab&to Middle
@@ -269,15 +272,14 @@ void Servo_GrabRight()
 void Servo_Grab_Upper()//done
 {
     Servo_Add_Action(2,266,-1);
-    Servo_Add_Action(3,1020,-1);//transion
-//    Servo_Add_Action(0xFFF0,900,-1);
+    Servo_Add_Action(3,1000,-1);
+	  Servo_Add_Action(4,720,-1);
     Servo_Add_Action(101,765,-1);
-//    Servo_Add_Action(100,765,-1);
     Servo_Add_Action(1,529,-1);
-    Servo_Add_Action(3,1023,-1);
-    Servo_Add_Action(2,674,-1);
+    Servo_Add_Action(3,1010,-1);
+    Servo_Add_Action(2,528,-1);
+		Servo_Add_Action(4,791,-1);
     Servo_Add_Action(101,580,-1);
-//	Servo_TransPos();
 }
 
 void Servo_Grab_Pose_Lower()//done
@@ -378,4 +380,8 @@ void update_Servo_state(uint32_t id,int value)
     {
         servo_lastvalue[get_array_seq(id)]=value;
     }
+}
+void change_servo_speed(uint32_t id, double speed)
+{
+	servo_speed[id]=speed;
 }
