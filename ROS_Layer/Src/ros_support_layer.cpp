@@ -72,9 +72,9 @@ void setup(void)
     Servo_Add_Action(0,0,1000);//simply wait
 		Servo_TransPos();
 		Servo_Grab_Upper();
-		Servo_TransPos();
-		Servo_Grab_Upper();
-	  Servo_TransPos();
+//		Servo_TransPos();
+//		Servo_Grab_Upper();
+//	  Servo_TransPos();
 //		Servo_Grab();
 //		Servo_Put_Lower();
 //		Servo_Grab();		

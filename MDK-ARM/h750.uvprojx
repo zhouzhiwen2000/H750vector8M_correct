@@ -339,7 +339,7 @@
               <MiscControls></MiscControls>
               <Define>USE_HAL_DRIVER,STM32H750xx,USE_FULL_LL_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>../Core/Inc;                                 ../Drivers/STM32H7xx_HAL_Driver/Inc;                                 ../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy;                                 ../Drivers/CMSIS/Device/ST/STM32H7xx/Include;                                 ../Drivers/CMSIS/Include;                                 ..\Hardware;                                 ..\ROS_Layer\Inc;                                 ..\Tuning_Utils;                                 ..\Control;                                 ..\ROS_Layer\Src</IncludePath>
+              <IncludePath>../Core/Inc;                                  ../Drivers/STM32H7xx_HAL_Driver/Inc;                                  ../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy;                                  ../Drivers/CMSIS/Device/ST/STM32H7xx/Include;                                  ../Drivers/CMSIS/Include;                                  ..\Hardware;                                  ..\ROS_Layer\Inc;                                  ..\Tuning_Utils;                                  ..\Control;                                  ..\ROS_Layer\Src</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
