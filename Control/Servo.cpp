@@ -457,8 +457,23 @@ void Servo_Camera2()//done
 	Servo_Add_Action(4,1000,-1);
 	Servo_Add_Action(3,420,-1);
 	Servo_Add_Action(2,560,-1);
-    Servo_Add_Action(3,140,-1);
+  Servo_Add_Action(3,140,-1);
 }
+
+void Servo_Put_Upper_Storage()
+{
+
+}
+void Servo_Put_Lower_Storage()
+{
+
+}
+
+void Servo_Camera3()
+{
+
+}
+
 bool Is_Servo_Idle()
 {
     return Current==0;

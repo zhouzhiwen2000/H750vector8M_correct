@@ -22,6 +22,7 @@ extern "C" {
     extern uint8_t pending_flag;
     extern double Last_Target_X,Last_Target_Y,Last_Target_Z;
     extern long int Position_A,Position_B,Position_C,Position_D; //PID控制相关变量
+		extern long int Target_A,Target_B,Target_C,Target_D;
 		
 }
 void callback_pos(const geometry_msgs::Point& msg);
@@ -45,8 +46,10 @@ ros::Subscriber<std_msgs::String> display_sub("/car/display", &callback_display)
 ros::Subscriber<geometry_msgs::Point> servo_speed_sub("/car/servo_speed", &callback_servo_speed);
 geometry_msgs::Point pos_msg;
 std_msgs::Bool idle;
+std_msgs::Float64 error_car;
 ros::Publisher current_pos("cur_pos", &pos_msg);
 ros::Publisher servo_status("/servo_status", &idle);
+ros::Publisher car_status("/car_status", &error_car);
 
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart) {
     nh.getHardware()->flush();
@@ -65,6 +68,7 @@ void setup(void)
 	nh.subscribe(carmode_sub);
 	nh.subscribe(servo_sub);	
 	nh.advertise(servo_status);
+	nh.advertise(car_status);
 	nh.subscribe(display_sub);
 	nh.subscribe(xy_sub);
 	nh.subscribe(servo_speed_sub);
@@ -110,11 +114,17 @@ void publish_servo_status()
 		idle.data=Is_Servo_Idle();
 		servo_status.publish(&idle);
 }
+void publish_car_status()
+{
+		error_car.data = (Position_A-Target_A)*(Position_A-Target_A)+(Position_B-Target_B)*(Position_B-Target_B)+(Position_C-Target_C)*(Position_C-Target_C)+(Position_D-Target_D)*(Position_D-Target_D);
+		car_status.publish(&error_car);
+}
 void loop(void)
 {
 
     nh.spinOnce();
 		publish_servo_status();
+		publish_car_status();
 //		publish_pos();
 		
     //HAL_Delay(1000);
@@ -245,8 +255,16 @@ void callback_servo(const std_msgs::UInt8& msg)
 			break;
 		case 0x10:
 		  Servo_Camera2();
-			break;		
-		
+			break;
+		case 0x11:
+			Servo_Camera3();
+			break;
+		case 0x12:
+			Servo_Put_Upper_Storage();
+			break;
+		case 0x13:
+			Servo_Put_Lower_Storage();
+			break;
 	}
 	
 	publish_servo_status();
