@@ -157,6 +157,7 @@ void callback_pos(const geometry_msgs::Point& msg)//cm
     Move_Z=(msg.z*R)*1711.23398;//waiting
     if(relative==1)
         pending_flag=1;
+		publish_car_status();
 }
 
 void callback_speedlimit(const std_msgs::Float64& msg)//cm/s
@@ -188,6 +189,7 @@ void callback_mode(const std_msgs::UInt8& msg)//pos_mode 0:absolute 1:relative
         }
         relative=msg.data;
     }
+		publish_car_status();
 }
 void publish_pos()
 {
