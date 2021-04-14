@@ -116,7 +116,15 @@ void publish_servo_status()
 }
 void publish_car_status()
 {
-		error_car.data = sqrt((Position_A-Target_A)*(Position_A-Target_A)+(Position_B-Target_B)*(Position_B-Target_B)+(Position_C-Target_C)*(Position_C-Target_C)+(Position_D-Target_D)*(Position_D-Target_D));
+		double pos_a=Position_A/1000.0;
+		double pos_b=Position_B/1000.0;
+		double pos_c=Position_C/1000.0;
+		double pos_d=Position_D/1000.0;	
+		double tgt_a=Target_A/1000.0;
+		double tgt_b=Target_B/1000.0;
+		double tgt_c=Target_C/1000.0;
+		double tgt_d=Target_D/1000.0;		
+		error_car.data = sqrt((pos_a-tgt_a)*(pos_a-tgt_a)+(pos_b-tgt_b)*(pos_b-tgt_b)+(pos_c-tgt_c)*(pos_c-tgt_c)+(pos_d-tgt_d)*(pos_d-tgt_d));
 		car_status.publish(&error_car);
 }
 void loop(void)
