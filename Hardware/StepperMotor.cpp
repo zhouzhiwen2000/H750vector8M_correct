@@ -50,7 +50,7 @@ void stepper_ISR(void)
                 current_halfstep_total=0;
                 clear_count=0;
                 clear_flag=false;
-                set_stepper(200);
+                set_stepper(450);
             }
             else
             {

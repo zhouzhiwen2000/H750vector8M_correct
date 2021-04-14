@@ -169,7 +169,7 @@ public:
   void initNode(char *portName)
   {
     hardware_.init(portName);
-    mode_ = 0;
+    mode_  = 0;
     bytes_ = 0;
     index_ = 0;
     topic_ = 0;

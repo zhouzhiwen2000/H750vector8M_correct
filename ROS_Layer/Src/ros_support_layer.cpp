@@ -58,20 +58,31 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 
 void setup(void)
 {
-    nh.initNode();
-    nh.subscribe(carspeed_sub);
-    nh.subscribe(carpos_sub);
-    nh.subscribe(carspeedlimit_sub);
-    nh.subscribe(carmode_sub);
-    nh.subscribe(servo_sub);	
-    nh.advertise(servo_status);
-    nh.subscribe(display_sub);
-    nh.subscribe(xy_sub);
-	  nh.subscribe(servo_speed_sub);
-		set_stepper(-10000);
-    Servo_Add_Action(0,0,1000);//simply wait
-		Servo_TransPos();
-		Servo_Grab_Upper();
+	nh.initNode();
+	nh.subscribe(carspeed_sub);
+	nh.subscribe(carpos_sub);
+	nh.subscribe(carspeedlimit_sub);
+	nh.subscribe(carmode_sub);
+	nh.subscribe(servo_sub);	
+	nh.advertise(servo_status);
+	nh.subscribe(display_sub);
+	nh.subscribe(xy_sub);
+	nh.subscribe(servo_speed_sub);
+	set_stepper(-10000);
+	Servo_Add_Action(0,0,1000);//simply wait
+	Servo_TransPos();
+	
+	
+//	Servo_Grab_Pose_Lower();
+	
+	
+	
+//	Servo_GrabRight();
+//	Servo_Put_Upper();
+
+	
+	
+//		Servo_Grab_Upper();
 //		Servo_TransPos();
 //		Servo_Grab_Upper();
 //	  Servo_TransPos();
@@ -237,6 +248,7 @@ void callback_servo(const std_msgs::UInt8& msg)
 			break;		
 		
 	}
+	
 	publish_servo_status();
 }
 void callback_display(const std_msgs::String& msg)

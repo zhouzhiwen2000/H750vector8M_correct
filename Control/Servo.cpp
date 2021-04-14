@@ -175,11 +175,11 @@ void Servo_Add_Action_bunch(std::vector<_act>  acts,int32_t time)
 
 void Servo_TransPos()//grab&to Middle
 {
-	  Servo_Add_Action(1,529,-1);
-    Servo_Add_Action(2,266,-1);
-    Servo_Add_Action(3,1000,-1);
-	  Servo_Add_Action(4,720,-1);
-		Servo_Add_Action(100,765,-1);
+	Servo_Add_Action(1,529,-1);
+	Servo_Add_Action(2,266,-1);
+	Servo_Add_Action(3,717,-1);
+	Servo_Add_Action(4,950,-1);
+	Servo_Add_Action(100,765,-1);
 }
 
 void All_Middle()//grab&to Middle
@@ -192,78 +192,128 @@ void All_Middle()//grab&to Middle
 
 void Servo_PutLeft()
 {
-    Servo_Add_Action(2,266,-1);
-    Servo_Add_Action(3,1020,-1);
-    Servo_Add_Action(0xFFF0,50,-1);//stepper 25-900
-    Servo_Add_Action(100,840,-1);//left/right
-    Servo_Add_Action(1,336,-1);
-    Servo_Add_Action(3,985,-1);//3-4-2
-    Servo_Add_Action(2,22,-1);
-    Servo_Add_Action(101,765,-1);//claw
-    Servo_TransPos();//default status
+	Servo_Add_Action(2,266,-1);
+    Servo_Add_Action(3,717,-1);//transion
+
+    Servo_Add_Action(1,385,-1);
+	Servo_Add_Action(2,500,-1);
+    Servo_Add_Action(3,685,-1);
+	Servo_Add_Action(4,200,-1);
+    Servo_Add_Action(2,415,-1);
+    Servo_Add_Action(101,850,-1);
+	
+	Servo_Add_Action(2,500,-1);
+	Servo_Add_Action(4,950,-1);
+	Servo_Add_Action(3,717,-1);
+	Servo_Add_Action(2,266,-1);
+	Servo_Add_Action(1,529,-1);
+
 }
+
+
 void Servo_PutMiddle()
 {
-    Servo_Add_Action(2,266,-1);
-    Servo_Add_Action(3,1020,-1);//transion
-    Servo_Add_Action(0xFFF0,800,-1);
-    Servo_Add_Action(100,765,-1);
-    Servo_Add_Action(1,529,-1);
-    Servo_Add_Action(3,1003,-1);
-    Servo_Add_Action(2,30,-1);
-    Servo_Add_Action(101,765,-1);
-    Servo_TransPos();
+	Servo_Add_Action(0xFFF0,850,-1);
+	
+	Servo_Add_Action(100,765,-1);
+
+	Servo_Add_Action(2,460,500);
+    Servo_Add_Action(1,529,500);
+    Servo_Add_Action(3,717,500);
+	Servo_Add_Action(4,500,500);
+    Servo_Add_Action(4,135,1000);
+	
+	Servo_Add_Action(101,850,-1);
+	
+	Servo_Add_Action(4,950,1000);
+	Servo_Add_Action(0xFFF0,450,-1);//Stepper Middle
+	Servo_TransPos();
+	
 }
+
+//1:685 2:380 3: 685 4:190
 void Servo_PutRight()
-{
-    Servo_Add_Action(2,266,-1);
-    Servo_Add_Action(3,1020,-1);//transion
-    Servo_Add_Action(0xFFF0,50,-1);
-    Servo_Add_Action(100,666,-1);
-    Servo_Add_Action(1,720,-1);
-    Servo_Add_Action(3,980,-1);
-    Servo_Add_Action(2,24,-1);
-    Servo_Add_Action(101,765,-1);
-    Servo_TransPos();
+{	
+	Servo_Add_Action(2,266,-1);
+    Servo_Add_Action(3,717,-1);//transion
+
+    Servo_Add_Action(1,695,-1);
+	Servo_Add_Action(2,500,-1);
+    Servo_Add_Action(3,685,-1);
+	Servo_Add_Action(4,200,-1);
+    Servo_Add_Action(2,415,-1);
+    Servo_Add_Action(101,850,-1);
+	
+	Servo_Add_Action(2,500,-1);
+	Servo_Add_Action(4,950,-1);
+	Servo_Add_Action(3,717,-1);
+	Servo_Add_Action(2,266,-1);
+	Servo_Add_Action(1,529,-1);
 }
+
 void Servo_GrabLeft()
 {
-    Servo_Add_Action(2,266,-1);
-    Servo_Add_Action(3,1020,-1);//transion
-    Servo_Add_Action(0xFFF0,50,-1);
-    Servo_Add_Action(101,765,-1);
-    Servo_Add_Action(100,840,-1);
-    Servo_Add_Action(1,336,-1);
-    Servo_Add_Action(3,985,-1);
-    Servo_Add_Action(2,50,-1);
-    Servo_Add_Action(101,580,-1);
-    Servo_TransPos();
+//	Servo_Add_Action(2,266,-1);
+//    Servo_Add_Action(3,717,-1);//transion
+	Servo_Add_Action(100,765,-1);
+	Servo_Add_Action(101,850,-1);
+
+    Servo_Add_Action(1,385,-1);
+	Servo_Add_Action(2,500,-1);
+    Servo_Add_Action(3,685,-1);
+	Servo_Add_Action(4,200,-1);
+    Servo_Add_Action(2,415,-1);
+    Servo_Grab();
+	
+	Servo_Add_Action(2,500,-1);
+	Servo_Add_Action(4,950,-1);
+	Servo_Add_Action(3,717,-1);
+	Servo_Add_Action(2,266,-1);
+	Servo_Add_Action(1,529,-1);
 }
 void Servo_GrabMiddle()
 {
-    Servo_Add_Action(2,266,-1);
-    Servo_Add_Action(3,1020,-1);//transion
-    Servo_Add_Action(0xFFF0,800,-1);
-    Servo_Add_Action(101,765,-1);
-    Servo_Add_Action(100,765,-1);
+	Servo_Add_Action(100,765,-1);
+	Servo_Add_Action(101,850,-1);
+	Servo_Add_Action(0xFFF0,850,-1);
+	
+//	Servo_Add_Action(100,765,-1);
+//	Servo_Add_Action(101,850,-1);
+	
+	Servo_Add_Action(2,460,-1);
     Servo_Add_Action(1,529,-1);
-    Servo_Add_Action(3,1003,-1);
-    Servo_Add_Action(2,50,-1);
-    Servo_Add_Action(101,580,-1);
-    Servo_TransPos();
+    Servo_Add_Action(3,717,-1);
+	Servo_Add_Action(4,500,-1);
+    Servo_Add_Action(4,135,-1);
+	
+	Servo_Grab();
+	
+	Servo_Add_Action(4,950,-1);
+	Servo_Add_Action(0xFFF0,450,-1);//Stepper Middle
+	Servo_TransPos();
+	
+	
+	
 }
 void Servo_GrabRight()
 {
-    Servo_Add_Action(2,266,-1);
-    Servo_Add_Action(3,1020,-1);//transion
-    Servo_Add_Action(0xFFF0,50,-1);
-    Servo_Add_Action(101,765,-1);
-    Servo_Add_Action(100,666,-1);
-    Servo_Add_Action(1,720,-1);
-    Servo_Add_Action(3,980,-1);
-    Servo_Add_Action(2,50,-1);
-    Servo_Add_Action(101,580,-1);
-    Servo_TransPos();
+//    Servo_Add_Action(2,266,-1);
+//    Servo_Add_Action(3,717,-1);//transion
+	Servo_Add_Action(100,765,-1); 
+	Servo_Add_Action(101,850,-1);
+
+    Servo_Add_Action(1,695,-1);
+	Servo_Add_Action(2,500,-1);
+    Servo_Add_Action(3,685,-1);
+	Servo_Add_Action(4,200,-1);
+    Servo_Add_Action(2,415,-1);
+    Servo_Grab();
+	
+	Servo_Add_Action(2,500,-1);
+	Servo_Add_Action(4,950,-1);
+	Servo_Add_Action(3,717,-1);
+	Servo_Add_Action(2,266,-1);
+	Servo_Add_Action(1,529,-1);
 }
 
 
@@ -271,29 +321,43 @@ void Servo_GrabRight()
 
 void Servo_Grab_Upper()//done
 {
-    Servo_Add_Action(2,266,-1);
-    Servo_Add_Action(3,1000,-1);
-	  Servo_Add_Action(4,720,-1);
-    Servo_Add_Action(101,765,-1);
+	
+	Servo_Add_Action(2,266,-1);
+    Servo_Add_Action(3,717,-1);//transion
+    Servo_Add_Action(0xFFF0,450,-1);
+    Servo_Add_Action(101,850,-1);
+    Servo_Add_Action(100,765,-1);
     Servo_Add_Action(1,529,-1);
-    Servo_Add_Action(3,1010,-1);
-    Servo_Add_Action(2,528,-1);
-		Servo_Add_Action(4,791,-1);
-    Servo_Add_Action(101,580,-1);
+    Servo_Add_Action(3,660,-1);
+	Servo_Add_Action(4,888,-1);
+    Servo_Add_Action(2,580,-1);
+    Servo_Grab();
+	
+	Servo_TransPos();
+	
+	
 }
 
-void Servo_Grab_Pose_Lower()//done
+void Servo_Grab_Pose_Lower()//抓地上的物块
 {
+
+    Servo_Add_Action(101,850,-1);
+	Servo_Add_Action(3,717,-1);
+	Servo_Add_Action(4,950,-1);
+	Servo_Add_Action(2,266,-1);
+	Servo_Add_Action(3,475,-1);
+	Servo_Add_Action(2,740,-1);
+	Servo_Add_Action(3,400,-1);
+	Servo_Add_Action(2,790,-1);
+	Servo_Add_Action(2,840,-1);
+    Servo_Add_Action(4,980,-1);
+	Servo_Add_Action(3,320,-1);
+	
+    Servo_Grab();
+	
     Servo_Add_Action(2,266,-1);
-    Servo_Add_Action(3,1020,-1);//transion
-//    Servo_Add_Action(0xFFF0,50,-1);
-    Servo_Add_Action(101,765,-1);
-//    Servo_Add_Action(100,765,-1);
-    Servo_Add_Action(1,529,-1);
-    Servo_Add_Action(3,865,-1);
-    Servo_Add_Action(2,945,-1);
-//	Servo_Add_Action(0xFFF0,900,5000);
-//	Servo_Add_Action(101,580,1000);
+	Servo_Add_Action(4,950,-1);
+    Servo_Add_Action(3,717,-1);
 }
 void Servo_Grab_Pose2_Lower()//done
 {
@@ -305,68 +369,95 @@ void Servo_Grab()//done
     Servo_Add_Action(101,580,-1);
 }
 
+//2:700 3:450 4:1000
 void Servo_Put_Upper()
 {
+	Servo_Add_Action(4,1000,-1);
+    Servo_Add_Action(3,450,-1);
+    Servo_Add_Action(2,700,-1);
+    Servo_Add_Action(101,850,-1);
+
+	Servo_Add_Action(3,600,-1);
     Servo_Add_Action(2,266,-1);
-    Servo_Add_Action(3,1020,-1);//transion
-//    Servo_Add_Action(0xFFF0,700,-1);
-//    Servo_Add_Action(100,765,-1);
-    Servo_Add_Action(1,529,-1);
-    Servo_Add_Action(3,977,-1);
-    Servo_Add_Action(2,885,-1);
-    Servo_Add_Action(101,765,-1);
-    Servo_Add_Action(0xFFF0,50,-1);
-    Servo_Add_Action(2,500,-1);
-//	Servo_Add_Action(3,940,500);
-//	Servo_TransPos();
+	Servo_Add_Action(3,717,-1);
+	Servo_Add_Action(4,950,-1);
+
 }
 
+//2: 840  3: 320  4:980  放下的状态
+//2: 740  3: 475  4:950  起来的中间状态
 void Servo_Put_Lower()
 {
-    Servo_Add_Action(2,266,-1);
-    Servo_Add_Action(3,1020,-1);//transion
+	
+//    Servo_Add_Action(2,266,-1);
+//    Servo_Add_Action(3,717,-1);//transion
+	
 //    Servo_Add_Action(0xFFF0,700,-1);
 //    Servo_Add_Action(100,765,-1);
     Servo_Add_Action(1,529,-1);
-    Servo_Add_Action(3,799,-1);
-    Servo_Add_Action(2,1021,-1);
+	
+    Servo_Add_Action(3,320,-1);
+	Servo_Add_Action(4,980,-1);
+    Servo_Add_Action(2,840,-1);
     Servo_Add_Action(101,765,-1);
-    Servo_Add_Action(0xFFF0,50,-1);
-    Servo_Add_Action(2,990,-1);
-    Servo_Add_Action(3,880,-1);
-//	Servo_TransPos();
+
+	Servo_Add_Action(2,790,-1);
+	Servo_Add_Action(3,400,-1);
+	Servo_Add_Action(2,740,-1);
+	Servo_Add_Action(3,475,-1);
+	
+    Servo_Add_Action(2,266,-1);
+	Servo_Add_Action(4,950,-1);
+    Servo_Add_Action(3,717,-1);
 
 }
+
+//2: 560 3: 140  4: 1000 100: 850
 void Servo_Camera()//done
 {
     Servo_Add_Action(2,266,-1);
-    Servo_Add_Action(3,1020,-1);//transion
+    Servo_Add_Action(3,717,-1);//transion
 //    Servo_Add_Action(0xFFF0,100,-1);
-    Servo_Add_Action(101,765,-1);
+//    Servo_Add_Action(101,765,-1);
 //    Servo_Add_Action(100,765,-1);
     Servo_Add_Action(1,529,-1);
-    Servo_Add_Action(3,1020,-1);
-    Servo_Add_Action(2,460,-1);
+	
+	Servo_Add_Action(4,1000,-1);
+	Servo_Add_Action(3,420,-1);
+	Servo_Add_Action(2,560,-1);
+    Servo_Add_Action(3,140,-1);
+    
+	Servo_Add_Action(100,765,-1);
+}
+//2: 500 3: 295 4: 870
+
+void Servo_Camera1()//看台子上面的物块
+{
+//    Servo_Add_Action(2,266,-1);
+//    Servo_Add_Action(3,717,-1);//transion
+	
+	
+//    Servo_Add_Action(0xFFF0,100,-1);
+//    Servo_Add_Action(101,850,-1);
+//    Servo_Add_Action(100,765,-1);
+//    Servo_Add_Action(1,529,-1);
+	Servo_Add_Action(4,870,-1);
+    Servo_Add_Action(3,295,-1);
+	Servo_Add_Action(2,500,-1);
+	
+	Servo_Add_Action(100,850,-1);
+
 }
 
-void Servo_Camera1()//done
-{
-    Servo_Add_Action(2,266,-1);
-    Servo_Add_Action(3,1020,-1);//transion
-//    Servo_Add_Action(0xFFF0,100,-1);
-    Servo_Add_Action(101,765,-1);
-//    Servo_Add_Action(100,765,-1);
-    Servo_Add_Action(1,529,-1);
-    Servo_Add_Action(3,1005,-1);
-    Servo_Add_Action(2,460,-1);
-}
 void Servo_Camera2()//done
 {
-    Servo_Add_Action(2,330,-1);
-    Servo_Add_Action(3,1020,-1);//transion
-//    Servo_Add_Action(0xFFF0,100,-1);
-    Servo_Add_Action(101,765,-1);
-//    Servo_Add_Action(100,765,-1);
+    Servo_Add_Action(1,110,-1);
+	
+	
+	Servo_Add_Action(4,1000,-1);
+	Servo_Add_Action(3,420,-1);
+	Servo_Add_Action(2,560,-1);
+    Servo_Add_Action(3,140,-1);
 }
 bool Is_Servo_Idle()
 {
