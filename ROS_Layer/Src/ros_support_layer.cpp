@@ -34,6 +34,12 @@ void callback_servo(const std_msgs::UInt8& msg);
 void callback_xy(const geometry_msgs::Point& msg);
 void callback_display(const std_msgs::String& msg);
 void publish_pos();
+
+std_msgs::Bool test_data;
+void test_cb(const std_msgs::Bool& msg)
+{
+	test_data=msg;
+}
 ros::NodeHandle nh;
 //ros::Subscriber<std_msgs::Float64> carspeed_sub("/car/speed", &callback_speed);
 ros::Subscriber<geometry_msgs::Point> carpos_sub("/car/pos", &callback_pos);
@@ -42,6 +48,7 @@ ros::Subscriber<std_msgs::Float64> carspeedlimit_sub("/car/speedlimit", &callbac
 ros::Subscriber<std_msgs::UInt8> carmode_sub("/car/mode", &callback_mode);
 ros::Subscriber<std_msgs::UInt8> servo_sub("/car/servo", &callback_servo);
 ros::Subscriber<geometry_msgs::Point> xy_sub("/car/xy", &callback_xy);
+ros::Subscriber<std_msgs::Bool> test("/test", &test_cb);
 ros::Subscriber<std_msgs::String> display_sub("/car/display", &callback_display);
 ros::Subscriber<geometry_msgs::Point> servo_speed_sub("/car/servo_speed", &callback_servo_speed);
 geometry_msgs::Point pos_msg;
@@ -66,6 +73,7 @@ void setup(void)
 	nh.subscribe(carpos_sub);
 	nh.subscribe(carspeedlimit_sub);
 	nh.subscribe(carmode_sub);
+	nh.subscribe(test);
 	nh.subscribe(servo_sub);	
 	nh.advertise(servo_status);
 	nh.advertise(car_status);
@@ -111,8 +119,8 @@ void setup(void)
 }
 void publish_servo_status()
 {
-		idle.data=Is_Servo_Idle();
-		servo_status.publish(&idle);
+		//idle.data=Is_Servo_Idle();
+		servo_status.publish(&test_data);
 }
 void publish_car_status()
 {

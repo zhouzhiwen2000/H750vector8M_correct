@@ -147,7 +147,7 @@ int main(void)
 	LL_TIM_EnableCounter(TIM7);//¿ª¶¨Ê±Æ÷
 //	uint8_t EOL []={0xff,0xff,0xff};
 //	HAL_UART_Transmit(&huart7,EOL,3,0xffff);
-//	HAL_UART_Transmit(&huart4,"hello",5,0xffff);
+//	HAL_UART_Transmit(&huart1,"hello",5,0xffff);
   uint32_t count = 0;
   /* USER CODE END 2 */
 
@@ -212,12 +212,12 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.HSEState = RCC_HSE_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
-  RCC_OscInitStruct.PLL.PLLM = 1;
-  RCC_OscInitStruct.PLL.PLLN = 120;
+  RCC_OscInitStruct.PLL.PLLM = 5;
+  RCC_OscInitStruct.PLL.PLLN = 192;
   RCC_OscInitStruct.PLL.PLLP = 2;
   RCC_OscInitStruct.PLL.PLLQ = 2;
   RCC_OscInitStruct.PLL.PLLR = 2;
-  RCC_OscInitStruct.PLL.PLLRGE = RCC_PLL1VCIRANGE_3;
+  RCC_OscInitStruct.PLL.PLLRGE = RCC_PLL1VCIRANGE_2;
   RCC_OscInitStruct.PLL.PLLVCOSEL = RCC_PLL1VCOWIDE;
   RCC_OscInitStruct.PLL.PLLFRACN = 0;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
