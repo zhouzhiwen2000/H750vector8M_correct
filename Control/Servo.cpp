@@ -25,7 +25,7 @@ action_servo * Last=0;
 _act * ptr_test;
 uint32_t time_start;
 int stepper_lastvalue=0;
-double servo_speed[10]={0.5,0.5,0.3,0.3,0.3,0.5,0.5,0.5,0.5,0.5};//{none,1,2,3,4,100,101,none....}
+double servo_speed[10]={0.5,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.5,0.5};//{none,1,2,3,4,100,101,none....}
 int servo_lastvalue[10]= {0};
 uint32_t get_array_seq(uint32_t id)
 {
@@ -253,12 +253,12 @@ void Servo_PutRight()
 
 void Servo_GrabLeft()
 {
-//	Servo_Add_Action(2,266,-1);
+//    Servo_Add_Action(2,266,-1);
 //    Servo_Add_Action(3,717,-1);//transion
-	Servo_Add_Action(100,765,-1);
+	Servo_Add_Action(100,765,-1); 
 	Servo_Add_Action(101,850,-1);
 
-    Servo_Add_Action(1,385,-1);
+    Servo_Add_Action(1,695,-1);
 	Servo_Add_Action(2,500,-1);
     Servo_Add_Action(3,685,-1);
 	Servo_Add_Action(4,200,-1);
@@ -270,6 +270,7 @@ void Servo_GrabLeft()
 	Servo_Add_Action(3,717,-1);
 	Servo_Add_Action(2,266,-1);
 	Servo_Add_Action(1,529,-1);
+
 }
 void Servo_GrabMiddle()
 {
@@ -297,12 +298,12 @@ void Servo_GrabMiddle()
 }
 void Servo_GrabRight()
 {
-//    Servo_Add_Action(2,266,-1);
+	//	Servo_Add_Action(2,266,-1);
 //    Servo_Add_Action(3,717,-1);//transion
-	Servo_Add_Action(100,765,-1); 
+	Servo_Add_Action(100,765,-1);
 	Servo_Add_Action(101,850,-1);
 
-    Servo_Add_Action(1,695,-1);
+    Servo_Add_Action(1,385,-1);
 	Servo_Add_Action(2,500,-1);
     Servo_Add_Action(3,685,-1);
 	Servo_Add_Action(4,200,-1);
@@ -330,7 +331,7 @@ void Servo_Grab_Upper()//done
     Servo_Add_Action(1,529,-1);
     Servo_Add_Action(3,660,-1);
 	Servo_Add_Action(4,888,-1);
-    Servo_Add_Action(2,580,-1);
+    Servo_Add_Action(2,590,-1);
     Servo_Grab();
 	
 	Servo_TransPos();
@@ -340,7 +341,7 @@ void Servo_Grab_Upper()//done
 
 void Servo_Grab_Pose_Lower()//抓地上的物块
 {
-
+	Servo_Add_Action(100,765,-1);
     Servo_Add_Action(101,850,-1);
 	Servo_Add_Action(3,717,-1);
 	Servo_Add_Action(4,950,-1);
@@ -445,7 +446,7 @@ void Servo_Camera1()//看台子上面的物块
     Servo_Add_Action(3,295,-1);
 	Servo_Add_Action(2,500,-1);
 	
-	Servo_Add_Action(100,850,-1);
+	Servo_Add_Action(100,765,-1);
 
 }
 
