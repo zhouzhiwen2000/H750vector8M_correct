@@ -59,8 +59,6 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
     nh.getHardware()->reset_rbuf();
 }
 
-
-
 void setup(void)
 {
 	nh.initNode();
@@ -79,111 +77,8 @@ void setup(void)
 	Servo_TransPos();
 	
 	
-
-//	
-//	//970 430 735
-//	
-//	Servo_Add_Action(0xFFF0,25,-1);
-//	Servo_Add_Action(101,850,-1);
-//	
-//	//480 650 1000
-//	Servo_Add_Action(2,480,-1);
-//	Servo_Add_Action(4,1000,-1);
-//    Servo_Add_Action(3,650,-1);
-//	
-//	
-//	//520 670 1000
-//	Servo_Add_Action(2,520,-1);
-//    Servo_Add_Action(3,670,-1);
-
-//	
-//	//560 650 1000
-//	Servo_Add_Action(2,560,-1);
-//    Servo_Add_Action(3,650,-1);
-//	
-//	
-//	//600 630 1000
-//	Servo_Add_Action(2,600,-1);
-//    Servo_Add_Action(3,630,-1);
-//	
-//	//640 640 1000
-//	Servo_Add_Action(2,640,-1);
-//    Servo_Add_Action(3,640,-1);
-//	
-//	//660 600 1000
-//	Servo_Add_Action(2,660,-1);
-//    Servo_Add_Action(3,600,-1);
-//	
-//	//700 520 1000
-//	Servo_Add_Action(2,700,-1);
-//    Servo_Add_Action(3,520,-1);
-//	
-//	//720 430 1000
-//	Servo_Add_Action(3,430,-1);
-//	Servo_Add_Action(2,720,-1);
-//	
-//	
-//	Servo_Add_Action(0xFFF0,850,-1);
-//    
-//	
-//	//740 430 940
-//	Servo_Add_Action(2,740,-1);
-//	Servo_Add_Action(4,940,-1);
-//	
-//	//800 430 860
-//	Servo_Add_Action(2,800,-1);
-//	Servo_Add_Action(4,860,-1);
-//	
-//	
-//	//860 430 780
-//	Servo_Add_Action(2,860,-1);
-//	Servo_Add_Action(4,780,-1);
-//	
-//	//900 430 735
-//	Servo_Add_Action(2,900,-1);
-//	Servo_Add_Action(4,735,-1);
-//	
-//	//920 430 735
-//	Servo_Add_Action(2,920,-1);
-
-//	
-//	Servo_Grab();
-//	
-//	Servo_Add_Action(2,900,-1);
-//	Servo_Add_Action(4,780,-1);
-//	Servo_Add_Action(2,860,-1);
-//	Servo_Add_Action(4,860,-1);
-//	Servo_Add_Action(2,800,-1);
-//	Servo_Add_Action(4,940,-1);
-//	Servo_Add_Action(2,740,-1);
-//	Servo_Add_Action(0xFFF0,25,-1);
-//	
-//	
-//	//***********************************************************
-//	Servo_Add_Action(2,720,-1);
-//	Servo_Add_Action(3,430,-1);
-//    Servo_Add_Action(3,520,-1);
-//	Servo_Add_Action(2,700,-1);
-//    Servo_Add_Action(3,600,-1);
-//	Servo_Add_Action(2,660,-1);
-//    Servo_Add_Action(3,640,-1);
-//	Servo_Add_Action(2,640,-1);
-//    Servo_Add_Action(3,630,-1);
-//	Servo_Add_Action(2,600,-1);
-//    Servo_Add_Action(3,650,-1);
-//	Servo_Add_Action(2,560,-1);
-//    Servo_Add_Action(3,670,-1);
-//	Servo_Add_Action(2,520,-1);
-//    Servo_Add_Action(3,650,-1);
-//	Servo_Add_Action(4,1000,-1);
-//	Servo_Add_Action(2,480,-1);
-//	
-//	Servo_Add_Action(0xFFF0,450,-1);
-//	
-//	
-//	Servo_PutMiddle();
+//	Servo_Grab_Pose_Lower();
 	
-
 	
 	
 //	Servo_GrabRight();
@@ -221,7 +116,15 @@ void publish_servo_status()
 }
 void publish_car_status()
 {
-		error_car.data = sqrt((Position_A-Target_A)*(Position_A-Target_A)+(Position_B-Target_B)*(Position_B-Target_B)+(Position_C-Target_C)*(Position_C-Target_C)+(Position_D-Target_D)*(Position_D-Target_D));
+		double pos_a=Position_A/1000.0;
+		double pos_b=Position_B/1000.0;
+		double pos_c=Position_C/1000.0;
+		double pos_d=Position_D/1000.0;	
+		double tgt_a=Target_A/1000.0;
+		double tgt_b=Target_B/1000.0;
+		double tgt_c=Target_C/1000.0;
+		double tgt_d=Target_D/1000.0;		
+		error_car.data = sqrt((pos_a-tgt_a)*(pos_a-tgt_a)+(pos_b-tgt_b)*(pos_b-tgt_b)+(pos_c-tgt_c)*(pos_c-tgt_c)+(pos_d-tgt_d)*(pos_d-tgt_d));
 		car_status.publish(&error_car);
 }
 void loop(void)
