@@ -54,7 +54,7 @@ std_msgs::UInt64 msgid;
 ros::Publisher current_pos("cur_pos", &pos_msg);
 ros::Publisher servo_status("/servo_status", &idle);
 ros::Publisher car_status("/car_status", &error_car);
-ros::Publisher msgid_pub("/car/msgid", &error_car);
+ros::Publisher msgid_pub("/car/msgid", &msgid);
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart) {
     nh.getHardware()->flush();
 }
