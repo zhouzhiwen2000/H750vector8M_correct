@@ -138,6 +138,7 @@ void loop(void)
     nh.spinOnce();
 		publish_servo_status();
 		publish_car_status();
+		msgid_pub.publish(&msgid);
 //		publish_pos();
 		
     //HAL_Delay(1000);
