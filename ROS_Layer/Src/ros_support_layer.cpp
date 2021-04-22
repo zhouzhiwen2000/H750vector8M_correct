@@ -167,7 +167,7 @@ void callback_pos(const geometry_msgs::Point& msg)// cm
 
 void callback_speedlimit(const std_msgs::Float64& msg)// cm/s
 {
-    RC_Velocity=msg.data*8.556169931964706*2;
+    RC_Velocity=msg.data*8.556169931964706;
 }
 
 void callback_servo_speed(const geometry_msgs::Point& msg)// cm/s
