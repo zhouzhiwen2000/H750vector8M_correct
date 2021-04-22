@@ -139,11 +139,8 @@ void Servo_Add_Action_bunch(std::vector<_act>  acts,int32_t time)
                 stepper_lastvalue=get_steps();//update steps
             }
             int stepper_time=fabs(act.value-stepper_lastvalue)*2.0*get_speed()/10;//in ms
-            if(stepper_time>time)
-            {
-								if(stepper_time>New->time)
-                New->time=stepper_time;
-            }
+						if(stepper_time>New->time)
+            New->time=stepper_time;
             stepper_lastvalue=act.value;
         }
         else
