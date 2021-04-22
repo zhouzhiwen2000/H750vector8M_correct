@@ -227,9 +227,11 @@ void Servo_PutLeft()
 	if(last_mode_servo == 0x06)
 	{
 		
-		Servo_Add_Action(2,500,-1);
 		Servo_Add_Action(3,685,-1);
-		Servo_Add_Action(4,500,-1);Servo_Add_Action(1,385,-1);
+		Servo_Add_Action(1,385,-1);
+		
+		Servo_Add_Action(4,500,-1);
+		Servo_Add_Action(2,500,-1);
 		Servo_Add_Action(4,200,-1);
 		Servo_Add_Action(2,415,500);
 	}
@@ -238,24 +240,20 @@ void Servo_PutLeft()
 		Servo_Add_Action(2,266,-1);
 		Servo_Add_Action(3,717,-1);//transion
 
-		
-
-		Servo_Add_Action(2,500,-1);
 		Servo_Add_Action(3,685,-1);
-		Servo_Add_Action(4,500,-1);Servo_Add_Action(1,385,-1);
+		Servo_Add_Action(1,385,-1);
+		Servo_Add_Action(4,500,-1);
+		Servo_Add_Action(2,500,-1);
 		Servo_Add_Action(4,200,-1);
 		Servo_Add_Action(2,415,500);
 	}
+
     Servo_Add_Action(101,850,-1);
 	
-	Servo_Add_Action(2,500,-1);
-	Servo_Add_Action(4,950,-1);
-	Servo_Add_Action(3,717,-1);
-	Servo_Add_Action(2,266,-1);
+	Servo_Add_Action(2,500,300);
+	Servo_Add_Action(4,500,-1);
 	Servo_Add_Action(1,529,-1);
-	
-	
-
+	Servo_Add_Action(3,717,-1);
 }
 
 
@@ -263,13 +261,12 @@ void Servo_PutMiddle()
 {
 	if(last_mode_servo == 0x06)
 	{
-		Servo_Add_Action(0xFFF0,850,-1);
-	
-		Servo_Add_Action(2,460,-1);
-		
+		//Servo_Add_Action(0xFFF0,850,-1);
 		Servo_Add_Action(3,717,-1);
-		Servo_Add_Action(4,500,-1);
-		Servo_Add_Action(4,135,500);
+		
+		Servo_Add_Action(4,600,-1);
+		Servo_Add_Action(2,480,-1);
+		Servo_Add_Action(4,120,500);
 	}
 	else
 	{
@@ -286,9 +283,12 @@ void Servo_PutMiddle()
 	
 	Servo_Add_Action(101,850,-1);
 	
-	Servo_Add_Action(4,950,-1);
+	Servo_Add_Action(4,600,-1);
+	Servo_Add_Action(2,400,-1);
+	Servo_Add_Action(4,880,-1);
+	
 	Servo_Add_Action(0xFFF0,450,-1);//Stepper Middle
-	Servo_TransPos();
+	//Servo_TransPos();
 	
 }
 
@@ -298,9 +298,11 @@ void Servo_PutRight()
 	if(last_mode_servo == 0x06)
 	{
 		
-		Servo_Add_Action(2,500,-1);
 		Servo_Add_Action(3,685,-1);
-		Servo_Add_Action(4,500,-1);Servo_Add_Action(1,700,-1);
+		Servo_Add_Action(1,700,-1);
+		
+		Servo_Add_Action(4,500,-1);
+		Servo_Add_Action(2,500,-1);
 		Servo_Add_Action(4,200,-1);
 		Servo_Add_Action(2,415,500);
 	}
@@ -309,24 +311,27 @@ void Servo_PutRight()
 		Servo_Add_Action(2,266,-1);
 		Servo_Add_Action(3,717,-1);//transion
 
-		
-
-		Servo_Add_Action(2,500,-1);
 		Servo_Add_Action(3,685,-1);
-		Servo_Add_Action(4,500,-1);Servo_Add_Action(1,700,-1);
+		Servo_Add_Action(1,700,-1);
+		Servo_Add_Action(4,500,-1);
+		Servo_Add_Action(2,500,-1);
 		Servo_Add_Action(4,200,-1);
 		Servo_Add_Action(2,415,500);
 	}
 
-    
-	
     Servo_Add_Action(101,850,-1);
 	
-	Servo_Add_Action(2,500,-1);
-	Servo_Add_Action(4,950,-1);
-	Servo_Add_Action(3,717,-1);
-	Servo_Add_Action(2,266,-1);
+	Servo_Add_Action(2,500,300);
+	Servo_Add_Action(4,500,-1);
 	Servo_Add_Action(1,529,-1);
+	Servo_Add_Action(3,717,-1);
+	
+
+//	Servo_Add_Action(2,500,-1);
+//	Servo_Add_Action(4,950,-1);
+//	Servo_Add_Action(3,717,-1);
+//	Servo_Add_Action(2,266,-1);
+//	Servo_Add_Action(1,529,-1);
 }
 
 void Servo_GrabLeft()
@@ -400,17 +405,25 @@ void Servo_GrabRight()
 
 void Servo_Grab_Upper()//done
 {
-	if(last_mode_servo != -1)
+//	if(last_mode_servo != -1)
+//	{
+//		Servo_Add_Action(1,529,-1);
+//		Servo_Add_Action(2,266,-1);
+//		Servo_Add_Action(3,717,-1);//transion
+//	}
+	
+	if(last_mode_servo == 0x0F)
 	{
-		Servo_Add_Action(1,529,-1);
-		Servo_Add_Action(2,266,-1);
-		Servo_Add_Action(3,717,-1);//transion
+		Servo_Add_Action(2,320,-1);
+		
 	}
 	
 	
-    Servo_Add_Action(0xFFF0,450,-1);
-    Servo_Add_Action(101,850,-1);
-    Servo_Add_Action(100,765,-1);
+//    Servo_Add_Action(0xFFF0,450,-1);
+//    Servo_Add_Action(101,850,-1);
+//    Servo_Add_Action(100,765,-1);
+	
+	Servo_Add_Action(101,850,-1);
 	
     
     Servo_Add_Action(3,660,-1);
@@ -419,6 +432,8 @@ void Servo_Grab_Upper()//done
     Servo_Grab();
 	
 	last_mode_servo=0x06;
+	
+	Servo_Add_Action(2,400,300);
 	
 	//Servo_TransPos();
 	
@@ -580,7 +595,7 @@ void Servo_Grab_Pose2_Lower()//抓台子下的物块
 }
 void Servo_Grab()//done
 {
-    Servo_Add_Action(101,580,-1);
+    Servo_Add_Action(101,580,300);
 }
 
 //2:700 3:450 4:1000
@@ -589,9 +604,9 @@ void Servo_Put_Upper()//码垛
 	Servo_Add_Action(4,1000,-1);
     Servo_Add_Action(3,450,-1);
     Servo_Add_Action(2,700,500);
-    Servo_Add_Action(101,850,-1);
+    Servo_Add_Action(101,850,300);
 
-	Servo_Add_Action(3,600,-1);
+	Servo_Add_Action(3,600,300);
     Servo_Add_Action(2,266,-1);
 	Servo_Add_Action(3,717,-1);
 	Servo_Add_Action(4,950,-1);
@@ -681,11 +696,26 @@ void Servo_Camera1()//看台子上面的物块
 //    Servo_Add_Action(101,850,-1);
 //    Servo_Add_Action(100,765,-1);
 //    Servo_Add_Action(1,529,-1);
+	
+	if(last_mode_servo == 0||last_mode_servo == 2)
+	{
+		Servo_Add_Action(3,295,-1);
+		Servo_Add_Action(4,870,-1);
+	}
+	else if(last_mode_servo == 1)
+	{
+		
+	}
+	
+	
+	
 	Servo_Add_Action(4,870,-1);
     Servo_Add_Action(3,295,-1);
 	Servo_Add_Action(2,500,-1);
 	
 	Servo_Add_Action(100,765,-1);
+	
+	last_mode_servo = 0x0F;
 
 }
 //670 700 80
