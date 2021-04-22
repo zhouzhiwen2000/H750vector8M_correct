@@ -24,6 +24,7 @@ void Servo_Camera();
 void Servo_Camera1();
 void Servo_Camera2();
 void Servo_Camera3();
+void Servo_Camera_AdjPosLower();
 void Servo_Put_Upper_Storage();
 void Servo_Put_Lower_Storage();
 bool Is_Servo_Idle();
