@@ -141,6 +141,7 @@ void Servo_Add_Action_bunch(std::vector<_act>  acts,int32_t time)
             int stepper_time=fabs(act.value-stepper_lastvalue)*2.0*get_speed()/10;//in ms
             if(stepper_time>time)
             {
+								if(stepper_time>New->time)
                 New->time=stepper_time;
             }
             stepper_lastvalue=act.value;
@@ -150,6 +151,7 @@ void Servo_Add_Action_bunch(std::vector<_act>  acts,int32_t time)
             if(time==-1)
             {
                 int servo_time=fabs((int)act.value-(int)servo_lastvalue[get_array_seq(act.id)])/servo_speed[get_array_seq(act.id)];//in ms
+								if(servo_time>New->time)
                 New->time=servo_time;
             }
             servo_lastvalue[get_array_seq(act.id)]=act.value;
