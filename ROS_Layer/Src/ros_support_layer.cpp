@@ -25,6 +25,7 @@ extern "C" {
 		extern long int Target_A,Target_B,Target_C,Target_D;
 		
 }
+extern int last_mode_servo;
 void callback_pos(const geometry_msgs::Point& msg);
 void callback_speed(const geometry_msgs::Point& msg);
 void callback_speedlimit(const std_msgs::Float64& msg);
@@ -59,6 +60,8 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
     nh.getHardware()->reset_rbuf();
 }
 
+
+
 void setup(void)
 {
 	nh.initNode();
@@ -77,7 +80,31 @@ void setup(void)
 	Servo_TransPos();
 	
 	
+//	Servo_Camera2();
+//	Servo_TransPos();
+	
+	//Servo_Camera_AdjPosLower();
+//	Servo_Grab();
+
+
+
+//
+
+	
+
+//-
+	
+//	Servo_Camera_AdjPosLower();
+//	Servo_TransPos();
+
+//	Servo_Grab_Pose2_Lower();
+//	Servo_PutMiddle();
+
+	
+//	Servo_Camera();
 //	Servo_Grab_Pose_Lower();
+//	Servo_PutMiddle();
+	
 	
 	
 	
@@ -85,29 +112,7 @@ void setup(void)
 //	Servo_Put_Upper();
 
 	
-	
-//		Servo_Grab_Upper();
-//		Servo_TransPos();
-//		Servo_Grab_Upper();
-//	  Servo_TransPos();
-//		Servo_Grab();
-//		Servo_Put_Lower();
-//		Servo_Grab();		
-//		Servo_Put_Upper();
-//	  Servo_Grab_Pose_Lower();
-//		Servo_Add_Action(0,0,3000);
-//	  Servo_Grab_Pose2_Lower();
-//	  Servo_Grab();
-//	  All_Middle();
-//	  Servo_PutLeft();
-//		Servo_PutMiddle();
-//		Servo_PutRight();
-//		Servo_Camera1();
-//		Servo_Camera2();
-//		Servo_Camera();
-//		Servo_Grab_Pose_Lower();
-//		Servo_Grab_Pose2_Lower();
-		Screen_printString("helloWorld!");
+	Screen_printString("helloWorld!");
 }
 void publish_servo_status()
 {
@@ -116,43 +121,35 @@ void publish_servo_status()
 }
 void publish_car_status()
 {
-		double pos_a=Position_A;
-		double pos_b=Position_B;
-		double pos_c=Position_C;
-		double pos_d=Position_D;	
-		double tgt_a=Target_A;
-		double tgt_b=Target_B;
-		double tgt_c=Target_C;
-		double tgt_d=Target_D;		
-		error_car.data = sqrt((pos_a-tgt_a)*(pos_a-tgt_a)+(pos_b-tgt_b)*(pos_b-tgt_b)+(pos_c-tgt_c)*(pos_c-tgt_c)+(pos_d-tgt_d)*(pos_d-tgt_d));
+		error_car.data = sqrt((Position_A-Target_A)*(Position_A-Target_A)+(Position_B-Target_B)*(Position_B-Target_B)+(Position_C-Target_C)*(Position_C-Target_C)+(Position_D-Target_D)*(Position_D-Target_D));
 		car_status.publish(&error_car);
 }
 void loop(void)
 {
 
     nh.spinOnce();
-		publish_servo_status();
-		publish_car_status();
+	publish_servo_status();
+	publish_car_status();
 //		publish_pos();
 		
     //HAL_Delay(1000);
 }
-void callback_speed(const geometry_msgs::Point& msg)//cm/s
+void callback_speed(const geometry_msgs::Point& msg)// cm/s
 {
     Run_Flag=0;
     Move_X=msg.x*8.556169931964706;//0.1168747240823413;
     Move_Y=msg.y*8.556169931964706;//0.1168747240823413;
     Move_Z=(msg.z*R)*8.556169931964706;//0.1168747240823413;//waiting
 }
-void callback_pos(const geometry_msgs::Point& msg)//cm
+void callback_pos(const geometry_msgs::Point& msg)// cm
 {
     if(Run_Flag==0)//mode changed from speed mode
     {
         if(relative==0)//changed to abs pos
         {
             double NOW_X,NOW_Y,NOW_Z;
-            NOW_X=(Position_B-Position_A)/2.0;
-            NOW_Y=(Position_B+Position_C)/2.0;
+            NOW_X=(Position_B-Position_A)/2.0;//2021-4-20 changed **************************************************
+            NOW_Y=(Position_B+Position_C)/2.0;//2021-4-20 changed **************************************************
             NOW_Z=(Position_C-Position_A+Position_D-Position_B)/4.0/(a_PARAMETER+b_PARAMETER);
             Last_Target_X=NOW_X;//纠正限速器状态
             Last_Target_Y=NOW_Y;//
@@ -168,17 +165,17 @@ void callback_pos(const geometry_msgs::Point& msg)//cm
 		publish_car_status();
 }
 
-void callback_speedlimit(const std_msgs::Float64& msg)//cm/s
+void callback_speedlimit(const std_msgs::Float64& msg)// cm/s
 {
-    RC_Velocity=msg.data*8.556169931964706;
+    RC_Velocity=msg.data*8.556169931964706*2;
 }
 
-void callback_servo_speed(const geometry_msgs::Point& msg)//cm/s
+void callback_servo_speed(const geometry_msgs::Point& msg)// cm/s
 {
     change_servo_speed(msg.x,msg.y);
 }
 
-void callback_mode(const std_msgs::UInt8& msg)//pos_mode 0:absolute 1:relative
+void callback_mode(const std_msgs::UInt8& msg)// pos_mode 0:absolute 1:relative
 {
     if(relative!=msg.data)//mode changed
     {
@@ -216,65 +213,92 @@ void callback_servo(const std_msgs::UInt8& msg)
 	{
 		case 0x00:
 			Servo_PutRight();
+			last_mode_servo=0x00;
 			break;
 		case 0x01:
 			Servo_PutMiddle();
+			last_mode_servo=0x01;
 			break;		
 		case 0x02:
 			Servo_PutLeft();
+			last_mode_servo=0x02;
 			break;		
 		case 0x03:
 			Servo_GrabLeft();
+			last_mode_servo=0x03;
 			break;
 		case 0x04:
 			Servo_GrabMiddle();
+			last_mode_servo=0x04;
 			break;		
 		case 0x05:
 			Servo_GrabRight();
+			last_mode_servo=0x05;
 			break;
 		case 0x06:
 			Servo_Grab_Upper();
+			last_mode_servo=0x06;
 			break;		
 		case 0x07:
 			Servo_Grab_Pose_Lower();
+			last_mode_servo=0x07;
 			break;
 		case 0x08:
 			Servo_Grab_Pose2_Lower();
+			last_mode_servo=0x08;
 			break;		
 		case 0x09:
 			Servo_Grab();
+			last_mode_servo=0x09;
 			break;		
 		
 		case 0x0A:
 			Servo_Put_Upper();
+			last_mode_servo=0x0A;
 			break;		
 		case 0x0B:
 			Servo_Put_Lower();
+			last_mode_servo=0x0B;
 			break;
 		case 0x0C:
 			Servo_Camera();
+			last_mode_servo=0x0C;
 			break;
 		case 0x0D:
-		  Servo_TransPos();
+			Servo_TransPos();
+			last_mode_servo=0x0D;
 			break;
 		case 0x0E:
-		  All_Middle();
+			All_Middle();
+			last_mode_servo=0x0E;
 			break;
 		case 0x0F:
-		  Servo_Camera1();
+			Servo_Camera1();
+			last_mode_servo=0x0F;
 			break;
 		case 0x10:
-		  Servo_Camera2();
+			Servo_Camera2();
+			last_mode_servo=0x10;
 			break;
 		case 0x11:
 			Servo_Camera3();
+			last_mode_servo=0x11;
 			break;
 		case 0x12:
 			Servo_Put_Upper_Storage();
+			last_mode_servo=0x12;
 			break;
 		case 0x13:
 			Servo_Put_Lower_Storage();
+			last_mode_servo=0x13;
 			break;
+		case 0x14:
+			Servo_Camera_AdjPosLower();//预备抓下层物块时调整为止的看
+			last_mode_servo = 0x14;
+			break;
+		
+		
+		
 	}
 	
 	publish_servo_status();
