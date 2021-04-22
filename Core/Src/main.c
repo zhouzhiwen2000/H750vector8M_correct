@@ -52,6 +52,7 @@
 /* USER CODE BEGIN PV */
 extern u8 delay_flag;
 bool ledstate=false;
+bool ros_ok=false;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -172,7 +173,10 @@ int main(void)
 			Servo_Server();
 			if(count>=10)
 			{
-				HAL_GPIO_WritePin(LED_GPIO_Port,LED_Pin,ledstate);
+				if(ros_ok)
+				{
+					HAL_GPIO_WritePin(LED_GPIO_Port,LED_Pin,ledstate);
+				}
 				ledstate=!ledstate;
 				count=0;
 			}
