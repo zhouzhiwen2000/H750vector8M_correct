@@ -91,7 +91,7 @@ void setup(void)
 	nh.subscribe(ros_ok_sub);
 	set_stepper(-10000);
 	Servo_Add_Action(0,0,1000);//simply wait
-	Servo_TransPos();
+//	Servo_TransPos();
 	start.data=false;
 	
 //	Servo_Camera2();
@@ -147,7 +147,12 @@ void loop(void)
 	publish_car_status();
 	if(HAL_GPIO_ReadPin(KEY2_GPIO_Port,KEY2_Pin)==0)
 	{
-		start.data=true;
+		if(start.data==false)
+		{
+			start.data=true;
+			Servo_TransPos();
+			last_mode_servo=255;
+		}
 		car_start.publish(&start);
 	}
 	msgid_pub.publish(&msgid);
