@@ -119,114 +119,54 @@ int Read_Encoder(u8 TIMX)
 **************************************************************************/
 void Set_Pwm(int motor_a,int motor_b,int motor_c,int motor_d)
 {
-    if(motor_d>0)//正转
+    if(motor_d>0)//正转H-L
     {
         __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_1,motor_d);
-        HAL_GPIO_WritePin(D1AIN1_GPIO_Port,D1AIN1_Pin,GPIO_PIN_RESET);
-        HAL_GPIO_WritePin(D1AIN2_GPIO_Port,D1AIN2_Pin,GPIO_PIN_SET);
+        __HAL_TIM_SET_COMPARE(&htim8,TIM_CHANNEL_1,0);
     }
-    else//Inverse转
+    else//Inverse转L-H
     {
-        __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_1,-motor_d);
-        HAL_GPIO_WritePin(D1AIN1_GPIO_Port,D1AIN1_Pin,GPIO_PIN_SET);
-        HAL_GPIO_WritePin(D1AIN2_GPIO_Port,D1AIN2_Pin,GPIO_PIN_RESET);
+        __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_1,0);
+        __HAL_TIM_SET_COMPARE(&htim8,TIM_CHANNEL_1,-motor_d);
     }
 
-    if(motor_a>0)//正转
+    if(motor_a>0)//正转H-L
     {
         __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_2,motor_a);
-        HAL_GPIO_WritePin(D1BIN1_GPIO_Port,D1BIN1_Pin,GPIO_PIN_SET);
-        HAL_GPIO_WritePin(D1BIN2_GPIO_Port,D1BIN2_Pin,GPIO_PIN_RESET);
+        __HAL_TIM_SET_COMPARE(&htim8,TIM_CHANNEL_2,0);
+
     }
-    else//Inverse转
+    else//Inverse转L-H
     {
-        __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_2,-motor_a);
-        HAL_GPIO_WritePin(D1BIN1_GPIO_Port,D1BIN1_Pin,GPIO_PIN_RESET);
-        HAL_GPIO_WritePin(D1BIN2_GPIO_Port,D1BIN2_Pin,GPIO_PIN_SET);
+        __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_2,0);
+        __HAL_TIM_SET_COMPARE(&htim8,TIM_CHANNEL_2,-motor_a);
     }
 
-    if(motor_c>0)//正转
+    if(motor_c>0)//正转H-L
     {
         __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_3,motor_c);
-        HAL_GPIO_WritePin(D2AIN1_GPIO_Port,D2AIN1_Pin,GPIO_PIN_RESET);
-        HAL_GPIO_WritePin(D2AIN2_GPIO_Port,D2AIN2_Pin,GPIO_PIN_SET);
+        __HAL_TIM_SET_COMPARE(&htim8,TIM_CHANNEL_3,0);
     }
-    else//Inverse转
+    else//Inverse转L-H
     {
-        __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_3,-motor_c);
-        HAL_GPIO_WritePin(D2AIN1_GPIO_Port,D2AIN1_Pin,GPIO_PIN_SET);
-        HAL_GPIO_WritePin(D2AIN2_GPIO_Port,D2AIN2_Pin,GPIO_PIN_RESET);
+        __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_3,0);
+        __HAL_TIM_SET_COMPARE(&htim8,TIM_CHANNEL_3,-motor_c);
+
     }
 
-    if(motor_b>0)//正转
+    if(motor_b>0)//正转H-L
     {
         __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_4,motor_b);
-        HAL_GPIO_WritePin(D2BIN1_GPIO_Port,D2BIN1_Pin,GPIO_PIN_SET);
-        HAL_GPIO_WritePin(D2BIN2_GPIO_Port,D2BIN2_Pin,GPIO_PIN_RESET);
+        __HAL_TIM_SET_COMPARE(&htim8,TIM_CHANNEL_4,0);
     }
-    else//Inverse转
+    else//Inverse转L-H
     {
-        __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_4,-motor_b);
-        HAL_GPIO_WritePin(D2BIN1_GPIO_Port,D2BIN1_Pin,GPIO_PIN_RESET);
-        HAL_GPIO_WritePin(D2BIN2_GPIO_Port,D2BIN2_Pin,GPIO_PIN_SET);
+        __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_4,0);
+        __HAL_TIM_SET_COMPARE(&htim8,TIM_CHANNEL_4,-motor_b);
     }
 }
 
 
-//void Set_Pwm(int motor_a,int motor_b,int motor_c,int motor_d)
-//{
-//    if(motor_c>0)//正转
-//    {
-//        __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_1,motor_c);
-//        HAL_GPIO_WritePin(GPIOB,GPIO_PIN_12,GPIO_PIN_SET);
-//        HAL_GPIO_WritePin(GPIOB,GPIO_PIN_13,GPIO_PIN_RESET);
-//    }
-//    else//Inverse转
-//    {
-//        __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_1,-motor_c);
-//        HAL_GPIO_WritePin(GPIOB,GPIO_PIN_12,GPIO_PIN_RESET);
-//        HAL_GPIO_WritePin(GPIOB,GPIO_PIN_13,GPIO_PIN_SET);
-//    }
-
-//    if(motor_b>0)//正转
-//    {
-//        __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_2,motor_b);
-//        HAL_GPIO_WritePin(GPIOB,GPIO_PIN_14,GPIO_PIN_RESET);
-//        HAL_GPIO_WritePin(GPIOB,GPIO_PIN_15,GPIO_PIN_SET);
-//    }
-//    else//Inverse转
-//    {
-//        __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_2,-motor_b);
-//        HAL_GPIO_WritePin(GPIOB,GPIO_PIN_14,GPIO_PIN_SET);
-//        HAL_GPIO_WritePin(GPIOB,GPIO_PIN_15,GPIO_PIN_RESET);
-//    }
-
-//    if(motor_d>0)//正转
-//    {
-//        __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_3,motor_d);
-//        HAL_GPIO_WritePin(GPIOC,GPIO_PIN_6,GPIO_PIN_SET);
-//        HAL_GPIO_WritePin(GPIOC,GPIO_PIN_7,GPIO_PIN_RESET);
-//    }
-//    else//Inverse转
-//    {
-//        __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_3,-motor_d);
-//        HAL_GPIO_WritePin(GPIOC,GPIO_PIN_6,GPIO_PIN_RESET);
-//        HAL_GPIO_WritePin(GPIOC,GPIO_PIN_7,GPIO_PIN_SET);
-//    }
-
-//    if(motor_a>0)//正转
-//    {
-//        __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_4,motor_a);
-//        HAL_GPIO_WritePin(GPIOC,GPIO_PIN_8,GPIO_PIN_RESET);
-//        HAL_GPIO_WritePin(GPIOC,GPIO_PIN_9,GPIO_PIN_SET);
-//    }
-//    else//Inverse转
-//    {
-//        __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_4,-motor_a);
-//        HAL_GPIO_WritePin(GPIOC,GPIO_PIN_8,GPIO_PIN_SET);
-//        HAL_GPIO_WritePin(GPIOC,GPIO_PIN_9,GPIO_PIN_RESET);
-//    }
-//}
 /**************************************************************************
 函数功能：限制PWM赋值
 入口参数：幅值
@@ -472,41 +412,4 @@ void Kinematic_Analysis2(float Vx,float Vy,float Vz)
     Rate_B   = +Vx+Vy-Vz*(a_PARAMETER+b_PARAMETER);
     Rate_C   = -Vx+Vy+Vz*(a_PARAMETER+b_PARAMETER);
     Rate_D   = +Vx+Vy+Vz*(a_PARAMETER+b_PARAMETER);
-}
-void Enable_Motors(bool enable)
-{
-    if(enable)
-    {
-        HAL_GPIO_WritePin(D1EN_GPIO_Port,D1EN_Pin,GPIO_PIN_SET);
-        HAL_GPIO_WritePin(D2EN_GPIO_Port,D2EN_Pin,GPIO_PIN_SET);
-    }
-    else
-    {
-        HAL_GPIO_WritePin(D1EN_GPIO_Port,D1EN_Pin,GPIO_PIN_RESET);
-        HAL_GPIO_WritePin(D2EN_GPIO_Port,D2EN_Pin,GPIO_PIN_RESET);
-    }
-}
-void Lock_Motors(u8 id)
-{
-    Enable_Motors(true);
-    switch(id)
-    {
-    case 1: {
-        HAL_GPIO_WritePin(D1AIN1_GPIO_Port,D1AIN1_Pin,GPIO_PIN_RESET);
-        HAL_GPIO_WritePin(D1AIN2_GPIO_Port,D1AIN2_Pin,GPIO_PIN_RESET);
-    }
-    case 2: {
-        HAL_GPIO_WritePin(D1BIN1_GPIO_Port,D1BIN1_Pin,GPIO_PIN_RESET);
-        HAL_GPIO_WritePin(D1BIN2_GPIO_Port,D1BIN2_Pin,GPIO_PIN_RESET);
-    }
-    case 3: {
-        HAL_GPIO_WritePin(D2AIN1_GPIO_Port,D2AIN1_Pin,GPIO_PIN_RESET);
-        HAL_GPIO_WritePin(D2AIN2_GPIO_Port,D2AIN2_Pin,GPIO_PIN_RESET);
-    }
-    case 4: {
-        HAL_GPIO_WritePin(D2BIN1_GPIO_Port,D2BIN1_Pin,GPIO_PIN_RESET);
-        HAL_GPIO_WritePin(D2BIN2_GPIO_Port,D2BIN2_Pin,GPIO_PIN_RESET);
-    }
-    }
-
 }

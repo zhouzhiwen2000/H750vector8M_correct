@@ -55,7 +55,7 @@ void Servo_Server()
                     if(action.id!=0xFFF0)
                         WritePos(action.id,action.value,Current->time,0);
                     else
-                        set_stepper(action.value);
+                        set_stepper_1(action.value);
                     Current->acts.erase(Current->acts.begin());
                 }
 //				WritePos(Current->id,Current->value,Current->time,0);
@@ -80,9 +80,9 @@ void Servo_Add_Action(uint32_t id,uint32_t value,int32_t time)
     {
         if(Current==0)
         {
-            stepper_lastvalue=get_steps();//update steps
+            stepper_lastvalue=get_steps_1();//update steps
         }
-        int stepper_time=fabs((int)value-(int)stepper_lastvalue)*2.0*get_speed()/10;//in ms
+        int stepper_time=fabs((int)value-(int)stepper_lastvalue)*2.0*get_speed_1()/10;//in ms
         New->time=stepper_time;
         stepper_lastvalue=value;
     }
@@ -111,7 +111,7 @@ void Servo_Add_Action(uint32_t id,uint32_t value,int32_t time)
                 WritePos(action.id,action.value,Current->time,0);
             else
             {
-                set_stepper(action.value);
+                set_stepper_1(action.value);
             }
             Current->acts.erase(Current->acts.begin());
         }
@@ -136,9 +136,9 @@ void Servo_Add_Action_bunch(std::vector<_act>  acts,int32_t time)
         {
             if(Current==0)
             {
-                stepper_lastvalue=get_steps();//update steps
+                stepper_lastvalue=get_steps_1();//update steps
             }
-            int stepper_time=fabs(act.value-stepper_lastvalue)*2.0*get_speed()/10;//in ms
+            int stepper_time=fabs(act.value-stepper_lastvalue)*2.0*get_speed_1()/10;//in ms
             if(stepper_time>time)
             {
                 New->time=stepper_time;
@@ -171,7 +171,7 @@ void Servo_Add_Action_bunch(std::vector<_act>  acts,int32_t time)
             if(action.id!=0xFFF0)
                 WritePos(action.id,action.value,Current->time,0);
             else
-                set_stepper(action.value);
+                set_stepper_1(action.value);
             Current->acts.erase(Current->acts.begin());
         }
         time_start=HAL_GetTick();

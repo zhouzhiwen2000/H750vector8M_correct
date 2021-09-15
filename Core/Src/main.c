@@ -131,23 +131,29 @@ int main(void)
   MX_UART5_Init();
   MX_UART4_Init();
   MX_TIM7_Init();
+  MX_TIM8_Init();
   /* USER CODE BEGIN 2 */
+
+  /*Enable Encoders*/
   HAL_TIM_Encoder_Start(&htim2, TIM_CHANNEL_ALL);
 	HAL_TIM_Encoder_Start(&htim3, TIM_CHANNEL_ALL);
 	HAL_TIM_Encoder_Start(&htim4, TIM_CHANNEL_ALL);
 	HAL_TIM_Encoder_Start(&htim5, TIM_CHANNEL_ALL);
+  /*Enable Motors*/
 	HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_1);
 	HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_2);
 	HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_3);
 	HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_4);
-	Enable_Motors(true);
+	HAL_TIM_PWM_Start(&htim8,TIM_CHANNEL_1);
+	HAL_TIM_PWM_Start(&htim8,TIM_CHANNEL_2);
+	HAL_TIM_PWM_Start(&htim8,TIM_CHANNEL_3);
+	HAL_TIM_PWM_Start(&htim8,TIM_CHANNEL_4);
+
   HAL_TIM_Base_Start_IT(&htim6);
 	setup();
 	LL_TIM_EnableIT_UPDATE(TIM7);//TIM7更新事件中断请求使能
 	LL_TIM_EnableCounter(TIM7);//开定时器
-//	uint8_t EOL []={0xff,0xff,0xff};
-//	HAL_UART_Transmit(&huart7,EOL,3,0xffff);
-//	HAL_UART_Transmit(&huart4,"hello",5,0xffff);
+
   uint32_t count = 0;
   /* USER CODE END 2 */
 

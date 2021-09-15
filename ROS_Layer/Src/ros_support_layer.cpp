@@ -75,7 +75,7 @@ void setup(void)
 	nh.subscribe(display_sub);
 	nh.subscribe(xy_sub);
 	nh.subscribe(servo_speed_sub);
-	set_stepper(-10000);
+	set_stepper_1(-10000);
 	Servo_Add_Action(0,0,1000);//simply wait
 	Servo_TransPos();
 	
