@@ -16,9 +16,9 @@ long int Position_A,Position_B,Position_C,Position_D,Rate_A,Rate_B,Rate_C,Rate_D
 long int Motor_A,Motor_B,Motor_C,Motor_D;        //µç»úPWM±äÁ¿
 long int Target_A,Target_B,Target_C,Target_D;     //µç»úÄ¿±êÖµ
 //u16 PID_Parameter[10],Flash_Parameter[10];  //FlashÏà¹ØÊı×é
-float	Position_KP=5,Position_KI=0,Position_KD=25;  //Î»ÖÃ¿ØÖÆPID²ÎÊı
-float Velocity_KP=5,Velocity_KI=5              ;	          //ËÙ¶È¿ØÖÆPID²ÎÊı
-double RC_Velocity=140;                             //Î»ÖÃÄ£Ê½ËÙ¶È£¬µ¥Î»ºÍÄ¿±êËÙ¶Èµ¥Î»ÏàÍ¬
+float	Position_KP=1.8,Position_KI=0,Position_KD=19;  //Î»ÖÃ¿ØÖÆPID²ÎÊı
+float Velocity_KP=1.5,Velocity_KI=1.5              ;	          //ËÙ¶È¿ØÖÆPID²ÎÊı
+double RC_Velocity=42.5;                             //Î»ÖÃÄ£Ê½ËÙ¶È£¬µ¥Î»ºÍÄ¿±êËÙ¶Èµ¥Î»ÏàÍ¬
 float Move_X=0,Move_Y=0,Move_Z=0;   //XYZÖáÄ¿±êËÙ¶È
 uint8_t pending_flag=0;
 int flag_clear_i=0;
@@ -426,7 +426,7 @@ void Count_Velocity(void) //ÓÃÓÚ¿ØÖÆÎ»ÖÃÄ£Ê½ÏÂµÄËÙ¶È ¾ø¶ÔÎ»ÖÃÄ£Ê½ÏÂ£¬ÈôÔÚÖ´ĞĞÍê³
     if(Bias_X!=0||Bias_Y!=0||Bias_Z!=0) Kinematic_Analysis2(Bias_X,Bias_Y,Bias_Z);
 
     Xianfu_Velocity(RC_Velocity*myabs(Rate_A)/Divider,RC_Velocity*myabs(Rate_B)/Divider,RC_Velocity*myabs(Rate_C)/Divider,RC_Velocity*myabs(Rate_D)/Divider);//·½ÏòÏŞËÙ£¬ÄÜÏŞÖÆ×ÜËÙ¶È²»³¬¹ıRC_Velocity
-    /*¶ÔBias_X£¬Y,Z½øĞĞKinematic_AnalysisÔÙ³ıÒÔBiasµÄÄ£È»ºó³ËÒÔRC_VelocityÏàµ±ÓÚ¶Ô·½ÏòÎªĞĞ½ø·½Ïò£¨Bias·½Ïò£©£¬´óĞ¡ÎªRC_VelocityµÄÊ¸Á¿½øĞĞKinematic_Analysis£©¡£*/
+    /*¶ÔBias_X£¬Y,Z½øĞĞKinematic_AnalysisÔÙ³ıÒÔBiasµÄÄ£È»ºó³ËÒÔRC_VelocityÏàµ±Óë¶Ô·½ÏòÎªĞĞ½ø·½Ïò£¨Bias_X·½Ïò£©£¬´óĞ¡ÎªRC_VelocityµÄÊ¸Á¿½øĞĞKinematic_Analysis£©¡£*/
     if(relative==0)
     {
         Last_Target_X=Move_X;   //±£´æXÖáÉÏÒ»´ÎµÄÎ»ÖÃĞÅÏ¢£¬±ãÓÚµ÷ÓÃ

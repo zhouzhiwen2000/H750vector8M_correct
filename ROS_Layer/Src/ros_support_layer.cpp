@@ -3,7 +3,6 @@
 #include "geometry_msgs/Point.h"
 #include "Screen_drv.h"
 #include <std_msgs/Float64.h>
-#include <std_msgs/UInt64.h>
 #include <std_msgs/UInt8.h>
 #include <std_msgs/Bool.h>
 #include <std_msgs/String.h>
@@ -24,8 +23,6 @@ extern "C" {
     extern double Last_Target_X,Last_Target_Y,Last_Target_Z;
     extern long int Position_A,Position_B,Position_C,Position_D; //PID控制相关变量
 		extern long int Target_A,Target_B,Target_C,Target_D;
-		extern bool ros_ok;
-
 		
 }
 extern int last_mode_servo;
@@ -37,7 +34,6 @@ void callback_mode(const std_msgs::UInt8& msg);
 void callback_servo(const std_msgs::UInt8& msg);
 void callback_xy(const geometry_msgs::Point& msg);
 void callback_display(const std_msgs::String& msg);
-void callback_ros_ok(const std_msgs::Bool& msg);
 void publish_pos();
 ros::NodeHandle nh;
 //ros::Subscriber<std_msgs::Float64> carspeed_sub("/car/speed", &callback_speed);
@@ -49,19 +45,12 @@ ros::Subscriber<std_msgs::UInt8> servo_sub("/car/servo", &callback_servo);
 ros::Subscriber<geometry_msgs::Point> xy_sub("/car/xy", &callback_xy);
 ros::Subscriber<std_msgs::String> display_sub("/car/display", &callback_display);
 ros::Subscriber<geometry_msgs::Point> servo_speed_sub("/car/servo_speed", &callback_servo_speed);
-ros::Subscriber<std_msgs::Bool> ros_ok_sub("/car/ros_ok", &callback_ros_ok);
 geometry_msgs::Point pos_msg;
 std_msgs::Bool idle;
-std_msgs::Bool start;
 std_msgs::Float64 error_car;
-std_msgs::UInt64 msgid;
-
-
 ros::Publisher current_pos("cur_pos", &pos_msg);
 ros::Publisher servo_status("/servo_status", &idle);
 ros::Publisher car_status("/car_status", &error_car);
-ros::Publisher car_start("/car_start", &start);
-ros::Publisher msgid_pub("/car/msgid", &msgid);
 
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart) {
     nh.getHardware()->flush();
@@ -83,16 +72,13 @@ void setup(void)
 	nh.subscribe(servo_sub);	
 	nh.advertise(servo_status);
 	nh.advertise(car_status);
-  nh.advertise(car_start);
-	nh.advertise(msgid_pub);
 	nh.subscribe(display_sub);
 	nh.subscribe(xy_sub);
 	nh.subscribe(servo_speed_sub);
-	nh.subscribe(ros_ok_sub);
 	set_stepper(-10000);
 	Servo_Add_Action(0,0,1000);//simply wait
-//	Servo_TransPos();
-	start.data=false;
+	Servo_TransPos();
+	
 	
 //	Servo_Camera2();
 //	Servo_TransPos();
@@ -126,7 +112,7 @@ void setup(void)
 //	Servo_Put_Upper();
 
 	
-	Screen_printString("HelloWorld!");
+	Screen_printString("helloWorld!");
 }
 void publish_servo_status()
 {
@@ -138,24 +124,12 @@ void publish_car_status()
 		error_car.data = sqrt((Position_A-Target_A)*(Position_A-Target_A)+(Position_B-Target_B)*(Position_B-Target_B)+(Position_C-Target_C)*(Position_C-Target_C)+(Position_D-Target_D)*(Position_D-Target_D));
 		car_status.publish(&error_car);
 }
-
 void loop(void)
 {
 
-  nh.spinOnce();
+    nh.spinOnce();
 	publish_servo_status();
 	publish_car_status();
-	if(HAL_GPIO_ReadPin(KEY2_GPIO_Port,KEY2_Pin)==0)
-	{
-		if(start.data==false)
-		{
-			start.data=true;
-			Servo_TransPos();
-			last_mode_servo=255;
-		}
-		car_start.publish(&start);
-	}
-	msgid_pub.publish(&msgid);
 //		publish_pos();
 		
     //HAL_Delay(1000);
@@ -166,8 +140,6 @@ void callback_speed(const geometry_msgs::Point& msg)// cm/s
     Move_X=msg.x*8.556169931964706;//0.1168747240823413;
     Move_Y=msg.y*8.556169931964706;//0.1168747240823413;
     Move_Z=(msg.z*R)*8.556169931964706;//0.1168747240823413;//waiting
-		msgid.data++;
-		msgid_pub.publish(&msgid);
 }
 void callback_pos(const geometry_msgs::Point& msg)// cm
 {
@@ -191,22 +163,16 @@ void callback_pos(const geometry_msgs::Point& msg)// cm
     if(relative==1)
         pending_flag=1;
 		publish_car_status();
-		msgid.data++;
-		msgid_pub.publish(&msgid);
 }
 
 void callback_speedlimit(const std_msgs::Float64& msg)// cm/s
 {
-    RC_Velocity=msg.data*8.556169931964706;
-		msgid.data++;
-		msgid_pub.publish(&msgid);
+    RC_Velocity=msg.data*8.556169931964706*2;
 }
 
 void callback_servo_speed(const geometry_msgs::Point& msg)// cm/s
 {
     change_servo_speed(msg.x,msg.y);
-		msgid.data++;
-		msgid_pub.publish(&msgid);
 }
 
 void callback_mode(const std_msgs::UInt8& msg)// pos_mode 0:absolute 1:relative
@@ -229,8 +195,6 @@ void callback_mode(const std_msgs::UInt8& msg)// pos_mode 0:absolute 1:relative
         relative=msg.data;
     }
 		publish_car_status();
-		msgid.data++;
-		msgid_pub.publish(&msgid);
 }
 void publish_pos()
 {
@@ -338,14 +302,10 @@ void callback_servo(const std_msgs::UInt8& msg)
 	}
 	
 	publish_servo_status();
-	msgid.data++;
-	msgid_pub.publish(&msgid);
 }
 void callback_display(const std_msgs::String& msg)
 {
 	Screen_printString(msg.data);
-	msgid.data++;
-	msgid_pub.publish(&msgid);
 }	
 void callback_xy(const geometry_msgs::Point& msg)
 {
@@ -362,13 +322,5 @@ void callback_xy(const geometry_msgs::Point& msg)
 				Servo_Add_Action(100,1024-msg.x,-1);
 		}
 	publish_servo_status();
-	msgid.data++;
-	msgid_pub.publish(&msgid);
 }
 
-void callback_ros_ok(const std_msgs::Bool& msg)
-{
-	ros_ok=msg.data;
-	msgid.data++;
-	msgid_pub.publish(&msgid);
-}

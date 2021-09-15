@@ -7,7 +7,7 @@ extern "C" {//functions&variables imported from C
 
 }
 using namespace std;
-int current_speed=15;//1 for 0.1ms per halfstep
+int current_speed=10;//1 for 0.1ms per halfstep
 int current_halfstep_left=0;
 int current_halfstep_total=0;
 int clear_count=0;
