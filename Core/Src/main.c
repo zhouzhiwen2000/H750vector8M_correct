@@ -153,11 +153,8 @@ int main(void)
 
 	LL_TIM_EnableIT_UPDATE(TIM6);//TIM7更新事件中断请求使能
 	LL_TIM_EnableCounter(TIM6);//开定时器
-	setup();
 	LL_TIM_EnableIT_UPDATE(TIM7);//TIM7更新事件中断请求使能
 	LL_TIM_EnableCounter(TIM7);//开定时器
-
-  uint32_t count = 0;
   /* USER CODE END 2 */
 
   /* Init scheduler */
@@ -175,27 +172,17 @@ int main(void)
 		if(!delay_flag)//50ms 20hz
 		{
 			delay_flag=1;
-//			DataScope();
-//			if(count<2)
-//			{
-				loop();//10hz
-//				count=0;
-//			}
-//			else
-//			{
-//				count++;
-//			}
 			Servo_Server();
-			if(count>=10)
-			{
-				HAL_GPIO_WritePin(LED_GPIO_Port,LED_Pin,ledstate);
-				ledstate=!ledstate;
-				count=0;
-			}
-			else
-			{
-				count++;
-			}
+			// if(count>=10)
+			// {
+			// 	HAL_GPIO_WritePin(LED_GPIO_Port,LED_Pin,ledstate);
+			// 	ledstate=!ledstate;
+			// 	count=0;
+			// }
+			// else
+			// {
+			// 	count++;
+			// }
 		}
     /* USER CODE END WHILE */
 

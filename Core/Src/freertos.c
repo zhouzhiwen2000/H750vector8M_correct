@@ -26,6 +26,9 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "semphr.h"
+#include "ros_support_layer.h"
+#include "Control.h"
 
 /* USER CODE END Includes */
 
@@ -52,6 +55,13 @@ const osThreadAttr_t controlTask_attributes = {
   .stack_size = 1000 * 4,
   .priority = (osPriority_t) osPriorityRealtime,
 };
+SemaphoreHandle_t Control_Lock = NULL;
+osThreadId_t ROSTaskHandle;
+const osThreadAttr_t ROSTask_attributes = {
+  .name = "ROSTask",
+  .stack_size = 1000 * 4,
+  .priority = (osPriority_t) osPriorityNormal,
+};
 /* USER CODE END Variables */
 /* Definitions for defaultTask */
 osThreadId_t defaultTaskHandle;
@@ -64,6 +74,7 @@ const osThreadAttr_t defaultTask_attributes = {
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
 void StartControlTask(void *argument);
+void StartROSTask(void *argument);
 /* USER CODE END FunctionPrototypes */
 
 void StartDefaultTask(void *argument);
@@ -103,7 +114,7 @@ void MX_FREERTOS_Init(void) {
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   controlTaskHandle = osThreadNew(StartControlTask, NULL, &controlTask_attributes);
-
+  ROSTaskHandle = osThreadNew(StartROSTask, NULL, &ROSTask_attributes);
 
 
   /* USER CODE END RTOS_THREADS */
@@ -136,12 +147,23 @@ void StartDefaultTask(void *argument)
 /* USER CODE BEGIN Application */
 void StartControlTask(void *argument)
 {
-  
+  Control_Lock = xSemaphoreCreateMutex();//create lock used for control loop
   for(;;)
   {
     TickType_t tcnt=xTaskGetTickCount();
     Control();
     osDelayUntil(tcnt+10);//100Hz
+  }
+}
+
+void StartROSTask(void *argument)
+{
+  setup();
+  for(;;)
+  {
+    TickType_t tcnt=xTaskGetTickCount();
+    loop();
+    osDelayUntil(tcnt+50);//20Hz
   }
 }
 /* USER CODE END Application */

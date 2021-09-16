@@ -4,12 +4,13 @@
 #include "gpio.h"
 #include "Control.h"
 #include <math.h>
+#include "FreeRTOS.h"
+#include "semphr.h"
 /*È¦ÊýºÍ±àÂëÆ÷Êý¾Ý¶ÔÓ¦¹ØÏµ£º×ªÒ»È¦¶ÔÓ¦±àÂëÆ÷Êý¾Ý¸Ä±ä32256£¬¼´±àÂëÆ÷Êä³ö32256Âö³å*/
 /*¾àÀëµ¥Î»£ºÂö³å£¬¼´1/32256.0È¦*/
 /*ËÙ¶Èµ¥Î»£ºÂö³å/5ms£¬¼´200*Âö³å/s,0.0062003968253968È¦/s*/
 /*ÂÖ×ÓÖ±¾¶6cm,ÖÜ³¤18.849555555cm¡£*/
 /*¹Ê¾àÀëµ¥Î»£º1/32256.0*18.849555555cm,ËÙ¶Èµ¥Î»£º0.1168747240823413cm/s*/
-u8 delay_50,delay_flag;                         //ÑÓÊ±Ïà¹Ø±äÁ¿
 u8 Run_Flag=0;  																//ÔËÐÐ×´Ì¬±êÖ¾Î» 0ÎªËÙ¶ÈÄ£Ê½£¬1ÎªÎ»ÖÃÄ£Ê½
 int Encoder_A,Encoder_B,Encoder_C,Encoder_D;          //±àÂëÆ÷µÄÂö³å¼ÆÊý
 long int Position_A,Position_B,Position_C,Position_D,Rate_A,Rate_B,Rate_C,Rate_D; //PID¿ØÖÆÏà¹Ø±äÁ¿
@@ -22,7 +23,7 @@ double RC_Velocity=42.5;                             //Î»ÖÃÄ£Ê½ËÙ¶È£¬µ¥Î»ºÍÄ¿±êË
 float Move_X=0,Move_Y=0,Move_Z=0;   //XYZÖáÄ¿±êËÙ¶È
 uint8_t pending_flag=0;
 int flag_clear_i=0;
-
+extern SemaphoreHandle_t Control_Lock;
 uint8_t relative=1;
 #define a_PARAMETER          (0.6472324f)
 #define b_PARAMETER          (0.7622959f)
@@ -32,6 +33,7 @@ void Control()//100Hz
 //    Move_Y=5000;
 //    Move_Z=0;//necessary
 //		Target_A=1;
+    xSemaphoreTake(Control_Lock, portMAX_DELAY);
     if(Run_Flag==1&&relative==1)
     {
         if(pending_flag==1)
@@ -42,10 +44,7 @@ void Control()//100Hz
     }
     else
         Kinematic_Analysis(Move_X,Move_Y,Move_Z);
-    if(delay_flag==1)
-    {
-        if(++delay_50==10)	 delay_50=0,delay_flag=0;                     //¸øÖ÷º¯ÊýÌá¹©50msµÄ¾«×¼ÑÓÊ±
-    }
+
     Encoder_A=-Read_Encoder(4);                                         		 //===¶ÁÈ¡±àÂëÆ÷µÄÖµ
     Position_A+=Encoder_A;                                                 //===»ý·ÖµÃµ½ËÙ¶È
     Encoder_B=-Read_Encoder(5);                                         		 //===¶ÁÈ¡±àÂëÆ÷µÄÖµ
@@ -77,6 +76,7 @@ void Control()//100Hz
     }
     Xianfu_Pwm(8400);                 //===PWMÏÞ·ù
     Set_Pwm(Motor_A,Motor_B,Motor_C,Motor_D);     //===¸³Öµ¸øPWM¼Ä´æÆ÷
+    xSemaphoreGive(Control_Lock);
 }
 
 /**************************************************************************
@@ -412,4 +412,93 @@ void Kinematic_Analysis2(float Vx,float Vy,float Vz)
     Rate_B   = +Vx+Vy-Vz*(a_PARAMETER+b_PARAMETER);
     Rate_C   = -Vx+Vy+Vz*(a_PARAMETER+b_PARAMETER);
     Rate_D   = +Vx+Vy+Vz*(a_PARAMETER+b_PARAMETER);
+}
+
+/**************************************************************************
+ * Thread-safe wrappers
+ *************************************************************************/
+void Set_Move(float x, float y, float z) //Move variables thread-safe wrapper
+{
+    xSemaphoreTake(Control_Lock, portMAX_DELAY);
+    Move_X = x;
+    Move_Y = y;
+    Move_Z = z;
+    xSemaphoreGive(Control_Lock);
+}
+
+void Set_Run_Flag(u8 flag) //Run_Flag thread-safe wrapper
+{
+    xSemaphoreTake(Control_Lock, portMAX_DELAY);
+    Run_Flag = flag;
+    xSemaphoreGive(Control_Lock);
+}
+
+u8 Get_Run_Flag() //Run_Flag thread-safe wrapper
+{
+    xSemaphoreTake(Control_Lock, portMAX_DELAY);
+    u8 flag = Run_Flag;
+    xSemaphoreGive(Control_Lock);
+    return flag;
+}
+
+void Set_relative(u8 flag) //Run_Flag thread-safe wrapper
+{
+    xSemaphoreTake(Control_Lock, portMAX_DELAY);
+    relative = flag;
+    xSemaphoreGive(Control_Lock);
+}
+
+u8 Get_relative() //Run_Flag thread-safe wrapper
+{
+    xSemaphoreTake(Control_Lock, portMAX_DELAY);
+    u8 flag = relative;
+    xSemaphoreGive(Control_Lock);
+    return flag;
+}
+
+void Set_pending_flag(u8 flag) //Run_Flag thread-safe wrapper
+{
+    xSemaphoreTake(Control_Lock, portMAX_DELAY);
+    pending_flag = flag;
+    xSemaphoreGive(Control_Lock);
+}
+
+u8 Get_pending_flag() //Run_Flag thread-safe wrapper
+{
+    xSemaphoreTake(Control_Lock, portMAX_DELAY);
+    u8 flag = pending_flag;
+    xSemaphoreGive(Control_Lock);
+    return flag;
+}
+void Set_RC_Velocity(double vol) //RC_Velocity thread-safe wrapper
+{
+    xSemaphoreTake(Control_Lock, portMAX_DELAY);
+    RC_Velocity = vol;
+    xSemaphoreGive(Control_Lock);
+}
+
+double Get_Error() //Error thread-safe wrapper
+{
+    xSemaphoreTake(Control_Lock, portMAX_DELAY);
+    double error = sqrt((Position_A-Target_A)*(Position_A-Target_A)+(Position_B-Target_B)*(Position_B-Target_B)+(Position_C-Target_C)*(Position_C-Target_C)+(Position_D-Target_D)*(Position_D-Target_D));
+    xSemaphoreGive(Control_Lock);
+    return error;
+}
+
+void Set_Last_Target(double x, double y, double z) //Last_Target thread-safe wrapper
+{
+    xSemaphoreTake(Control_Lock, portMAX_DELAY);
+    Last_Target_X = x;
+    Last_Target_Y = y;
+    Last_Target_Z = z;
+    xSemaphoreGive(Control_Lock);
+}
+
+void Get_Position_NOW(double *x, double *y, double *z) //Position thread-safe wrapper
+{
+    xSemaphoreTake(Control_Lock, portMAX_DELAY);
+    *x=(Position_B-Position_A)/2.0;
+    *y=(Position_B+Position_C)/2.0;
+    *z=(Position_C-Position_A+Position_D-Position_B)/4.0/(a_PARAMETER+b_PARAMETER);
+    xSemaphoreGive(Control_Lock);
 }

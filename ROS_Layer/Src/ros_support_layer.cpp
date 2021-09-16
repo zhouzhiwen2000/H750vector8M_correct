@@ -14,16 +14,18 @@ extern "C" {//functions&variables imported from C
 #define a_PARAMETER          (0.6472324f)
 #define b_PARAMETER          (0.7622959f)
 #define R 15
-extern "C" {
-    extern float Move_X,Move_Y,Move_Z;   //XYZ轴目标速度
-    extern uint8_t Run_Flag;
-    extern int RC_Velocity;
-    extern uint8_t relative;
-    extern uint8_t pending_flag;
-    extern double Last_Target_X,Last_Target_Y,Last_Target_Z;
-    extern long int Position_A,Position_B,Position_C,Position_D; //PID控制相关变量
-		extern long int Target_A,Target_B,Target_C,Target_D;
-		
+extern "C" {//functions&variables exported to and imported from C
+	void Set_Move(float x, float y, float z);
+	void Set_Run_Flag(unsigned char flag);
+	uint8_t Get_Run_Flag();
+	void Set_RC_Velocity(double vol);
+	void Set_relative(uint8_t flag);
+	uint8_t Get_relative();
+	void Set_pending_flag(uint8_t flag);
+	uint8_t Get_pending_flag();
+	void Set_Last_Target(double x, double y, double z);
+	void Get_Position_NOW(double *x, double *y, double *z); //Position thread-safe wrapper
+	double Get_Error();
 }
 extern int last_mode_servo;
 void callback_pos(const geometry_msgs::Point& msg);
@@ -121,7 +123,7 @@ void publish_servo_status()
 }
 void publish_car_status()
 {
-		error_car.data = sqrt((Position_A-Target_A)*(Position_A-Target_A)+(Position_B-Target_B)*(Position_B-Target_B)+(Position_C-Target_C)*(Position_C-Target_C)+(Position_D-Target_D)*(Position_D-Target_D));
+		error_car.data = Get_Error();
 		car_status.publish(&error_car);
 }
 void loop(void)
@@ -136,38 +138,54 @@ void loop(void)
 }
 void callback_speed(const geometry_msgs::Point& msg)// cm/s
 {
-    Run_Flag=0;
-    Move_X=msg.x*8.556169931964706;//0.1168747240823413;
-    Move_Y=msg.y*8.556169931964706;//0.1168747240823413;
-    Move_Z=(msg.z*R)*8.556169931964706;//0.1168747240823413;//waiting
+    Set_Run_Flag(0);
+    Set_Move(\
+		msg.x*8.556169931964706,\
+		msg.y*8.556169931964706,\
+		(msg.z*R)*8.556169931964706\
+		);
+	//Run_Flag=0;
+	//Move_X=msg.x*8.556169931964706;//0.1168747240823413;
+    //Move_Y=msg.y*8.556169931964706;//0.1168747240823413;
+    //Move_Z=(msg.z*R)*8.556169931964706;//0.1168747240823413;//waiting
 }
 void callback_pos(const geometry_msgs::Point& msg)// cm
 {
-    if(Run_Flag==0)//mode changed from speed mode
+    if(Get_Run_Flag()==0)//mode changed from speed mode
     {
-        if(relative==0)//changed to abs pos
+        if(Get_relative()==0)//changed to abs pos
         {
             double NOW_X,NOW_Y,NOW_Z;
-            NOW_X=(Position_B-Position_A)/2.0;//2021-4-20 changed **************************************************
-            NOW_Y=(Position_B+Position_C)/2.0;//2021-4-20 changed **************************************************
-            NOW_Z=(Position_C-Position_A+Position_D-Position_B)/4.0/(a_PARAMETER+b_PARAMETER);
-            Last_Target_X=NOW_X;//纠正限速器状态
-            Last_Target_Y=NOW_Y;//
-            Last_Target_Z=NOW_Z;//
+			Get_Position_NOW(&NOW_X,&NOW_Y,&NOW_Z);
+			Set_Last_Target(NOW_X,NOW_Y,NOW_Z);
+            // NOW_X=(Position_B-Position_A)/2.0;//2021-4-20 changed **************************************************
+            // NOW_Y=(Position_B+Position_C)/2.0;//2021-4-20 changed **************************************************
+            // NOW_Z=(Position_C-Position_A+Position_D-Position_B)/4.0/(a_PARAMETER+b_PARAMETER);
+            // Last_Target_X=NOW_X;//纠正限速器状态
+            // Last_Target_Y=NOW_Y;//
+            // Last_Target_Z=NOW_Z;//
         }
     }
-    Run_Flag=1;
-    Move_X=msg.x*1711.23398;
-    Move_Y=msg.y*1711.23398;
-    Move_Z=(msg.z*R)*1711.23398;//waiting
-    if(relative==1)
-        pending_flag=1;
-		publish_car_status();
+	Set_Run_Flag(1);
+	Set_Move(\
+	msg.x*1711.23398,\
+	msg.y*1711.23398,\
+	(msg.z*R)*1711.23398\
+	);
+    //Run_Flag=1;
+    //Move_X=msg.x*1711.23398;
+    //Move_Y=msg.y*1711.23398;
+    //Move_Z=(msg.z*R)*1711.23398;//waiting
+    if(Get_relative()==1)
+		Set_pending_flag(1);
+        //pending_flag=1;
+	publish_car_status();
 }
 
 void callback_speedlimit(const std_msgs::Float64& msg)// cm/s
 {
-    RC_Velocity=msg.data*8.556169931964706*2;
+	Set_RC_Velocity(msg.data*8.556169931964706*2);
+    //RC_Velocity=msg.data*8.556169931964706*2;
 }
 
 void callback_servo_speed(const geometry_msgs::Point& msg)// cm/s
@@ -177,31 +195,36 @@ void callback_servo_speed(const geometry_msgs::Point& msg)// cm/s
 
 void callback_mode(const std_msgs::UInt8& msg)// pos_mode 0:absolute 1:relative
 {
-    if(relative!=msg.data)//mode changed
+    if(Get_relative()!=msg.data)//mode changed
     {
-        if(Run_Flag==1&&relative==1)//in position mode,want to change to absolute mode from relative mode
+        if(Get_Run_Flag()==1&&Get_relative()==1)//in position mode,want to change to absolute mode from relative mode
         {
             double NOW_X,NOW_Y,NOW_Z;
-            NOW_X=(Position_B-Position_A)/2.0;
-            NOW_Y=(Position_B+Position_C)/2.0;
-            NOW_Z=(Position_C-Position_A+Position_D-Position_B)/4.0/(a_PARAMETER+b_PARAMETER);
-            Last_Target_X=NOW_X;//纠正限速器状态
-            Last_Target_Y=NOW_Y;
-            Last_Target_Z=NOW_Z;
-            Move_X=NOW_X;//纠正目标坐标
-            Move_Y=NOW_Y;
-            Move_Z=NOW_Z;
+			Get_Position_NOW(&NOW_X,&NOW_Y,&NOW_Z);
+			Set_Last_Target(NOW_X,NOW_Y,NOW_Z);
+			Set_Move(NOW_X,NOW_Y,NOW_Z);
+            // NOW_X=(Position_B-Position_A)/2.0;
+            // NOW_Y=(Position_B+Position_C)/2.0;
+            // NOW_Z=(Position_C-Position_A+Position_D-Position_B)/4.0/(a_PARAMETER+b_PARAMETER);
+            // Last_Target_X=NOW_X;//纠正限速器状态
+            // Last_Target_Y=NOW_Y;
+            // Last_Target_Z=NOW_Z;
+            // Move_X=NOW_X;//纠正目标坐标
+            // Move_Y=NOW_Y;
+            // Move_Z=NOW_Z;
         }
-        relative=msg.data;
+		Set_relative(msg.data);
+        //relative=msg.data;
     }
 		publish_car_status();
 }
 void publish_pos()
 {
     double NOW_X,NOW_Y,NOW_Z;
-    NOW_X=(Position_B-Position_A)/2.0;
-    NOW_Y=(Position_B+Position_C)/2.0;
-    NOW_Z=(Position_C-Position_A+Position_D-Position_B)/4.0/(a_PARAMETER+b_PARAMETER);
+	Get_Position_NOW(&NOW_X,&NOW_Y,&NOW_Z);
+    // NOW_X=(Position_B-Position_A)/2.0;
+    // NOW_Y=(Position_B+Position_C)/2.0;
+    // NOW_Z=(Position_C-Position_A+Position_D-Position_B)/4.0/(a_PARAMETER+b_PARAMETER);
     pos_msg.x=NOW_X/1711.23398;
     pos_msg.y=NOW_Y/1711.23398;
     pos_msg.z=NOW_Z/1711.23398/R;//waiting
