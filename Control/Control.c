@@ -26,7 +26,7 @@ int flag_clear_i=0;
 uint8_t relative=1;
 #define a_PARAMETER          (0.6472324f)
 #define b_PARAMETER          (0.7622959f)
-void Control()
+void Control()//100Hz
 {
 //    Move_X=0;
 //    Move_Y=5000;
