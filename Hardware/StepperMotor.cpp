@@ -20,7 +20,7 @@ bool clear_flag_2=false;
 
 void stepper1_ISR(void)
 {
-    static uint32_t counter=0;
+    static int counter=0;
     static bool state=false;
     if(++counter>=current_speed_1)
     {
@@ -88,7 +88,7 @@ int get_steps_1(void)
 
 void stepper2_ISR(void)
 {
-    static uint32_t counter=0;
+    static int counter=0;
     static bool state=false;
     if(++counter>=current_speed_2)
     {

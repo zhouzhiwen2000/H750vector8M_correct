@@ -161,7 +161,7 @@ void callback_pos(const geometry_msgs::Point& msg)// cm
             // NOW_X=(Position_B-Position_A)/2.0;//2021-4-20 changed **************************************************
             // NOW_Y=(Position_B+Position_C)/2.0;//2021-4-20 changed **************************************************
             // NOW_Z=(Position_C-Position_A+Position_D-Position_B)/4.0/(a_PARAMETER+b_PARAMETER);
-            // Last_Target_X=NOW_X;//¾ÀÕýÏÞËÙÆ÷×´Ì¬
+            // Last_Target_X=NOW_X;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×´Ì¬
             // Last_Target_Y=NOW_Y;//
             // Last_Target_Z=NOW_Z;//
         }
@@ -206,10 +206,10 @@ void callback_mode(const std_msgs::UInt8& msg)// pos_mode 0:absolute 1:relative
             // NOW_X=(Position_B-Position_A)/2.0;
             // NOW_Y=(Position_B+Position_C)/2.0;
             // NOW_Z=(Position_C-Position_A+Position_D-Position_B)/4.0/(a_PARAMETER+b_PARAMETER);
-            // Last_Target_X=NOW_X;//¾ÀÕýÏÞËÙÆ÷×´Ì¬
+            // Last_Target_X=NOW_X;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×´Ì¬
             // Last_Target_Y=NOW_Y;
             // Last_Target_Z=NOW_Z;
-            // Move_X=NOW_X;//¾ÀÕýÄ¿±ê×ø±ê
+            // Move_X=NOW_X;//ï¿½ï¿½ï¿½ï¿½Ä¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
             // Move_Y=NOW_Y;
             // Move_Z=NOW_Z;
         }
@@ -316,7 +316,7 @@ void callback_servo(const std_msgs::UInt8& msg)
 			last_mode_servo=0x13;
 			break;
 		case 0x14:
-			Servo_Camera_AdjPosLower();//Ô¤±¸×¥ÏÂ²ãÎï¿éÊ±µ÷ÕûÎªÖ¹µÄ¿´
+			Servo_Camera_AdjPosLower();//Ô¤ï¿½ï¿½×¥ï¿½Â²ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ÎªÖ¹ï¿½Ä¿ï¿½
 			last_mode_servo = 0x14;
 			break;
 		

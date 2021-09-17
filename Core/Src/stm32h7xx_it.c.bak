@@ -23,8 +23,6 @@
 #include "stm32h7xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "Control.h"
-#include "StepperMotor.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -243,11 +241,7 @@ void TIM8_BRK_TIM12_IRQHandler(void)
 void TIM6_DAC_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM6_DAC_IRQn 0 */
-	if(LL_TIM_IsActiveFlag_UPDATE(TIM6) == SET)
-	{
-		LL_TIM_ClearFlag_UPDATE(TIM6);
-	  //Control();
-	}
+
   /* USER CODE END TIM6_DAC_IRQn 0 */
   /* USER CODE BEGIN TIM6_DAC_IRQn 1 */
 
@@ -260,12 +254,7 @@ void TIM6_DAC_IRQHandler(void)
 void TIM7_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM7_IRQn 0 */
-	if(LL_TIM_IsActiveFlag_UPDATE(TIM7) == SET)
-	{
-		LL_TIM_ClearFlag_UPDATE(TIM7);
-		stepper1_ISR();
-		stepper2_ISR();
-	}
+
   /* USER CODE END TIM7_IRQn 0 */
   /* USER CODE BEGIN TIM7_IRQn 1 */
 
