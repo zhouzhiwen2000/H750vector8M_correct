@@ -130,8 +130,8 @@ void MX_FREERTOS_Init(void) {
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
-  controlTaskHandle = osThreadNew(StartControlTask, NULL, &controlTask_attributes);
-  ROSTaskHandle = osThreadNew(StartROSTask, NULL, &ROSTask_attributes);
+//  controlTaskHandle = osThreadNew(StartControlTask, NULL, &controlTask_attributes);
+//  ROSTaskHandle = osThreadNew(StartROSTask, NULL, &ROSTask_attributes);
 
 
   /* USER CODE END RTOS_THREADS */
