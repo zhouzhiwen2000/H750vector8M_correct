@@ -298,7 +298,7 @@ void MX_TIM6_Init(void)
   LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_TIM6);
 
   /* TIM6 interrupt Init */
-  NVIC_SetPriority(TIM6_DAC_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(),7, 0));
+  NVIC_SetPriority(TIM6_DAC_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(),5, 0));
   NVIC_EnableIRQ(TIM6_DAC_IRQn);
 
   /* USER CODE BEGIN TIM6_Init 1 */
@@ -309,7 +309,7 @@ void MX_TIM6_Init(void)
   TIM_InitStruct.Autoreload = 4999;
   LL_TIM_Init(TIM6, &TIM_InitStruct);
   LL_TIM_DisableARRPreload(TIM6);
-  LL_TIM_SetTriggerOutput(TIM6, LL_TIM_TRGO_UPDATE);
+  LL_TIM_SetTriggerOutput(TIM6, LL_TIM_TRGO_RESET);
   LL_TIM_DisableMasterSlaveMode(TIM6);
   /* USER CODE BEGIN TIM6_Init 2 */
 
@@ -330,7 +330,7 @@ void MX_TIM7_Init(void)
   LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_TIM7);
 
   /* TIM7 interrupt Init */
-  NVIC_SetPriority(TIM7_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(),6, 0));
+  NVIC_SetPriority(TIM7_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(),5, 0));
   NVIC_EnableIRQ(TIM7_IRQn);
 
   /* USER CODE BEGIN TIM7_Init 1 */
@@ -447,10 +447,6 @@ void HAL_TIM_PWM_MspInit(TIM_HandleTypeDef* tim_pwmHandle)
   /* USER CODE END TIM8_MspInit 0 */
     /* TIM8 clock enable */
     __HAL_RCC_TIM8_CLK_ENABLE();
-
-    /* TIM8 interrupt Init */
-    HAL_NVIC_SetPriority(TIM8_BRK_TIM12_IRQn, 5, 0);
-    HAL_NVIC_EnableIRQ(TIM8_BRK_TIM12_IRQn);
   /* USER CODE BEGIN TIM8_MspInit 1 */
 
   /* USER CODE END TIM8_MspInit 1 */
@@ -649,9 +645,6 @@ void HAL_TIM_PWM_MspDeInit(TIM_HandleTypeDef* tim_pwmHandle)
   /* USER CODE END TIM8_MspDeInit 0 */
     /* Peripheral clock disable */
     __HAL_RCC_TIM8_CLK_DISABLE();
-
-    /* TIM8 interrupt Deinit */
-    HAL_NVIC_DisableIRQ(TIM8_BRK_TIM12_IRQn);
   /* USER CODE BEGIN TIM8_MspDeInit 1 */
 
   /* USER CODE END TIM8_MspDeInit 1 */

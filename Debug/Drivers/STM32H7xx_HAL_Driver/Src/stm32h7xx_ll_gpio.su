@@ -7,5 +7,5 @@ stm32h7xx_ll_gpio.h:635:22:LL_GPIO_SetAFPin_8_15	24	static
 stm32h7xx_ll_bus.h:1523:22:LL_AHB4_GRP1_ForceReset	16	static
 stm32h7xx_ll_bus.h:1565:22:LL_AHB4_GRP1_ReleaseReset	16	static
 stm32h7xx_ll_gpio.c:105:13:LL_GPIO_DeInit	24	static
-stm32h7xx_ll_gpio.c:201:13:LL_GPIO_Init	32	static,ignoring_inline_asm
+stm32h7xx_ll_gpio.c:201:13:LL_GPIO_Init	40	static,ignoring_inline_asm
 stm32h7xx_ll_gpio.c:275:6:LL_GPIO_StructInit	16	static
