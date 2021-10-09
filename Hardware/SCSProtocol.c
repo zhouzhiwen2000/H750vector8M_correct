@@ -1,8 +1,8 @@
 /*
  * SCSProtocol.c
- * SCS´®ĞĞ¶æ»úĞ­Òé³ÌĞò
- * ÈÕÆÚ: 2016.11.11
- * ×÷Õß: Ì·ĞÛÀÖ
+ * SCSä¸²è¡Œèˆµæœºåè®®ç¨‹åº
+ * æ—¥æœŸ: 2016.11.11
+ * ä½œè€…: è°­é›„ä¹
  */
 
 #include <stddef.h>
@@ -15,11 +15,11 @@ typedef		short			s16;
 typedef		unsigned long	u32;	
 typedef		long			s32;
 
-static u8	Level =1;//¶æ»ú·µ»ØµÈ¼¶
-static u8	End = 1;//´¦ÀíÆ÷´óĞ¡¶Ë½á¹¹
+static u8	Level =1;//èˆµæœºè¿”å›ç­‰çº§
+static u8	End = 1;//å¤„ç†å™¨å¤§å°ç«¯ç»“æ„
 int	Ack(u8 ID);
-//1¸ö16Î»Êı²ğ·ÖÎª2¸ö8Î»Êı
-//DataLÎªµÍÎ»£¬DataHÎª¸ßÎ»
+//1ä¸ª16ä½æ•°æ‹†åˆ†ä¸º2ä¸ª8ä½æ•°
+//DataLä¸ºä½ä½ï¼ŒDataHä¸ºé«˜ä½
 void Host2SCS(u8 *DataL, u8* DataH, int Data)
 {
 	if(End){
@@ -31,8 +31,8 @@ void Host2SCS(u8 *DataL, u8* DataH, int Data)
 	}
 }
 
-//2¸ö8Î»Êı×éºÏÎª1¸ö16Î»Êı
-//DataLÎªµÍÎ»£¬DataHÎª¸ßÎ»
+//2ä¸ª8ä½æ•°ç»„åˆä¸º1ä¸ª16ä½æ•°
+//DataLä¸ºä½ä½ï¼ŒDataHä¸ºé«˜ä½
 int SCS2Host(u8 DataL, u8 DataH)
 {
 	int Data;
@@ -79,24 +79,24 @@ void writeBuf(u8 ID, u8 MemAddr, u8 *nDat, u8 nLen, u8 Fun)
 	writeSCS(&CheckSum, 1);
 }
 
-//ÆÕÍ¨Ğ´Ö¸Áî
-//¶æ»úID£¬MemAddrÄÚ´æ±íµØÖ·£¬Ğ´ÈëÊı¾İ£¬Ğ´Èë³¤¶È
+//æ™®é€šå†™æŒ‡ä»¤
+//èˆµæœºIDï¼ŒMemAddrå†…å­˜è¡¨åœ°å€ï¼Œå†™å…¥æ•°æ®ï¼Œå†™å…¥é•¿åº¦
 int genWrite(u8 ID, u8 MemAddr, u8 *nDat, u8 nLen)
 {
 	writeBuf(ID, MemAddr, nDat, nLen, INST_WRITE);
 	return Ack(ID);
 }
 
-//Òì²½Ğ´Ö¸Áî
-//¶æ»úID£¬MemAddrÄÚ´æ±íµØÖ·£¬Ğ´ÈëÊı¾İ£¬Ğ´Èë³¤¶È
+//å¼‚æ­¥å†™æŒ‡ä»¤
+//èˆµæœºIDï¼ŒMemAddrå†…å­˜è¡¨åœ°å€ï¼Œå†™å…¥æ•°æ®ï¼Œå†™å…¥é•¿åº¦
 int regWrite(u8 ID, u8 MemAddr, u8 *nDat, u8 nLen)
 {
 	writeBuf(ID, MemAddr, nDat, nLen, INST_REG_WRITE);
 	return Ack(ID);
 }
 
-//Í¬²½Ğ´Ö¸Áî
-//¶æ»úID[]Êı×é£¬IDNÊı×é³¤¶È£¬MemAddrÄÚ´æ±íµØÖ·£¬Ğ´ÈëÊı¾İ£¬Ğ´Èë³¤¶È
+//åŒæ­¥å†™æŒ‡ä»¤
+//èˆµæœºID[]æ•°ç»„ï¼ŒIDNæ•°ç»„é•¿åº¦ï¼ŒMemAddrå†…å­˜è¡¨åœ°å€ï¼Œå†™å…¥æ•°æ®ï¼Œå†™å…¥é•¿åº¦
 void snycWrite(u8 ID[], u8 IDN, u8 MemAddr, u8 *nDat, u8 nLen)
 {
 	u8 i, j;
@@ -155,8 +155,8 @@ int writePos(u8 ID, u16 Position, u16 Time, u16 Speed, u8 Fun)
 	return Ack(ID);
 }
 
-//Ğ´Î»ÖÃÖ¸Áî
-//¶æ»úID£¬PositionÎ»ÖÃ£¬Ö´ĞĞÊ±¼äTime£¬Ö´ĞĞËÙ¶ÈSpeed
+//å†™ä½ç½®æŒ‡ä»¤
+//èˆµæœºIDï¼ŒPositionä½ç½®ï¼Œæ‰§è¡Œæ—¶é—´Timeï¼Œæ‰§è¡Œé€Ÿåº¦Speed
 int WritePos(u8 ID, u16 Position, u16 Time, u16 Speed)
 {
 	if(ID!=0)
@@ -165,8 +165,8 @@ int WritePos(u8 ID, u16 Position, u16 Time, u16 Speed)
 		return 0;
 }
 
-//Òì²½Ğ´Î»ÖÃÖ¸Áî
-//¶æ»úID£¬PositionÎ»ÖÃ£¬Ö´ĞĞÊ±¼äTime£¬Ö´ĞĞËÙ¶ÈSpeed
+//å¼‚æ­¥å†™ä½ç½®æŒ‡ä»¤
+//èˆµæœºIDï¼ŒPositionä½ç½®ï¼Œæ‰§è¡Œæ—¶é—´Timeï¼Œæ‰§è¡Œé€Ÿåº¦Speed
 int RegWritePos(u8 ID, u16 Position, u16 Time, u16 Speed)
 {
 	return writePos(ID, Position, Time, Speed, INST_REG_WRITE);
@@ -177,8 +177,8 @@ void RegWriteAction()
 	writeBuf(0xfe, 0, NULL, 0, INST_ACTION);
 }
 
-//Ğ´Î»ÖÃÖ¸Áî
-//¶æ»úID[]Êı×é£¬IDNÊı×é³¤¶È£¬PositionÎ»ÖÃ£¬Ö´ĞĞÊ±¼äTime£¬Ö´ĞĞËÙ¶ÈSpeed
+//å†™ä½ç½®æŒ‡ä»¤
+//èˆµæœºID[]æ•°ç»„ï¼ŒIDNæ•°ç»„é•¿åº¦ï¼ŒPositionä½ç½®ï¼Œæ‰§è¡Œæ—¶é—´Timeï¼Œæ‰§è¡Œé€Ÿåº¦Speed
 void SyncWritePos(u8 ID[], u8 IDN, u16 Position, u16 Time, u16 Speed)
 {
 	u8 buf[6];
@@ -190,7 +190,7 @@ void SyncWritePos(u8 ID[], u8 IDN, u16 Position, u16 Time, u16 Speed)
 
 
 
-//¶àÈ¦¿ØÖÆÖ¸Áî
+//å¤šåœˆæ§åˆ¶æŒ‡ä»¤
 int WriteSpe(u8 ID, s16 Speed)
 {
 	if(Speed<0){
@@ -219,7 +219,7 @@ int joinMode(u8 ID, u16 minAngle, u16 maxAngle)
 	return genWrite(ID, P_MIN_ANGLE_LIMIT_L, bBuf, 4);
 }
 
-//¸´Î»¶æ»ú²ÎÊıÎªÄ¬ÈÏÖµ
+//å¤ä½èˆµæœºå‚æ•°ä¸ºé»˜è®¤å€¼
 int Reset(u8 ID)
 {
 	//flushSCS();

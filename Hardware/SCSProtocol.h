@@ -1,8 +1,8 @@
 /*
  * SCSProtocol.h
- * SCS´®ĞĞ¶æ»úĞ­Òé³ÌĞò
- * ÈÕÆÚ: 2016.11.11
- * ×÷Õß: Ì·ĞÛÀÖ
+ * SCSä¸²è¡Œèˆµæœºåè®®ç¨‹åº
+ * æ—¥æœŸ: 2016.11.11
+ * ä½œè€…: è°­é›„ä¹
  */
 
 #ifndef _SCSPROTOCOL_H
@@ -10,31 +10,31 @@
 
 #include <stdint.h>
 
-extern int genWrite(uint8_t ID, uint8_t MemAddr, uint8_t *nDat, uint8_t nLen);//ÆÕÍ¨Ğ´Ö¸Áî
-extern int regWrite(uint8_t ID, uint8_t MemAddr, uint8_t *nDat, uint8_t nLen);//Òì²½Ğ´Ö¸Áî
-extern void snycWrite(uint8_t ID[], uint8_t IDN, uint8_t MemAddr, uint8_t *nDat, uint8_t nLen);//Í¬²½Ğ´Ö¸Áî
-extern int writeByte(uint8_t ID, uint8_t MemAddr, uint8_t bDat);//Ğ´1¸ö×Ö½Ú
-extern int writeWord(uint8_t ID, uint8_t MemAddr, uint16_t wDat);//Ğ´2¸ö×Ö½Ú
-extern int EnableTorque(uint8_t ID, uint8_t Enable);//Å¤Á¦¿ØÖÆÖ¸Áî
-extern int WritePos(uint8_t ID, uint16_t Position, uint16_t Time, uint16_t Speed);//ÆÕÍ¨Ğ´Î»ÖÃÖ¸Áî
-extern int RegWritePos(uint8_t ID, uint16_t Position, uint16_t Time, uint16_t Speed);//Òì²½Ğ´Î»ÖÃÖ¸Áî
-extern void RegWriteAction(void);//Ö´ĞĞÒì²½Ğ´Ö¸Áî
-extern void SyncWritePos(uint8_t ID[], uint8_t IDN, uint16_t Position, uint16_t Time, uint16_t Speed);//Í¬²½Ğ´Î»ÖÃÖ¸Áî
-extern int WriteSpe(uint8_t ID, int16_t Speed);//¶àÈ¦¿ØÖÆÖ¸Áî
-//extern int Read(uint8_t ID, uint8_t MemAddr, uint8_t *nData, uint8_t nLen);//¶ÁÖ¸Áî
-//extern int readByte(uint8_t ID, uint8_t MemAddr);//¶Á1¸ö×Ö½Ú
-//extern int readWord(uint8_t ID, uint8_t MemAddr);//¶Á2¸ö×Ö½Ú
-//extern int ReadPos(uint8_t ID);//¶ÁÎ»ÖÃ
-//extern int ReadVoltage(uint8_t ID);//¶ÁµçÑ¹
-//extern int ReadTemper(uint8_t ID);//¼ÇÎÂ¶È
-//extern int Ping(uint8_t ID);//PingÖ¸Áî
-extern int wheelMode(uint8_t ID);//¶àÈ¦ÂÖ×ÓÄ£Ê½
-extern int joinMode(uint8_t ID, unsigned short minAngle, unsigned short maxAngle);//ÆÕÍ¨ËÅ·şÄ£Ê½
-extern int Reset(uint8_t ID);//¸´Î»¶æ»ú²ÎÊıÎªÄ¬ÈÏÖµ
+extern int genWrite(uint8_t ID, uint8_t MemAddr, uint8_t *nDat, uint8_t nLen);//æ™®é€šå†™æŒ‡ä»¤
+extern int regWrite(uint8_t ID, uint8_t MemAddr, uint8_t *nDat, uint8_t nLen);//å¼‚æ­¥å†™æŒ‡ä»¤
+extern void snycWrite(uint8_t ID[], uint8_t IDN, uint8_t MemAddr, uint8_t *nDat, uint8_t nLen);//åŒæ­¥å†™æŒ‡ä»¤
+extern int writeByte(uint8_t ID, uint8_t MemAddr, uint8_t bDat);//å†™1ä¸ªå­—èŠ‚
+extern int writeWord(uint8_t ID, uint8_t MemAddr, uint16_t wDat);//å†™2ä¸ªå­—èŠ‚
+extern int EnableTorque(uint8_t ID, uint8_t Enable);//æ‰­åŠ›æ§åˆ¶æŒ‡ä»¤
+extern int WritePos(uint8_t ID, uint16_t Position, uint16_t Time, uint16_t Speed);//æ™®é€šå†™ä½ç½®æŒ‡ä»¤
+extern int RegWritePos(uint8_t ID, uint16_t Position, uint16_t Time, uint16_t Speed);//å¼‚æ­¥å†™ä½ç½®æŒ‡ä»¤
+extern void RegWriteAction(void);//æ‰§è¡Œå¼‚æ­¥å†™æŒ‡ä»¤
+extern void SyncWritePos(uint8_t ID[], uint8_t IDN, uint16_t Position, uint16_t Time, uint16_t Speed);//åŒæ­¥å†™ä½ç½®æŒ‡ä»¤
+extern int WriteSpe(uint8_t ID, int16_t Speed);//å¤šåœˆæ§åˆ¶æŒ‡ä»¤
+//extern int Read(uint8_t ID, uint8_t MemAddr, uint8_t *nData, uint8_t nLen);//è¯»æŒ‡ä»¤
+//extern int readByte(uint8_t ID, uint8_t MemAddr);//è¯»1ä¸ªå­—èŠ‚
+//extern int readWord(uint8_t ID, uint8_t MemAddr);//è¯»2ä¸ªå­—èŠ‚
+//extern int ReadPos(uint8_t ID);//è¯»ä½ç½®
+//extern int ReadVoltage(uint8_t ID);//è¯»ç”µå‹
+//extern int ReadTemper(uint8_t ID);//è®°æ¸©åº¦
+//extern int Ping(uint8_t ID);//PingæŒ‡ä»¤
+extern int wheelMode(uint8_t ID);//å¤šåœˆè½®å­æ¨¡å¼
+extern int joinMode(uint8_t ID, unsigned short minAngle, unsigned short maxAngle);//æ™®é€šä¼ºæœæ¨¡å¼
+extern int Reset(uint8_t ID);//å¤ä½èˆµæœºå‚æ•°ä¸ºé»˜è®¤å€¼
 
-//extern int Ack(uint8_t ID);//Ó¦´ğ
+//extern int Ack(uint8_t ID);//åº”ç­”
 
-//Ó²¼ş½Ó¿Úº¯Êı
+//ç¡¬ä»¶æ¥å£å‡½æ•°
 extern int writeSCS(uint8_t *nDat, int nLen);
 extern int readSCS(uint8_t *nDat, int nLen);
 //extern void flushSCS(void);

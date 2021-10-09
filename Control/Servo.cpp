@@ -425,7 +425,7 @@ void Servo_Grab_Upper()//done
 	
 }
 
-void Servo_Grab_Pose_Lower()//×¥µØÉÏµÄÎï¿é
+void Servo_Grab_Pose_Lower()//æŠ“åœ°ä¸Šçš„ç‰©å—
 {
 	
 	if(last_mode_servo == 0x0C)
@@ -474,7 +474,7 @@ void Servo_Grab_Pose_Lower()//×¥µØÉÏµÄÎï¿é
 	Servo_Add_Action(4,950,-1);
     Servo_Add_Action(3,717,-1);
 }
-void Servo_Grab_Pose2_Lower()//×¥Ì¨×ÓÏÂµÄÎï¿é
+void Servo_Grab_Pose2_Lower()//æŠ“å°å­ä¸‹çš„ç‰©å—
 {
     	
 	//970 430 735
@@ -584,7 +584,7 @@ void Servo_Grab()//done
 }
 
 //2:700 3:450 4:1000
-void Servo_Put_Upper()//Âë¶â
+void Servo_Put_Upper()//ç å›
 {
 	Servo_Add_Action(4,1000,-1);
     Servo_Add_Action(3,450,-1);
@@ -600,10 +600,10 @@ void Servo_Put_Upper()//Âë¶â
 
 
 
-//2: 840  3: 320  4:980  ·ÅÏÂµÄ×´Ì¬
-//2: 740  3: 475  4:950  ÆğÀ´µÄÖĞ¼ä×´Ì¬
+//2: 840  3: 320  4:980  æ”¾ä¸‹çš„çŠ¶æ€
+//2: 740  3: 475  4:950  èµ·æ¥çš„ä¸­é—´çŠ¶æ€
 
-//2: 560 3: 140  4: 1000 100: 850  ¹Û²ìÈ¦È¦
+//2: 560 3: 140  4: 1000 100: 850  è§‚å¯Ÿåœˆåœˆ
 void Servo_Put_Lower()
 {
 	
@@ -647,7 +647,7 @@ void Servo_Put_Lower()
 }
 
 //2: 500 3: 140  4: 1000 100: 850
-void Servo_Camera()//¹Û²ìÈ¦È¦
+void Servo_Camera()//è§‚å¯Ÿåœˆåœˆ
 {
 	if(last_mode_servo != -1)
 	{
@@ -671,7 +671,7 @@ void Servo_Camera()//¹Û²ìÈ¦È¦
 }
 //2: 500 3: 295 4: 870
 
-void Servo_Camera1()//¿´Ì¨×ÓÉÏÃæµÄÎï¿é
+void Servo_Camera1()//çœ‹å°å­ä¸Šé¢çš„ç‰©å—
 {
 //    Servo_Add_Action(2,266,-1);
 //    Servo_Add_Action(3,717,-1);//transion
@@ -690,7 +690,7 @@ void Servo_Camera1()//¿´Ì¨×ÓÉÏÃæµÄÎï¿é
 }
 //670 700 80
 
-void Servo_Camera2()//¿´¶şÎ¬Âë
+void Servo_Camera2()//çœ‹äºŒç»´ç 
 {
 	Servo_Add_Action(2,670,-1);
 	
@@ -719,7 +719,7 @@ void Servo_Camera_AdjPosLower()
 	
 }
 
-void Servo_Camera3()//¿´Áù¸öÎï¿é
+void Servo_Camera3()//çœ‹å…­ä¸ªç‰©å—
 {
 	
 	Servo_Add_Action(2,500,-1);

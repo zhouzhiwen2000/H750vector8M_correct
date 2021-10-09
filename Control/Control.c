@@ -6,21 +6,21 @@
 #include <math.h>
 #include "FreeRTOS.h"
 #include "semphr.h"
-/*È¦ÊıºÍ±àÂëÆ÷Êı¾İ¶ÔÓ¦¹ØÏµ£º×ªÒ»È¦¶ÔÓ¦±àÂëÆ÷Êı¾İ¸Ä±ä32256£¬¼´±àÂëÆ÷Êä³ö32256Âö³å*/
-/*¾àÀëµ¥Î»£ºÂö³å£¬¼´1/32256.0È¦*/
-/*ËÙ¶Èµ¥Î»£ºÂö³å/5ms£¬¼´200*Âö³å/s,0.0062003968253968È¦/s*/
-/*ÂÖ×ÓÖ±¾¶6cm,ÖÜ³¤18.849555555cm¡£*/
-/*¹Ê¾àÀëµ¥Î»£º1/32256.0*18.849555555cm,ËÙ¶Èµ¥Î»£º0.1168747240823413cm/s*/
-u8 Run_Flag=0;  																//ÔËĞĞ×´Ì¬±êÖ¾Î» 0ÎªËÙ¶ÈÄ£Ê½£¬1ÎªÎ»ÖÃÄ£Ê½
-int Encoder_A,Encoder_B,Encoder_C,Encoder_D;          //±àÂëÆ÷µÄÂö³å¼ÆÊı
-long int Position_A,Position_B,Position_C,Position_D,Rate_A,Rate_B,Rate_C,Rate_D; //PID¿ØÖÆÏà¹Ø±äÁ¿
-long int Motor_A,Motor_B,Motor_C,Motor_D;        //µç»úPWM±äÁ¿
-long int Target_A,Target_B,Target_C,Target_D;     //µç»úÄ¿±êÖµ
-//u16 PID_Parameter[10],Flash_Parameter[10];  //FlashÏà¹ØÊı×é
-float	Position_KP=1.8,Position_KI=0,Position_KD=19;  //Î»ÖÃ¿ØÖÆPID²ÎÊı
-float Velocity_KP=1.5,Velocity_KI=1.5              ;	          //ËÙ¶È¿ØÖÆPID²ÎÊı
-double RC_Velocity=42.5;                             //Î»ÖÃÄ£Ê½ËÙ¶È£¬µ¥Î»ºÍÄ¿±êËÙ¶Èµ¥Î»ÏàÍ¬
-float Move_X=0,Move_Y=0,Move_Z=0;   //XYZÖáÄ¿±êËÙ¶È
+/*åœˆæ•°å’Œç¼–ç å™¨æ•°æ®å¯¹åº”å…³ç³»ï¼šè½¬ä¸€åœˆå¯¹åº”ç¼–ç å™¨æ•°æ®æ”¹å˜32256ï¼Œå³ç¼–ç å™¨è¾“å‡º32256è„‰å†²*/
+/*è·ç¦»å•ä½ï¼šè„‰å†²ï¼Œå³1/32256.0åœˆ*/
+/*é€Ÿåº¦å•ä½ï¼šè„‰å†²/5msï¼Œå³200*è„‰å†²/s,0.0062003968253968åœˆ/s*/
+/*è½®å­ç›´å¾„6cm,å‘¨é•¿18.849555555cmã€‚*/
+/*æ•…è·ç¦»å•ä½ï¼š1/32256.0*18.849555555cm,é€Ÿåº¦å•ä½ï¼š0.1168747240823413cm/s*/
+u8 Run_Flag=0;  																//è¿è¡ŒçŠ¶æ€æ ‡å¿—ä½ 0ä¸ºé€Ÿåº¦æ¨¡å¼ï¼Œ1ä¸ºä½ç½®æ¨¡å¼
+int Encoder_A,Encoder_B,Encoder_C,Encoder_D;          //ç¼–ç å™¨çš„è„‰å†²è®¡æ•°
+long int Position_A,Position_B,Position_C,Position_D,Rate_A,Rate_B,Rate_C,Rate_D; //PIDæ§åˆ¶ç›¸å…³å˜é‡
+long int Motor_A,Motor_B,Motor_C,Motor_D;        //ç”µæœºPWMå˜é‡
+long int Target_A,Target_B,Target_C,Target_D;     //ç”µæœºç›®æ ‡å€¼
+//u16 PID_Parameter[10],Flash_Parameter[10];  //Flashç›¸å…³æ•°ç»„
+float	Position_KP=1.8,Position_KI=0,Position_KD=19;  //ä½ç½®æ§åˆ¶PIDå‚æ•°
+float Velocity_KP=1.5,Velocity_KI=1.5              ;	          //é€Ÿåº¦æ§åˆ¶PIDå‚æ•°
+double RC_Velocity=42.5;                             //ä½ç½®æ¨¡å¼é€Ÿåº¦ï¼Œå•ä½å’Œç›®æ ‡é€Ÿåº¦å•ä½ç›¸åŒ
+float Move_X=0,Move_Y=0,Move_Z=0;   //XYZè½´ç›®æ ‡é€Ÿåº¦
 uint8_t pending_flag=0;
 int flag_clear_i=0;
 extern SemaphoreHandle_t Control_Lock;
@@ -45,44 +45,44 @@ void Control()//100Hz
     else
         Kinematic_Analysis(Move_X,Move_Y,Move_Z);
 
-    Encoder_A=-Read_Encoder(4);                                         		 //===¶ÁÈ¡±àÂëÆ÷µÄÖµ
-    Position_A+=Encoder_A;                                                 //===»ı·ÖµÃµ½ËÙ¶È
-    Encoder_B=-Read_Encoder(5);                                         		 //===¶ÁÈ¡±àÂëÆ÷µÄÖµ
-    Position_B+=Encoder_B;                                                 //===»ı·ÖµÃµ½ËÙ¶È
-    Encoder_C=Read_Encoder(3);                                         		//===¶ÁÈ¡±àÂëÆ÷µÄÖµ
-    Position_C+=Encoder_C;                                                 //===»ı·ÖµÃµ½ËÙ¶È
-    Encoder_D=Read_Encoder(2);                                         		//===¶ÁÈ¡±àÂëÆ÷µÄÖµ
-    Position_D+=Encoder_D;                                                 //===»ı·ÖµÃµ½ËÙ¶È
-//    UART_Control();			//UARTÌá¹©¿ØÖÆÄ¿±êÁ¿£¨¿É°üº¬ÏŞËÙÖµ£©
-//    if(RC_Velocity>0&&RC_Velocity<15)  RC_Velocity=15;                   //±ÜÃâµç»ú½øÈëµÍËÙ·ÇÏßĞÔÇø£¬ÏŞËÙ×îµÍ15
-    if(Run_Flag==0)//ËÙ¶ÈÄ£Ê½
+    Encoder_A=-Read_Encoder(4);                                         		 //===è¯»å–ç¼–ç å™¨çš„å€¼
+    Position_A+=Encoder_A;                                                 //===ç§¯åˆ†å¾—åˆ°é€Ÿåº¦
+    Encoder_B=-Read_Encoder(5);                                         		 //===è¯»å–ç¼–ç å™¨çš„å€¼
+    Position_B+=Encoder_B;                                                 //===ç§¯åˆ†å¾—åˆ°é€Ÿåº¦
+    Encoder_C=Read_Encoder(3);                                         		//===è¯»å–ç¼–ç å™¨çš„å€¼
+    Position_C+=Encoder_C;                                                 //===ç§¯åˆ†å¾—åˆ°é€Ÿåº¦
+    Encoder_D=Read_Encoder(2);                                         		//===è¯»å–ç¼–ç å™¨çš„å€¼
+    Position_D+=Encoder_D;                                                 //===ç§¯åˆ†å¾—åˆ°é€Ÿåº¦
+//    UART_Control();			//UARTæä¾›æ§åˆ¶ç›®æ ‡é‡ï¼ˆå¯åŒ…å«é™é€Ÿå€¼ï¼‰
+//    if(RC_Velocity>0&&RC_Velocity<15)  RC_Velocity=15;                   //é¿å…ç”µæœºè¿›å…¥ä½é€Ÿéçº¿æ€§åŒºï¼Œé™é€Ÿæœ€ä½15
+    if(Run_Flag==0)//é€Ÿåº¦æ¨¡å¼
     {
-        Motor_A=Incremental_PI_A(Encoder_A,Target_A);                         //===ËÙ¶È±Õ»·¿ØÖÆ¼ÆËãµç»úA×îÖÕPWM
-        Motor_B=Incremental_PI_B(Encoder_B,Target_B);                         //===ËÙ¶È±Õ»·¿ØÖÆ¼ÆËãµç»úB×îÖÕPWM
-        Motor_C=Incremental_PI_C(Encoder_C,Target_C);                         //===ËÙ¶È±Õ»·¿ØÖÆ¼ÆËãµç»úC×îÖÕPWM
-        Motor_D=Incremental_PI_D(Encoder_D,Target_D);                         //===ËÙ¶È±Õ»·¿ØÖÆ¼ÆËãµç»úC×îÖÕPWM
+        Motor_A=Incremental_PI_A(Encoder_A,Target_A);                         //===é€Ÿåº¦é—­ç¯æ§åˆ¶è®¡ç®—ç”µæœºAæœ€ç»ˆPWM
+        Motor_B=Incremental_PI_B(Encoder_B,Target_B);                         //===é€Ÿåº¦é—­ç¯æ§åˆ¶è®¡ç®—ç”µæœºBæœ€ç»ˆPWM
+        Motor_C=Incremental_PI_C(Encoder_C,Target_C);                         //===é€Ÿåº¦é—­ç¯æ§åˆ¶è®¡ç®—ç”µæœºCæœ€ç»ˆPWM
+        Motor_D=Incremental_PI_D(Encoder_D,Target_D);                         //===é€Ÿåº¦é—­ç¯æ§åˆ¶è®¡ç®—ç”µæœºCæœ€ç»ˆPWM
     }
-    else//Î»ÖÃÄ£Ê½
+    else//ä½ç½®æ¨¡å¼
     {
-        Motor_A=Position_PID_A(Position_A,Target_A)>>8;//Î»ÖÃ±Õ»·¿ØÖÆ£¬¼ÆËãµç»úAËÙ¶ÈÄÚ»·µÄÊäÈëÁ¿
-        Motor_B=Position_PID_B(Position_B,Target_B)>>8;//Î»ÖÃ±Õ»·¿ØÖÆ£¬¼ÆËãµç»úBËÙ¶ÈÄÚ»·µÄÊäÈëÁ¿
-        Motor_C=Position_PID_C(Position_C,Target_C)>>8;//Î»ÖÃ±Õ»·¿ØÖÆ£¬¼ÆËãµç»úCËÙ¶ÈÄÚ»·µÄÊäÈëÁ¿
-        Motor_D=Position_PID_D(Position_D,Target_D)>>8;//Î»ÖÃ±Õ»·¿ØÖÆ£¬¼ÆËãµç»úDËÙ¶ÈÄÚ»·µÄÊäÈëÁ¿
-        Count_Velocity();   //Õë¶ÔĞĞ½ø·½ÏòÏŞËÙ£¬ÄÜÏŞÖÆ×ÜËÙ¶È²»³¬¹ıRC_Velocity
-        Motor_A=Incremental_PI_A(Encoder_A,-Motor_A);         //===ËÙ¶È±Õ»·¿ØÖÆ¼ÆËãµç»úA×îÖÕPWM
-        Motor_B=Incremental_PI_B(Encoder_B,-Motor_B);         //===ËÙ¶È±Õ»·¿ØÖÆ¼ÆËãµç»úB×îÖÕPWM
-        Motor_C=Incremental_PI_C(Encoder_C,-Motor_C);         //===ËÙ¶È±Õ»·¿ØÖÆ¼ÆËãµç»úC×îÖÕPWM
-        Motor_D=Incremental_PI_D(Encoder_D,-Motor_D);         //===ËÙ¶È±Õ»·¿ØÖÆ¼ÆËãµç»úD×îÖÕPWM
+        Motor_A=Position_PID_A(Position_A,Target_A)>>8;//ä½ç½®é—­ç¯æ§åˆ¶ï¼Œè®¡ç®—ç”µæœºAé€Ÿåº¦å†…ç¯çš„è¾“å…¥é‡
+        Motor_B=Position_PID_B(Position_B,Target_B)>>8;//ä½ç½®é—­ç¯æ§åˆ¶ï¼Œè®¡ç®—ç”µæœºBé€Ÿåº¦å†…ç¯çš„è¾“å…¥é‡
+        Motor_C=Position_PID_C(Position_C,Target_C)>>8;//ä½ç½®é—­ç¯æ§åˆ¶ï¼Œè®¡ç®—ç”µæœºCé€Ÿåº¦å†…ç¯çš„è¾“å…¥é‡
+        Motor_D=Position_PID_D(Position_D,Target_D)>>8;//ä½ç½®é—­ç¯æ§åˆ¶ï¼Œè®¡ç®—ç”µæœºDé€Ÿåº¦å†…ç¯çš„è¾“å…¥é‡
+        Count_Velocity();   //é’ˆå¯¹è¡Œè¿›æ–¹å‘é™é€Ÿï¼Œèƒ½é™åˆ¶æ€»é€Ÿåº¦ä¸è¶…è¿‡RC_Velocity
+        Motor_A=Incremental_PI_A(Encoder_A,-Motor_A);         //===é€Ÿåº¦é—­ç¯æ§åˆ¶è®¡ç®—ç”µæœºAæœ€ç»ˆPWM
+        Motor_B=Incremental_PI_B(Encoder_B,-Motor_B);         //===é€Ÿåº¦é—­ç¯æ§åˆ¶è®¡ç®—ç”µæœºBæœ€ç»ˆPWM
+        Motor_C=Incremental_PI_C(Encoder_C,-Motor_C);         //===é€Ÿåº¦é—­ç¯æ§åˆ¶è®¡ç®—ç”µæœºCæœ€ç»ˆPWM
+        Motor_D=Incremental_PI_D(Encoder_D,-Motor_D);         //===é€Ÿåº¦é—­ç¯æ§åˆ¶è®¡ç®—ç”µæœºDæœ€ç»ˆPWM
     }
-    Xianfu_Pwm(8400);                 //===PWMÏŞ·ù
-    Set_Pwm(Motor_A,Motor_B,Motor_C,Motor_D);     //===¸³Öµ¸øPWM¼Ä´æÆ÷
+    Xianfu_Pwm(8400);                 //===PWMé™å¹…
+    Set_Pwm(Motor_A,Motor_B,Motor_C,Motor_D);     //===èµ‹å€¼ç»™PWMå¯„å­˜å™¨
     xSemaphoreGive(Control_Lock);
 }
 
 /**************************************************************************
-º¯Êı¹¦ÄÜ£ºµ¥Î»Ê±¼ä¶ÁÈ¡±àÂëÆ÷¼ÆÊı
-Èë¿Ú²ÎÊı£º¶¨Ê±Æ÷
-·µ»Ø  Öµ£ºËÙ¶ÈÖµ
+å‡½æ•°åŠŸèƒ½ï¼šå•ä½æ—¶é—´è¯»å–ç¼–ç å™¨è®¡æ•°
+å…¥å£å‚æ•°ï¼šå®šæ—¶å™¨
+è¿”å›  å€¼ï¼šé€Ÿåº¦å€¼
 **************************************************************************/
 int Read_Encoder(u8 TIMX)
 {
@@ -113,53 +113,53 @@ int Read_Encoder(u8 TIMX)
 
 
 /**************************************************************************
-º¯Êı¹¦ÄÜ£º¸³Öµ¸øPWM¼Ä´æÆ÷
-Èë¿Ú²ÎÊı£ºPWM
-·µ»Ø  Öµ£ºÎŞ
+å‡½æ•°åŠŸèƒ½ï¼šèµ‹å€¼ç»™PWMå¯„å­˜å™¨
+å…¥å£å‚æ•°ï¼šPWM
+è¿”å›  å€¼ï¼šæ— 
 **************************************************************************/
 void Set_Pwm(int motor_a,int motor_b,int motor_c,int motor_d)
 {
-    if(motor_d>0)//Õı×ªH-L
+    if(motor_d>0)//æ­£è½¬H-L
     {
         __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_1,motor_d);
         __HAL_TIM_SET_COMPARE(&htim8,TIM_CHANNEL_1,0);
     }
-    else//Inverse×ªL-H
+    else//Inverseè½¬L-H
     {
         __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_1,0);
         __HAL_TIM_SET_COMPARE(&htim8,TIM_CHANNEL_1,-motor_d);
     }
 
-    if(motor_a>0)//Õı×ªH-L
+    if(motor_a>0)//æ­£è½¬H-L
     {
         __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_2,motor_a);
         __HAL_TIM_SET_COMPARE(&htim8,TIM_CHANNEL_2,0);
 
     }
-    else//Inverse×ªL-H
+    else//Inverseè½¬L-H
     {
         __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_2,0);
         __HAL_TIM_SET_COMPARE(&htim8,TIM_CHANNEL_2,-motor_a);
     }
 
-    if(motor_c>0)//Õı×ªH-L
+    if(motor_c>0)//æ­£è½¬H-L
     {
         __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_3,motor_c);
         __HAL_TIM_SET_COMPARE(&htim8,TIM_CHANNEL_3,0);
     }
-    else//Inverse×ªL-H
+    else//Inverseè½¬L-H
     {
         __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_3,0);
         __HAL_TIM_SET_COMPARE(&htim8,TIM_CHANNEL_3,-motor_c);
 
     }
 
-    if(motor_b>0)//Õı×ªH-L
+    if(motor_b>0)//æ­£è½¬H-L
     {
         __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_4,motor_b);
         __HAL_TIM_SET_COMPARE(&htim8,TIM_CHANNEL_4,0);
     }
-    else//Inverse×ªL-H
+    else//Inverseè½¬L-H
     {
         __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_4,0);
         __HAL_TIM_SET_COMPARE(&htim8,TIM_CHANNEL_4,-motor_b);
@@ -168,9 +168,9 @@ void Set_Pwm(int motor_a,int motor_b,int motor_c,int motor_d)
 
 
 /**************************************************************************
-º¯Êı¹¦ÄÜ£ºÏŞÖÆPWM¸³Öµ
-Èë¿Ú²ÎÊı£º·ùÖµ
-·µ»Ø  Öµ£ºÎŞ
+å‡½æ•°åŠŸèƒ½ï¼šé™åˆ¶PWMèµ‹å€¼
+å…¥å£å‚æ•°ï¼šå¹…å€¼
+è¿”å›  å€¼ï¼šæ— 
 **************************************************************************/
 void Xianfu_Pwm(int amplitude)
 {
@@ -184,26 +184,26 @@ void Xianfu_Pwm(int amplitude)
     if(Motor_D>amplitude)  Motor_D=amplitude;
 }
 /**************************************************************************
-º¯Êı¹¦ÄÜ£ºÎ»ÖÃPID¿ØÖÆ¹ı³ÌÖĞËÙ¶ÈµÄÉèÖÃ
-Èë¿Ú²ÎÊı£ºÎŞ¡¢·ùÖµ
-·µ»Ø  Öµ£ºÎŞ
+å‡½æ•°åŠŸèƒ½ï¼šä½ç½®PIDæ§åˆ¶è¿‡ç¨‹ä¸­é€Ÿåº¦çš„è®¾ç½®
+å…¥å£å‚æ•°ï¼šæ— ã€å¹…å€¼
+è¿”å›  å€¼ï¼šæ— 
 **************************************************************************/
 void Xianfu_Velocity(int amplitude_A,int amplitude_B,int amplitude_C,int amplitude_D)
 {
-    if(Motor_A<-amplitude_A) Motor_A=-amplitude_A;	//Î»ÖÃ¿ØÖÆÄ£Ê½ÖĞ£¬Aµç»úµÄÔËĞĞËÙ¶È
-    if(Motor_A>amplitude_A)  Motor_A=amplitude_A;	  //Î»ÖÃ¿ØÖÆÄ£Ê½ÖĞ£¬Aµç»úµÄÔËĞĞËÙ¶È
-    if(Motor_B<-amplitude_B) Motor_B=-amplitude_B;	//Î»ÖÃ¿ØÖÆÄ£Ê½ÖĞ£¬Bµç»úµÄÔËĞĞËÙ¶È
-    if(Motor_B>amplitude_B)  Motor_B=amplitude_B;		//Î»ÖÃ¿ØÖÆÄ£Ê½ÖĞ£¬Bµç»úµÄÔËĞĞËÙ¶È
-    if(Motor_C<-amplitude_C) Motor_C=-amplitude_C;	//Î»ÖÃ¿ØÖÆÄ£Ê½ÖĞ£¬Cµç»úµÄÔËĞĞËÙ¶È
-    if(Motor_C>amplitude_C)  Motor_C=amplitude_C;		//Î»ÖÃ¿ØÖÆÄ£Ê½ÖĞ£¬Cµç»úµÄÔËĞĞËÙ¶È
-    if(Motor_D<-amplitude_D) Motor_D=-amplitude_D;	//Î»ÖÃ¿ØÖÆÄ£Ê½ÖĞ£¬Cµç»úµÄÔËĞĞËÙ¶È
-    if(Motor_D>amplitude_D)  Motor_D=amplitude_D;		//Î»ÖÃ¿ØÖÆÄ£Ê½ÖĞ£¬Cµç»úµÄÔËĞĞËÙ¶È
+    if(Motor_A<-amplitude_A) Motor_A=-amplitude_A;	//ä½ç½®æ§åˆ¶æ¨¡å¼ä¸­ï¼ŒAç”µæœºçš„è¿è¡Œé€Ÿåº¦
+    if(Motor_A>amplitude_A)  Motor_A=amplitude_A;	  //ä½ç½®æ§åˆ¶æ¨¡å¼ä¸­ï¼ŒAç”µæœºçš„è¿è¡Œé€Ÿåº¦
+    if(Motor_B<-amplitude_B) Motor_B=-amplitude_B;	//ä½ç½®æ§åˆ¶æ¨¡å¼ä¸­ï¼ŒBç”µæœºçš„è¿è¡Œé€Ÿåº¦
+    if(Motor_B>amplitude_B)  Motor_B=amplitude_B;		//ä½ç½®æ§åˆ¶æ¨¡å¼ä¸­ï¼ŒBç”µæœºçš„è¿è¡Œé€Ÿåº¦
+    if(Motor_C<-amplitude_C) Motor_C=-amplitude_C;	//ä½ç½®æ§åˆ¶æ¨¡å¼ä¸­ï¼ŒCç”µæœºçš„è¿è¡Œé€Ÿåº¦
+    if(Motor_C>amplitude_C)  Motor_C=amplitude_C;		//ä½ç½®æ§åˆ¶æ¨¡å¼ä¸­ï¼ŒCç”µæœºçš„è¿è¡Œé€Ÿåº¦
+    if(Motor_D<-amplitude_D) Motor_D=-amplitude_D;	//ä½ç½®æ§åˆ¶æ¨¡å¼ä¸­ï¼ŒCç”µæœºçš„è¿è¡Œé€Ÿåº¦
+    if(Motor_D>amplitude_D)  Motor_D=amplitude_D;		//ä½ç½®æ§åˆ¶æ¨¡å¼ä¸­ï¼ŒCç”µæœºçš„è¿è¡Œé€Ÿåº¦
 }
 
 /**************************************************************************
-º¯Êı¹¦ÄÜ£º¾ø¶ÔÖµº¯Êı
-Èë¿Ú²ÎÊı£ºlong int
-·µ»Ø  Öµ£ºunsigned int
+å‡½æ•°åŠŸèƒ½ï¼šç»å¯¹å€¼å‡½æ•°
+å…¥å£å‚æ•°ï¼šlong int
+è¿”å›  å€¼ï¼šunsigned int
 **************************************************************************/
 u32 myabs(long int a)
 {
@@ -213,67 +213,67 @@ u32 myabs(long int a)
     return temp;
 }
 /**************************************************************************
-º¯Êı¹¦ÄÜ£ºÔöÁ¿PI¿ØÖÆÆ÷
-Èë¿Ú²ÎÊı£º±àÂëÆ÷²âÁ¿Öµ£¬Ä¿±êËÙ¶È
-·µ»Ø  Öµ£ºµç»úPWM
-¸ù¾İÔöÁ¿Ê½ÀëÉ¢PID¹«Ê½
-pwm+=Kp[e£¨k£©-e(k-1)]+Ki*e(k)+Kd[e(k)-2e(k-1)+e(k-2)]
-e(k)´ú±í±¾´ÎÆ«²î
-e(k-1)´ú±íÉÏÒ»´ÎµÄÆ«²î  ÒÔ´ËÀàÍÆ
-pwm´ú±íÔöÁ¿Êä³ö
-ÔÚÎÒÃÇµÄËÙ¶È¿ØÖÆ±Õ»·ÏµÍ³ÀïÃæ£¬Ö»Ê¹ÓÃPI¿ØÖÆ
-pwm+=Kp[e£¨k£©-e(k-1)]+Ki*e(k)
+å‡½æ•°åŠŸèƒ½ï¼šå¢é‡PIæ§åˆ¶å™¨
+å…¥å£å‚æ•°ï¼šç¼–ç å™¨æµ‹é‡å€¼ï¼Œç›®æ ‡é€Ÿåº¦
+è¿”å›  å€¼ï¼šç”µæœºPWM
+æ ¹æ®å¢é‡å¼ç¦»æ•£PIDå…¬å¼
+pwm+=Kp[eï¼ˆkï¼‰-e(k-1)]+Ki*e(k)+Kd[e(k)-2e(k-1)+e(k-2)]
+e(k)ä»£è¡¨æœ¬æ¬¡åå·®
+e(k-1)ä»£è¡¨ä¸Šä¸€æ¬¡çš„åå·®  ä»¥æ­¤ç±»æ¨
+pwmä»£è¡¨å¢é‡è¾“å‡º
+åœ¨æˆ‘ä»¬çš„é€Ÿåº¦æ§åˆ¶é—­ç¯ç³»ç»Ÿé‡Œé¢ï¼Œåªä½¿ç”¨PIæ§åˆ¶
+pwm+=Kp[eï¼ˆkï¼‰-e(k-1)]+Ki*e(k)
 **************************************************************************/
 int Incremental_PI_A (int Encoder,int Target)
 {
     static int Bias,Pwm,Last_bias;
-    Bias=Encoder-Target;                //¼ÆËãÆ«²î
-    Pwm+=Velocity_KP*(Bias-Last_bias)+Velocity_KI*Bias;   //ÔöÁ¿Ê½PI¿ØÖÆÆ÷
+    Bias=Encoder-Target;                //è®¡ç®—åå·®
+    Pwm+=Velocity_KP*(Bias-Last_bias)+Velocity_KI*Bias;   //å¢é‡å¼PIæ§åˆ¶å™¨
     if(Pwm>8400)Pwm=8400;
     if(Pwm<-8400)Pwm=-8400;
-    Last_bias=Bias;	                   //±£´æÉÏÒ»´ÎÆ«²î
-    return Pwm;                         //ÔöÁ¿Êä³ö
+    Last_bias=Bias;	                   //ä¿å­˜ä¸Šä¸€æ¬¡åå·®
+    return Pwm;                         //å¢é‡è¾“å‡º
 }
 int Incremental_PI_B (int Encoder,int Target)
 {
     static int Bias,Pwm,Last_bias;
-    Bias=Encoder-Target;                //¼ÆËãÆ«²î
-    Pwm+=Velocity_KP*(Bias-Last_bias)+Velocity_KI*Bias;   //ÔöÁ¿Ê½PI¿ØÖÆÆ÷
+    Bias=Encoder-Target;                //è®¡ç®—åå·®
+    Pwm+=Velocity_KP*(Bias-Last_bias)+Velocity_KI*Bias;   //å¢é‡å¼PIæ§åˆ¶å™¨
     if(Pwm>8400)Pwm=8400;
     if(Pwm<-8400)Pwm=-8400;
-    Last_bias=Bias;	                   //±£´æÉÏÒ»´ÎÆ«²î
-    return Pwm;                         //ÔöÁ¿Êä³ö
+    Last_bias=Bias;	                   //ä¿å­˜ä¸Šä¸€æ¬¡åå·®
+    return Pwm;                         //å¢é‡è¾“å‡º
 }
 int Incremental_PI_C (int Encoder,int Target)
 {
     static int Bias,Pwm,Last_bias;
-    Bias=Encoder-Target;                                  //¼ÆËãÆ«²î
-    Pwm+=Velocity_KP*(Bias-Last_bias)+Velocity_KI*Bias;   //ÔöÁ¿Ê½PI¿ØÖÆÆ÷
+    Bias=Encoder-Target;                                  //è®¡ç®—åå·®
+    Pwm+=Velocity_KP*(Bias-Last_bias)+Velocity_KI*Bias;   //å¢é‡å¼PIæ§åˆ¶å™¨
     if(Pwm>8400)Pwm=8400;
     if(Pwm<-8400)Pwm=-8400;
-    Last_bias=Bias;	                   //±£´æÉÏÒ»´ÎÆ«²î
-    return Pwm;                         //ÔöÁ¿Êä³ö
+    Last_bias=Bias;	                   //ä¿å­˜ä¸Šä¸€æ¬¡åå·®
+    return Pwm;                         //å¢é‡è¾“å‡º
 }
 int Incremental_PI_D (int Encoder,int Target)
 {
     static int Bias,Pwm,Last_bias;
-    Bias=Encoder-Target;                                  //¼ÆËãÆ«²î
-    Pwm+=Velocity_KP*(Bias-Last_bias)+Velocity_KI*Bias;   //ÔöÁ¿Ê½PI¿ØÖÆÆ÷
+    Bias=Encoder-Target;                                  //è®¡ç®—åå·®
+    Pwm+=Velocity_KP*(Bias-Last_bias)+Velocity_KI*Bias;   //å¢é‡å¼PIæ§åˆ¶å™¨
     if(Pwm>8400)Pwm=8400;
     if(Pwm<-8400)Pwm=-8400;
-    Last_bias=Bias;	                   //±£´æÉÏÒ»´ÎÆ«²î
-    return Pwm;                         //ÔöÁ¿Êä³ö
+    Last_bias=Bias;	                   //ä¿å­˜ä¸Šä¸€æ¬¡åå·®
+    return Pwm;                         //å¢é‡è¾“å‡º
 }
 /**************************************************************************
-º¯Êı¹¦ÄÜ£ºÎ»ÖÃÊ½PID¿ØÖÆÆ÷
-Èë¿Ú²ÎÊı£º±àÂëÆ÷²âÁ¿Î»ÖÃĞÅÏ¢£¬Ä¿±êÎ»ÖÃ
-·µ»Ø  Öµ£ºµç»úPWM
-¸ù¾İÎ»ÖÃÊ½ÀëÉ¢PID¹«Ê½
-pwm=Kp*e(k)+Ki*¡Æe(k)+Kd[e£¨k£©-e(k-1)]
-e(k)´ú±í±¾´ÎÆ«²î
-e(k-1)´ú±íÉÏÒ»´ÎµÄÆ«²î
-¡Æe(k)´ú±íe(k)ÒÔ¼°Ö®Ç°µÄÆ«²îµÄÀÛ»ıºÍ;ÆäÖĞkÎª1,2,,k;
-pwm´ú±íÊä³ö
+å‡½æ•°åŠŸèƒ½ï¼šä½ç½®å¼PIDæ§åˆ¶å™¨
+å…¥å£å‚æ•°ï¼šç¼–ç å™¨æµ‹é‡ä½ç½®ä¿¡æ¯ï¼Œç›®æ ‡ä½ç½®
+è¿”å›  å€¼ï¼šç”µæœºPWM
+æ ¹æ®ä½ç½®å¼ç¦»æ•£PIDå…¬å¼
+pwm=Kp*e(k)+Ki*âˆ‘e(k)+Kd[eï¼ˆkï¼‰-e(k-1)]
+e(k)ä»£è¡¨æœ¬æ¬¡åå·®
+e(k-1)ä»£è¡¨ä¸Šä¸€æ¬¡çš„åå·®
+âˆ‘e(k)ä»£è¡¨e(k)ä»¥åŠä¹‹å‰çš„åå·®çš„ç´¯ç§¯å’Œ;å…¶ä¸­kä¸º1,2,,k;
+pwmä»£è¡¨è¾“å‡º
 **************************************************************************/
 int Position_PID_A (int Encoder,int Target)
 {
@@ -283,13 +283,13 @@ int Position_PID_A (int Encoder,int Target)
         Integral_bias=0;
         flag_clear_i=0;
     }
-    Bias=Encoder-Target;                                  //¼ÆËãÆ«²î
-    Integral_bias+=Bias;	                                 //Çó³öÆ«²îµÄ»ı·Ö
+    Bias=Encoder-Target;                                  //è®¡ç®—åå·®
+    Integral_bias+=Bias;	                                 //æ±‚å‡ºåå·®çš„ç§¯åˆ†
     if(Integral_bias>100000)Integral_bias=10000;
     if(Integral_bias<-100000)Integral_bias=-10000;
-    Pwm=Position_KP*Bias+Position_KI/100*Integral_bias+Position_KD*(Bias-Last_Bias);       //Î»ÖÃÊ½PID¿ØÖÆÆ÷
-    Last_Bias=Bias;                                       //±£´æÉÏÒ»´ÎÆ«²î
-    return Pwm;                                           //ÔöÁ¿Êä³ö
+    Pwm=Position_KP*Bias+Position_KI/100*Integral_bias+Position_KD*(Bias-Last_Bias);       //ä½ç½®å¼PIDæ§åˆ¶å™¨
+    Last_Bias=Bias;                                       //ä¿å­˜ä¸Šä¸€æ¬¡åå·®
+    return Pwm;                                           //å¢é‡è¾“å‡º
 }
 int Position_PID_B (int Encoder,int Target)
 {
@@ -299,13 +299,13 @@ int Position_PID_B (int Encoder,int Target)
         Integral_bias=0;
         flag_clear_i=0;
     }
-    Bias=Encoder-Target;                                  //¼ÆËãÆ«²î
-    Integral_bias+=Bias;	                                 //Çó³öÆ«²îµÄ»ı·Ö
+    Bias=Encoder-Target;                                  //è®¡ç®—åå·®
+    Integral_bias+=Bias;	                                 //æ±‚å‡ºåå·®çš„ç§¯åˆ†
     if(Integral_bias>100000)Integral_bias=10000;
     if(Integral_bias<-100000)Integral_bias=-10000;
-    Pwm=Position_KP*Bias+Position_KI/100*Integral_bias+Position_KD*(Bias-Last_Bias);       //Î»ÖÃÊ½PID¿ØÖÆÆ÷
-    Last_Bias=Bias;                                       //±£´æÉÏÒ»´ÎÆ«²î
-    return Pwm;                                           //ÔöÁ¿Êä³ö
+    Pwm=Position_KP*Bias+Position_KI/100*Integral_bias+Position_KD*(Bias-Last_Bias);       //ä½ç½®å¼PIDæ§åˆ¶å™¨
+    Last_Bias=Bias;                                       //ä¿å­˜ä¸Šä¸€æ¬¡åå·®
+    return Pwm;                                           //å¢é‡è¾“å‡º
 }
 int Position_PID_C (int Encoder,int Target)
 {
@@ -315,13 +315,13 @@ int Position_PID_C (int Encoder,int Target)
         Integral_bias=0;
         flag_clear_i=0;
     }
-    Bias=Encoder-Target;                                  //¼ÆËãÆ«²î
-    Integral_bias+=Bias;	                                 //Çó³öÆ«²îµÄ»ı·Ö
+    Bias=Encoder-Target;                                  //è®¡ç®—åå·®
+    Integral_bias+=Bias;	                                 //æ±‚å‡ºåå·®çš„ç§¯åˆ†
     if(Integral_bias>100000)Integral_bias=10000;
     if(Integral_bias<-100000)Integral_bias=-10000;
-    Pwm=Position_KP*Bias+Position_KI/100*Integral_bias+Position_KD*(Bias-Last_Bias);       //Î»ÖÃÊ½PID¿ØÖÆÆ÷
-    Last_Bias=Bias;                                       //±£´æÉÏÒ»´ÎÆ«²î
-    return Pwm;                                           //ÔöÁ¿Êä³ö
+    Pwm=Position_KP*Bias+Position_KI/100*Integral_bias+Position_KD*(Bias-Last_Bias);       //ä½ç½®å¼PIDæ§åˆ¶å™¨
+    Last_Bias=Bias;                                       //ä¿å­˜ä¸Šä¸€æ¬¡åå·®
+    return Pwm;                                           //å¢é‡è¾“å‡º
 }
 int Position_PID_D (int Encoder,int Target)
 {
@@ -331,54 +331,54 @@ int Position_PID_D (int Encoder,int Target)
         Integral_bias=0;
         flag_clear_i=0;
     }
-    Bias=Encoder-Target;                                  //¼ÆËãÆ«²î
-    Integral_bias+=Bias;	                                 //Çó³öÆ«²îµÄ»ı·Ö
+    Bias=Encoder-Target;                                  //è®¡ç®—åå·®
+    Integral_bias+=Bias;	                                 //æ±‚å‡ºåå·®çš„ç§¯åˆ†
     if(Integral_bias>100000)Integral_bias=10000;
     if(Integral_bias<-100000)Integral_bias=-10000;
-    Pwm=Position_KP*Bias+Position_KI/100*Integral_bias+Position_KD*(Bias-Last_Bias);       //Î»ÖÃÊ½PID¿ØÖÆÆ÷
-    Last_Bias=Bias;                                       //±£´æÉÏÒ»´ÎÆ«²î
-    return Pwm;                                           //ÔöÁ¿Êä³ö
+    Pwm=Position_KP*Bias+Position_KI/100*Integral_bias+Position_KD*(Bias-Last_Bias);       //ä½ç½®å¼PIDæ§åˆ¶å™¨
+    Last_Bias=Bias;                                       //ä¿å­˜ä¸Šä¸€æ¬¡åå·®
+    return Pwm;                                           //å¢é‡è¾“å‡º
 }
 double Last_Target_X,Last_Target_Y,Last_Target_Z;
 /**************************************************************************
-º¯Êı¹¦ÄÜ£ºÃ¿¸öµç»úÎ»ÖÃ¿ØÖÆ¹ı³ÌËÙ¶È¼ÆËã
-Èë¿Ú²ÎÊı£ºÎŞ
-·µ»Ø  Öµ£ºÎŞ
+å‡½æ•°åŠŸèƒ½ï¼šæ¯ä¸ªç”µæœºä½ç½®æ§åˆ¶è¿‡ç¨‹é€Ÿåº¦è®¡ç®—
+å…¥å£å‚æ•°ï¼šæ— 
+è¿”å›  å€¼ï¼šæ— 
 **************************************************************************/
-void Count_Velocity(void) //ÓÃÓÚ¿ØÖÆÎ»ÖÃÄ£Ê½ÏÂµÄËÙ¶È ¾ø¶ÔÎ»ÖÃÄ£Ê½ÏÂ£¬ÈôÔÚÖ´ĞĞÍê³ÉÇ°¸Ä±äÄ¿±ê£¬»á³öÎÊÌâ¡£
+void Count_Velocity(void) //ç”¨äºæ§åˆ¶ä½ç½®æ¨¡å¼ä¸‹çš„é€Ÿåº¦ ç»å¯¹ä½ç½®æ¨¡å¼ä¸‹ï¼Œè‹¥åœ¨æ‰§è¡Œå®Œæˆå‰æ”¹å˜ç›®æ ‡ï¼Œä¼šå‡ºé—®é¢˜ã€‚
 {
     static double Divider;
     double Bias_X,Bias_Y,Bias_Z;
     if(relative==0)
     {
-        Bias_X=(Move_X-Last_Target_X);  //ÇóXÖáÎ»ÒÆÁ¿
-        Bias_Y=(Move_Y-Last_Target_Y);	//ÇóYÖáÎ»ÒÆÁ¿
-        Bias_Z=(Move_Z-Last_Target_Z);	//ÇóZÖáÎ»ÒÆÁ¿
+        Bias_X=(Move_X-Last_Target_X);  //æ±‚Xè½´ä½ç§»é‡
+        Bias_Y=(Move_Y-Last_Target_Y);	//æ±‚Yè½´ä½ç§»é‡
+        Bias_Z=(Move_Z-Last_Target_Z);	//æ±‚Zè½´ä½ç§»é‡
     }
     else
     {
-        Bias_X=Move_X;  //ÇóXÖáÎ»ÒÆÁ¿
-        Bias_Y=Move_Y;	//ÇóYÖáÎ»ÒÆÁ¿
-        Bias_Z=Move_Z;	//ÇóZÖáÎ»ÒÆÁ¿
+        Bias_X=Move_X;  //æ±‚Xè½´ä½ç§»é‡
+        Bias_Y=Move_Y;	//æ±‚Yè½´ä½ç§»é‡
+        Bias_Z=Move_Z;	//æ±‚Zè½´ä½ç§»é‡
     }
 
     if(Bias_X!=0||Bias_Y!=0||Bias_Z!=0)Divider=sqrt(Bias_X*Bias_X+Bias_Y*Bias_Y+Bias_Z*Bias_Z);
     if(Bias_X!=0||Bias_Y!=0||Bias_Z!=0) Kinematic_Analysis2(Bias_X,Bias_Y,Bias_Z);
 
-    Xianfu_Velocity(RC_Velocity*myabs(Rate_A)/Divider,RC_Velocity*myabs(Rate_B)/Divider,RC_Velocity*myabs(Rate_C)/Divider,RC_Velocity*myabs(Rate_D)/Divider);//·½ÏòÏŞËÙ£¬ÄÜÏŞÖÆ×ÜËÙ¶È²»³¬¹ıRC_Velocity
-    /*¶ÔBias_X£¬Y,Z½øĞĞKinematic_AnalysisÔÙ³ıÒÔBiasµÄÄ£È»ºó³ËÒÔRC_VelocityÏàµ±Óë¶Ô·½ÏòÎªĞĞ½ø·½Ïò£¨Bias_X·½Ïò£©£¬´óĞ¡ÎªRC_VelocityµÄÊ¸Á¿½øĞĞKinematic_Analysis£©¡£*/
+    Xianfu_Velocity(RC_Velocity*myabs(Rate_A)/Divider,RC_Velocity*myabs(Rate_B)/Divider,RC_Velocity*myabs(Rate_C)/Divider,RC_Velocity*myabs(Rate_D)/Divider);//æ–¹å‘é™é€Ÿï¼Œèƒ½é™åˆ¶æ€»é€Ÿåº¦ä¸è¶…è¿‡RC_Velocity
+    /*å¯¹Bias_Xï¼ŒY,Zè¿›è¡ŒKinematic_Analysiså†é™¤ä»¥Biasçš„æ¨¡ç„¶åä¹˜ä»¥RC_Velocityç›¸å½“ä¸å¯¹æ–¹å‘ä¸ºè¡Œè¿›æ–¹å‘ï¼ˆBias_Xæ–¹å‘ï¼‰ï¼Œå¤§å°ä¸ºRC_Velocityçš„çŸ¢é‡è¿›è¡ŒKinematic_Analysisï¼‰ã€‚*/
     if(relative==0)
     {
-        Last_Target_X=Move_X;   //±£´æXÖáÉÏÒ»´ÎµÄÎ»ÖÃĞÅÏ¢£¬±ãÓÚµ÷ÓÃ
-        Last_Target_Y=Move_Y;   //±£´æYÖáÉÏÒ»´ÎµÄÎ»ÖÃĞÅÏ¢£¬±ãÓÚµ÷ÓÃ
-        Last_Target_Z=Move_Z;   //±£´æZÖáÉÏÒ»´ÎµÄÎ»ÖÃĞÅÏ¢£¬±ãÓÚµ÷ÓÃ
+        Last_Target_X=Move_X;   //ä¿å­˜Xè½´ä¸Šä¸€æ¬¡çš„ä½ç½®ä¿¡æ¯ï¼Œä¾¿äºè°ƒç”¨
+        Last_Target_Y=Move_Y;   //ä¿å­˜Yè½´ä¸Šä¸€æ¬¡çš„ä½ç½®ä¿¡æ¯ï¼Œä¾¿äºè°ƒç”¨
+        Last_Target_Z=Move_Z;   //ä¿å­˜Zè½´ä¸Šä¸€æ¬¡çš„ä½ç½®ä¿¡æ¯ï¼Œä¾¿äºè°ƒç”¨
     }
 }
 
 /**************************************************************************
-º¯Êı¹¦ÄÜ£ºĞ¡³µÔË¶¯ÊıÑ§Ä£ĞÍ,ÓÃÓÚËÙ¶È»ò¾ø¶ÔÎ»ÖÃ
-Èë¿Ú²ÎÊı£ºX Y Z ÈıÖáËÙ¶È»òÕßÎ»ÖÃ
-·µ»Ø  Öµ£ºÎŞ
+å‡½æ•°åŠŸèƒ½ï¼šå°è½¦è¿åŠ¨æ•°å­¦æ¨¡å‹,ç”¨äºé€Ÿåº¦æˆ–ç»å¯¹ä½ç½®
+å…¥å£å‚æ•°ï¼šX Y Z ä¸‰è½´é€Ÿåº¦æˆ–è€…ä½ç½®
+è¿”å›  å€¼ï¼šæ— 
 **************************************************************************/
 void Kinematic_Analysis(float Vx,float Vy,float Vz)
 {
@@ -389,9 +389,9 @@ void Kinematic_Analysis(float Vx,float Vy,float Vz)
 }
 
 /**************************************************************************
-º¯Êı¹¦ÄÜ£ºĞ¡³µÔË¶¯ÊıÑ§Ä£ĞÍ,Ïà¶ÔÎ»ÖÃĞÍ
-Èë¿Ú²ÎÊı£ºX Y Z ÈıÖáËÙ¶È»òÕßÎ»ÖÃ
-·µ»Ø  Öµ£ºÎŞ
+å‡½æ•°åŠŸèƒ½ï¼šå°è½¦è¿åŠ¨æ•°å­¦æ¨¡å‹,ç›¸å¯¹ä½ç½®å‹
+å…¥å£å‚æ•°ï¼šX Y Z ä¸‰è½´é€Ÿåº¦æˆ–è€…ä½ç½®
+è¿”å›  å€¼ï¼šæ— 
 **************************************************************************/
 void Kinematic_Analysis_Relative(float Vx,float Vy,float Vz)
 {
@@ -402,9 +402,9 @@ void Kinematic_Analysis_Relative(float Vx,float Vy,float Vz)
 }
 
 /**************************************************************************
-º¯Êı¹¦ÄÜ£º»ñÈ¡Î»ÖÃ¿ØÖÆ¹ı³ÌËÙ¶ÈÖµ
-Èë¿Ú²ÎÊı£ºX Y Z ÈıÖáÎ»ÖÃ±ä»¯Á¿
-·µ»Ø  Öµ£ºÎŞ
+å‡½æ•°åŠŸèƒ½ï¼šè·å–ä½ç½®æ§åˆ¶è¿‡ç¨‹é€Ÿåº¦å€¼
+å…¥å£å‚æ•°ï¼šX Y Z ä¸‰è½´ä½ç½®å˜åŒ–é‡
+è¿”å›  å€¼ï¼šæ— 
 **************************************************************************/
 void Kinematic_Analysis2(float Vx,float Vy,float Vz)
 {

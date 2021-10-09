@@ -1,16 +1,16 @@
 /*
  * SCServo.cpp
- * Ó²¼şÍ¨ĞÅ½Ó¿Ú
- * ÈÕÆÚ: 2016.11.11
- * ×÷Õß: Ì·ĞÛÀÖ
+ * ç¡¬ä»¶é€šä¿¡æ¥å£
+ * æ—¥æœŸ: 2016.11.11
+ * ä½œè€…: è°­é›„ä¹
  */
 
 #include "SCServo.h"
 #include "usart.h"
-uint32_t IOTimeOut = 2;//ÊäÈëÊä³ö³¬Ê±
+uint32_t IOTimeOut = 2;//è¾“å…¥è¾“å‡ºè¶…æ—¶
 
 
-//UART ·¢ËÍÊı¾İ½Ó¿Ú
+//UART å‘é€æ•°æ®æ¥å£
 int writeSCS(unsigned char *nDat, int nLen)
 {
 	HAL_UART_Transmit(&huart5,nDat,nLen,0xffff);

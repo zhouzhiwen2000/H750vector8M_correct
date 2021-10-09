@@ -64,9 +64,9 @@ void MX_FREERTOS_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 //volatile uint32_t SRAM1RAM[10] __attribute__((section("RAM_D1")))={1,2,3,4,5,1,2,3,4,5};//giving initial values here is invalid because the sram is powered after the initialization stage.
-#if 1 //���û����Σ�����Ҫ��targetѡ����ѡ��ʹ��USE microLIB
+#if 1 
 
-	__asm(".global __use_no_semihosting\n\t") ;//ע�ͱ���, ����1
+	__asm(".global __use_no_semihosting\n\t") ;
 
 //		struct __FILE {
 //		int handle;
@@ -78,7 +78,6 @@ void MX_FREERTOS_Init(void);
 			x = x;
 		}
 
-		//__use_no_semihosting was requested, but _ttywrch was referenced, �������º���, ����2
 		void _ttywrch(int ch)
 		{
 			ch = ch;
@@ -150,10 +149,10 @@ int main(void)
 	HAL_TIM_PWM_Start(&htim8,TIM_CHANNEL_3);
 	HAL_TIM_PWM_Start(&htim8,TIM_CHANNEL_4);
 
-	LL_TIM_EnableIT_UPDATE(TIM6);//TIM7�����¼��ж�����ʹ��
-	LL_TIM_EnableCounter(TIM6);//����ʱ��
-	LL_TIM_EnableIT_UPDATE(TIM7);//TIM7�����¼��ж�����ʹ��
-	LL_TIM_EnableCounter(TIM7);//����ʱ��
+	LL_TIM_EnableIT_UPDATE(TIM6);
+	LL_TIM_EnableCounter(TIM6);
+	LL_TIM_EnableIT_UPDATE(TIM7);
+	LL_TIM_EnableCounter(TIM7);
   /* USER CODE END 2 */
 
   /* Init scheduler */
