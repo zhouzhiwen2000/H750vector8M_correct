@@ -183,12 +183,11 @@ void StartControlTask(void *argument)
 {
   Control_Lock = xSemaphoreCreateMutex();//create lock used for control loop
   servoTaskHandle = osThreadNew(StartServoTask, NULL, &servoTask_attributes);
-  Set_Move(0,85.0,0);
+  Set_Move(0,2*85.0,0);
   for(;;)
   {
     TickType_t tcnt=xTaskGetTickCount();
-//    Set_Pwm(0,0,0,0);
-    Control();
+	Control();
     osDelayUntil(tcnt+10);//100Hz
   }
 }

@@ -17,8 +17,8 @@ long int Position_A,Position_B,Position_C,Position_D,Rate_A,Rate_B,Rate_C,Rate_D
 long int Motor_A,Motor_B,Motor_C,Motor_D;        //电机PWM变量
 long int Target_A,Target_B,Target_C,Target_D;     //电机目标值
 //u16 PID_Parameter[10],Flash_Parameter[10];  //Flash相关数组
-float	Position_KP=1.8,Position_KI=0,Position_KD=19;  //位置控制PID参数
-float Velocity_KP=1.5,Velocity_KI=1.5              ;	          //速度控制PID参数
+float	Position_KP=1.8,Position_KI=0,Position_KD=38;  //位置控制PID参数
+float Velocity_KP=4,Velocity_KI=4              ;	          //速度控制PID参数
 double RC_Velocity=42.5;                             //位置模式速度，单位和目标速度单位相同
 float Move_X=0,Move_Y=0,Move_Z=0;   //XYZ轴目标速度
 uint8_t pending_flag=0;
