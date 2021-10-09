@@ -45,13 +45,13 @@ void Control()//100Hz
     else
         Kinematic_Analysis(Move_X,Move_Y,Move_Z);
 
-    Encoder_A=-Read_Encoder(4);                                         		 //===读取编码器的值
+    Encoder_A=-Read_Encoder(2);                                         		 //===读取编码器的值
     Position_A+=Encoder_A;                                                 //===积分得到速度
-    Encoder_B=-Read_Encoder(5);                                         		 //===读取编码器的值
+    Encoder_B=-Read_Encoder(4);                                         		 //===读取编码器的值
     Position_B+=Encoder_B;                                                 //===积分得到速度
-    Encoder_C=Read_Encoder(3);                                         		//===读取编码器的值
+    Encoder_C=Read_Encoder(5);                                         		//===读取编码器的值
     Position_C+=Encoder_C;                                                 //===积分得到速度
-    Encoder_D=Read_Encoder(2);                                         		//===读取编码器的值
+    Encoder_D=Read_Encoder(3);                                         		//===读取编码器的值
     Position_D+=Encoder_D;                                                 //===积分得到速度
 //    UART_Control();			//UART提供控制目标量（可包含限速值）
 //    if(RC_Velocity>0&&RC_Velocity<15)  RC_Velocity=15;                   //避免电机进入低速非线性区，限速最低15
@@ -74,7 +74,7 @@ void Control()//100Hz
         Motor_C=Incremental_PI_C(Encoder_C,-Motor_C);         //===速度闭环控制计算电机C最终PWM
         Motor_D=Incremental_PI_D(Encoder_D,-Motor_D);         //===速度闭环控制计算电机D最终PWM
     }
-    Xianfu_Pwm(8400);                 //===PWM限幅
+    Xianfu_Pwm(11999);                 //===PWM限幅
     Set_Pwm(Motor_A,Motor_B,Motor_C,Motor_D);     //===赋值给PWM寄存器
     xSemaphoreGive(Control_Lock);
 }
@@ -116,53 +116,58 @@ int Read_Encoder(u8 TIMX)
 函数功能：赋值给PWM寄存器
 入口参数：PWM
 返回  值：无
+
+TIM1CH12-MOTOR1-A
+TIM1CH34-MOTOR2-D
+TIM8CH12-MOTOR3-B
+TIM8CH34 MOTOR4-C
 **************************************************************************/
 void Set_Pwm(int motor_a,int motor_b,int motor_c,int motor_d)
 {
-    if(motor_d>0)//正转H-L
+    if(motor_a>0)//正转H-L
     {
-        __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_1,motor_d);
-        __HAL_TIM_SET_COMPARE(&htim8,TIM_CHANNEL_1,0);
+        __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_1,motor_a);
+        __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_2,0);
     }
     else//Inverse转L-H
     {
         __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_1,0);
-        __HAL_TIM_SET_COMPARE(&htim8,TIM_CHANNEL_1,-motor_d);
+        __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_2,-motor_a);
     }
 
-    if(motor_a>0)//正转H-L
-    {
-        __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_2,motor_a);
-        __HAL_TIM_SET_COMPARE(&htim8,TIM_CHANNEL_2,0);
-
-    }
-    else//Inverse转L-H
-    {
-        __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_2,0);
-        __HAL_TIM_SET_COMPARE(&htim8,TIM_CHANNEL_2,-motor_a);
-    }
-
-    if(motor_c>0)//正转H-L
-    {
-        __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_3,motor_c);
-        __HAL_TIM_SET_COMPARE(&htim8,TIM_CHANNEL_3,0);
-    }
-    else//Inverse转L-H
+    if(motor_d>0)//正转H-L
     {
         __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_3,0);
-        __HAL_TIM_SET_COMPARE(&htim8,TIM_CHANNEL_3,-motor_c);
+        __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_4,motor_d);
 
+    }
+    else//Inverse转L-H
+    {
+        __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_3,-motor_d);
+        __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_4,0);
     }
 
     if(motor_b>0)//正转H-L
     {
-        __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_4,motor_b);
-        __HAL_TIM_SET_COMPARE(&htim8,TIM_CHANNEL_4,0);
+        __HAL_TIM_SET_COMPARE(&htim8,TIM_CHANNEL_1,motor_b);
+        __HAL_TIM_SET_COMPARE(&htim8,TIM_CHANNEL_2,0);
     }
     else//Inverse转L-H
     {
-        __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_4,0);
-        __HAL_TIM_SET_COMPARE(&htim8,TIM_CHANNEL_4,-motor_b);
+        __HAL_TIM_SET_COMPARE(&htim8,TIM_CHANNEL_1,0);
+        __HAL_TIM_SET_COMPARE(&htim8,TIM_CHANNEL_2,-motor_b);
+
+    }
+
+    if(motor_c>0)//正转H-L
+    {
+        __HAL_TIM_SET_COMPARE(&htim8,TIM_CHANNEL_3,0);
+        __HAL_TIM_SET_COMPARE(&htim8,TIM_CHANNEL_4,motor_c);
+    }
+    else//Inverse转L-H
+    {
+        __HAL_TIM_SET_COMPARE(&htim8,TIM_CHANNEL_3,-motor_c);
+        __HAL_TIM_SET_COMPARE(&htim8,TIM_CHANNEL_4,0);
     }
 }
 

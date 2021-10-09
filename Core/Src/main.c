@@ -30,7 +30,6 @@
 #include "SCServo.h"
 #include "Control.h"
 #include "com.h"
-#include "Servo.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -51,7 +50,6 @@
 
 /* USER CODE BEGIN PV */
 
-bool ledstate=false;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/

@@ -5,6 +5,8 @@ extern "C" {//functions&variables imported from C
 #include "Servo.h"
 #include "StepperMotor.h"
 #include <vector>
+#include "FreeRTOS.h"
+#include "semphr.h"
 class _act
 {
 public:
@@ -21,15 +23,16 @@ public:
 };
 
 
-action_servo * Current=0;
-action_servo * Last=0;
-_act * ptr_test;
-uint32_t time_start;
-int stepper_lastvalue=0;
-int last_mode_servo=-1;
-double servo_speed[10]={1.5,1,1,1,1,1,1,1,1,1};//{none,1,2,3,4,100,101,none....}
-int servo_lastvalue[10]= {0};
-
+static action_servo * Current=0;
+static action_servo * Last=0;
+static _act * ptr_test;
+static uint32_t time_start;
+static int stepper_lastvalue=0;
+static int last_mode_servo=-1;
+static double servo_speed[10]={1.5,1,1,1,1,1,1,1,1,1};//{none,1,2,3,4,100,101,none....}
+static int servo_lastvalue[10]= {0};
+extern SemaphoreHandle_t Servo_Lock;
+extern SemaphoreHandle_t Servo_Lock_Upper;
 
 uint32_t get_array_seq(uint32_t id)
 {
@@ -39,6 +42,7 @@ uint32_t get_array_seq(uint32_t id)
 
 void Servo_Server()
 {
+    xSemaphoreTake(Servo_Lock, portMAX_DELAY);
     if(Current!=0)
     {
         if(HAL_GetTick()-time_start>=Current->time)
@@ -63,10 +67,12 @@ void Servo_Server()
             }
         }
     }
+    xSemaphoreGive(Servo_Lock);
 }
 
 void Servo_Add_Action(uint32_t id,uint32_t value,int32_t time)
 {
+    xSemaphoreTake(Servo_Lock, portMAX_DELAY);
     action_servo * New=new action_servo() ;
 //	New->id=id;
 //	New->value=value;
@@ -118,11 +124,12 @@ void Servo_Add_Action(uint32_t id,uint32_t value,int32_t time)
 //		WritePos(Current->id,Current->value,Current->time,0);
         time_start=HAL_GetTick();
     }
-
+    xSemaphoreGive(Servo_Lock);
 }
 
 void Servo_Add_Action_bunch(std::vector<_act>  acts,int32_t time)
 {
+    xSemaphoreTake(Servo_Lock, portMAX_DELAY);
     action_servo * New=new(action_servo);
     New->acts=acts;
     New->time=time;
@@ -176,11 +183,12 @@ void Servo_Add_Action_bunch(std::vector<_act>  acts,int32_t time)
         }
         time_start=HAL_GetTick();
     }
+    xSemaphoreGive(Servo_Lock);
 }
 
 void Servo_TransPos()//grab&to Middle
 {
-	
+	xSemaphoreTakeRecursive(Servo_Lock_Upper, portMAX_DELAY);
 	if(last_mode_servo == 16)
 	{
 		Servo_Add_Action(4,950,-1);		
@@ -212,18 +220,22 @@ void Servo_TransPos()//grab&to Middle
 	}
 	
 	last_mode_servo = -1;
+	xSemaphoreGiveRecursive(Servo_Lock_Upper);
 }
 
 void All_Middle()//grab&to Middle
 {
+	xSemaphoreTakeRecursive(Servo_Lock_Upper, portMAX_DELAY);
     Servo_Add_Action(100,765,-1);
     Servo_Add_Action(0xFFF0,462,-1);
+    xSemaphoreGiveRecursive(Servo_Lock_Upper);
 }
 
 
 
 void Servo_PutLeft()
 {
+	xSemaphoreTakeRecursive(Servo_Lock_Upper, portMAX_DELAY);
 	if(last_mode_servo == 0x06)
 	{
 		
@@ -254,13 +266,14 @@ void Servo_PutLeft()
 	Servo_Add_Action(2,266,-1);
 	Servo_Add_Action(1,529,-1);
 	
-	
+	xSemaphoreGiveRecursive(Servo_Lock_Upper);
 
 }
 
 
 void Servo_PutMiddle()
 {
+	xSemaphoreTakeRecursive(Servo_Lock_Upper, portMAX_DELAY);
 	if(last_mode_servo == 0x06)
 	{
 		Servo_Add_Action(0xFFF0,850,-1);
@@ -289,12 +302,13 @@ void Servo_PutMiddle()
 	Servo_Add_Action(4,950,-1);
 	Servo_Add_Action(0xFFF0,450,-1);//Stepper Middle
 	Servo_TransPos();
-	
+	xSemaphoreGiveRecursive(Servo_Lock_Upper);
 }
 
 //1:700 2:380 3: 685 4:190
 void Servo_PutRight()
 {	
+	xSemaphoreTakeRecursive(Servo_Lock_Upper, portMAX_DELAY);
 	if(last_mode_servo == 0x06)
 	{
 		
@@ -327,10 +341,12 @@ void Servo_PutRight()
 	Servo_Add_Action(3,717,-1);
 	Servo_Add_Action(2,266,-1);
 	Servo_Add_Action(1,529,-1);
+	xSemaphoreGiveRecursive(Servo_Lock_Upper);
 }
 
 void Servo_GrabLeft()
 {
+	xSemaphoreTakeRecursive(Servo_Lock_Upper, portMAX_DELAY);
 //    Servo_Add_Action(2,266,-1);
 //    Servo_Add_Action(3,717,-1);//transion
 	Servo_Add_Action(100,765,-1); 
@@ -348,10 +364,11 @@ void Servo_GrabLeft()
 	Servo_Add_Action(3,717,-1);
 	Servo_Add_Action(2,266,-1);
 	Servo_Add_Action(1,529,-1);
-
+	xSemaphoreGiveRecursive(Servo_Lock_Upper);
 }
 void Servo_GrabMiddle()
 {
+	xSemaphoreTakeRecursive(Servo_Lock_Upper, portMAX_DELAY);
 	Servo_Add_Action(100,765,-1);
 	Servo_Add_Action(101,800,-1);
 	Servo_Add_Action(0xFFF0,850,-1);
@@ -370,12 +387,13 @@ void Servo_GrabMiddle()
 	Servo_Add_Action(4,950,-1);
 	Servo_Add_Action(0xFFF0,450,-1);//Stepper Middle
 	Servo_TransPos();
-	
+	xSemaphoreGiveRecursive(Servo_Lock_Upper);
 	
 	
 }
 void Servo_GrabRight()
 {
+	xSemaphoreTakeRecursive(Servo_Lock_Upper, portMAX_DELAY);
 	//	Servo_Add_Action(2,266,-1);
 //    Servo_Add_Action(3,717,-1);//transion
 	Servo_Add_Action(100,765,-1);
@@ -393,6 +411,7 @@ void Servo_GrabRight()
 	Servo_Add_Action(3,717,-1);
 	Servo_Add_Action(2,266,-1);
 	Servo_Add_Action(1,529,-1);
+	xSemaphoreGiveRecursive(Servo_Lock_Upper);
 }
 
 
@@ -400,6 +419,7 @@ void Servo_GrabRight()
 
 void Servo_Grab_Upper()//done
 {
+	xSemaphoreTakeRecursive(Servo_Lock_Upper, portMAX_DELAY);
 	if(last_mode_servo != -1)
 	{
 		Servo_Add_Action(1,529,-1);
@@ -421,13 +441,13 @@ void Servo_Grab_Upper()//done
 	last_mode_servo=0x06;
 	
 	//Servo_TransPos();
-	
+	xSemaphoreGiveRecursive(Servo_Lock_Upper);
 	
 }
 
 void Servo_Grab_Pose_Lower()//抓地上的物块
 {
-	
+	xSemaphoreTakeRecursive(Servo_Lock_Upper, portMAX_DELAY);
 	if(last_mode_servo == 0x0C)
 	{
 		Servo_Add_Action(100,765,-1);
@@ -473,10 +493,11 @@ void Servo_Grab_Pose_Lower()//抓地上的物块
     Servo_Add_Action(2,266,-1);
 	Servo_Add_Action(4,950,-1);
     Servo_Add_Action(3,717,-1);
+    xSemaphoreGiveRecursive(Servo_Lock_Upper);
 }
 void Servo_Grab_Pose2_Lower()//抓台子下的物块
 {
-    	
+	xSemaphoreTakeRecursive(Servo_Lock_Upper, portMAX_DELAY);
 	//970 430 735
 	
 	Servo_Add_Action(0xFFF0,25,-1);
@@ -575,17 +596,20 @@ void Servo_Grab_Pose2_Lower()//抓台子下的物块
 	Servo_Add_Action(2,480,-1);
 	
 	Servo_Add_Action(0xFFF0,450,-1);
-	
+	xSemaphoreGiveRecursive(Servo_Lock_Upper);
 	
 }
 void Servo_Grab()//done
 {
+	xSemaphoreTakeRecursive(Servo_Lock_Upper, portMAX_DELAY);
     Servo_Add_Action(101,580,-1);
+	xSemaphoreGiveRecursive(Servo_Lock_Upper);
 }
 
 //2:700 3:450 4:1000
 void Servo_Put_Upper()//码垛
 {
+	xSemaphoreTakeRecursive(Servo_Lock_Upper, portMAX_DELAY);
 	Servo_Add_Action(4,1000,-1);
     Servo_Add_Action(3,450,-1);
     Servo_Add_Action(2,700,500);
@@ -595,7 +619,7 @@ void Servo_Put_Upper()//码垛
     Servo_Add_Action(2,266,-1);
 	Servo_Add_Action(3,717,-1);
 	Servo_Add_Action(4,950,-1);
-
+	xSemaphoreGiveRecursive(Servo_Lock_Upper);
 }
 
 
@@ -606,7 +630,7 @@ void Servo_Put_Upper()//码垛
 //2: 560 3: 140  4: 1000 100: 850  观察圈圈
 void Servo_Put_Lower()
 {
-	
+	xSemaphoreTakeRecursive(Servo_Lock_Upper, portMAX_DELAY);
 	if(last_mode_servo == 0x0C)
 	{	
 		Servo_Add_Action(4,980,100);
@@ -643,12 +667,13 @@ void Servo_Put_Lower()
 	Servo_Add_Action(4,950,300);
 	Servo_Add_Action(3,717,300);
 
-
+	xSemaphoreGiveRecursive(Servo_Lock_Upper);
 }
 
 //2: 500 3: 140  4: 1000 100: 850
 void Servo_Camera()//观察圈圈
 {
+	xSemaphoreTakeRecursive(Servo_Lock_Upper, portMAX_DELAY);
 	if(last_mode_servo != -1)
 	{
 		Servo_Add_Action(2,266,-1);
@@ -668,11 +693,13 @@ void Servo_Camera()//观察圈圈
 	Servo_Add_Action(100,765,-1);
 	
 	last_mode_servo=0x0C;
+	xSemaphoreGiveRecursive(Servo_Lock_Upper);
 }
 //2: 500 3: 295 4: 870
 
 void Servo_Camera1()//看台子上面的物块
 {
+	xSemaphoreTakeRecursive(Servo_Lock_Upper, portMAX_DELAY);
 //    Servo_Add_Action(2,266,-1);
 //    Servo_Add_Action(3,717,-1);//transion
 	
@@ -686,19 +713,20 @@ void Servo_Camera1()//看台子上面的物块
 	Servo_Add_Action(2,500,-1);
 	
 	Servo_Add_Action(100,765,-1);
-
+	xSemaphoreGiveRecursive(Servo_Lock_Upper);
 }
 //670 700 80
 
 void Servo_Camera2()//看二维码
 {
+	xSemaphoreTakeRecursive(Servo_Lock_Upper, portMAX_DELAY);
 	Servo_Add_Action(2,670,-1);
 	
 	Servo_Add_Action(3,700,-1);
 	Servo_Add_Action(4,80,-1);
 	
 	last_mode_servo = 16;
-
+	xSemaphoreGiveRecursive(Servo_Lock_Upper);
 }
 
 void Servo_Put_Upper_Storage()
@@ -713,36 +741,44 @@ void Servo_Put_Lower_Storage()
 //2:500 3:160 4:900 
 void Servo_Camera_AdjPosLower()
 {
+	xSemaphoreTakeRecursive(Servo_Lock_Upper, portMAX_DELAY);
 	Servo_Add_Action(3,160,-1);
 	Servo_Add_Action(2,500,-1);
 	Servo_Add_Action(4,900,-1);
-	
+	xSemaphoreGiveRecursive(Servo_Lock_Upper);
 }
 
 void Servo_Camera3()//看六个物块
 {
-	
+	xSemaphoreTakeRecursive(Servo_Lock_Upper, portMAX_DELAY);
 	Servo_Add_Action(2,500,-1);
 	Servo_Add_Action(3,15,-1);
 	Servo_Add_Action(2,920,-1);
 	Servo_Add_Action(4,500,-1);
-
+	xSemaphoreGiveRecursive(Servo_Lock_Upper);
 }
 
 bool Is_Servo_Idle()
 {
-    return Current==0;
+	xSemaphoreTake(Servo_Lock, portMAX_DELAY);
+    bool idle=Current==0;
+    xSemaphoreGive(Servo_Lock);
+    return idle;
 }
 void update_Servo_state(uint32_t id,int value)
 {
+	xSemaphoreTake(Servo_Lock, portMAX_DELAY);
     if(id!=0xFFF0)
         stepper_lastvalue=value;
     else
     {
         servo_lastvalue[get_array_seq(id)]=value;
     }
+    xSemaphoreGive(Servo_Lock);
 }
 void change_servo_speed(uint32_t id, double speed)
 {
+	xSemaphoreTake(Servo_Lock, portMAX_DELAY);
 	servo_speed[id]=speed;
+	xSemaphoreGive(Servo_Lock);
 }

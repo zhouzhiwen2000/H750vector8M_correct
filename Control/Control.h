@@ -7,7 +7,7 @@ typedef		unsigned short	u16;
 typedef		short			s16;
 typedef		unsigned long	u32;
 typedef		long			s32;
-
+void Set_Move(float x, float y, float z); //Move variables thread-safe wrapper
 void Control();
 void Set_Pwm(int motor_a,int motor_b,int motor_c,int motor_d);
 void Xianfu_Pwm(int amplitude);

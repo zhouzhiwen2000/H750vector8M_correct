@@ -37,6 +37,7 @@
 #include <rmw_microros/rmw_microros.h>
 #include "usart.h"
 #include <std_msgs/msg/int32.h>
+#include "Servo.h"
 
 /* USER CODE END Includes */
 
@@ -64,11 +65,25 @@ const osThreadAttr_t controlTask_attributes = {
   .priority = (osPriority_t) osPriorityRealtime,
 };
 SemaphoreHandle_t Control_Lock = NULL;
+osThreadId_t servoTaskHandle;
+const osThreadAttr_t servoTask_attributes = {
+  .name = "servoTask",
+  .stack_size = 1000 * 4,
+  .priority = (osPriority_t) osPriorityNormal,
+};
+SemaphoreHandle_t Servo_Lock = NULL;
+SemaphoreHandle_t Servo_Lock_Upper = NULL;
 osThreadId_t ROSTaskHandle;
 const osThreadAttr_t ROSTask_attributes = {
   .name = "ROSTask",
   .stack_size = 1000 * 4,
   .priority = (osPriority_t) osPriorityNormal,
+};
+osThreadId_t LEDTaskHandle;
+const osThreadAttr_t LEDTask_attributes = {
+  .name = "LEDTask",
+  .stack_size = 64 * 4,
+  .priority = (osPriority_t) osPriorityLow,
 };
 /* USER CODE END Variables */
 /* Definitions for defaultTask */
@@ -82,7 +97,9 @@ const osThreadAttr_t defaultTask_attributes = {
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
 void StartControlTask(void *argument);
+void StartServoTask(void *argument);
 void StartROSTask(void *argument);
+void StartLEDTask(void *argument);
 bool cubemx_transport_open(struct uxrCustomTransport * transport);
 bool cubemx_transport_close(struct uxrCustomTransport * transport);
 size_t cubemx_transport_write(struct uxrCustomTransport* transport, const uint8_t * buf, size_t len, uint8_t * err);
@@ -131,7 +148,7 @@ void MX_FREERTOS_Init(void) {
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   controlTaskHandle = osThreadNew(StartControlTask, NULL, &controlTask_attributes);
-  ROSTaskHandle = osThreadNew(StartROSTask, NULL, &ROSTask_attributes);
+
 
 
   /* USER CODE END RTOS_THREADS */
@@ -165,11 +182,28 @@ void StartDefaultTask(void *argument)
 void StartControlTask(void *argument)
 {
   Control_Lock = xSemaphoreCreateMutex();//create lock used for control loop
+  servoTaskHandle = osThreadNew(StartServoTask, NULL, &servoTask_attributes);
+  Set_Move(0,85.0,0);
   for(;;)
   {
     TickType_t tcnt=xTaskGetTickCount();
+//    Set_Pwm(0,0,0,0);
     Control();
     osDelayUntil(tcnt+10);//100Hz
+  }
+}
+
+void StartServoTask(void *argument)
+{
+  Servo_Lock = xSemaphoreCreateMutex();//create lock used for control loop
+  Servo_Lock_Upper = xSemaphoreCreateRecursiveMutex();
+  ROSTaskHandle = osThreadNew(StartROSTask, NULL, &ROSTask_attributes);
+  LEDTaskHandle = osThreadNew(StartLEDTask, NULL, &LEDTask_attributes);
+  for(;;)
+  {
+    TickType_t tcnt=xTaskGetTickCount();
+    Servo_Server();
+    osDelayUntil(tcnt+50);//20Hz
   }
 }
 
@@ -231,6 +265,17 @@ void StartROSTask(void *argument)
 	msg.data++;
 	osDelay(10);
   }
+}
+
+void StartLEDTask(void *argument)
+{
+	static bool ledstate=false;
+	while(1)
+	{
+		HAL_GPIO_WritePin(LED_GPIO_Port,LED_Pin,ledstate);
+		ledstate=!ledstate;
+		osDelay(500);
+	}
 }
 /* USER CODE END Application */
 

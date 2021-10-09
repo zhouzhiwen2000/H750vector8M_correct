@@ -2,21 +2,21 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "gpio.h"
-
+#include <atomic>
 extern "C" {//functions&variables imported from C
 
 }
 using namespace std;
-int current_speed_1=10;//1 for 0.1ms per halfstep
-int current_halfstep_left_1=0;
-int current_halfstep_total_1=0;
-int clear_count_1=0;
-bool clear_flag_1=false;
-int current_speed_2=10;//1 for 0.1ms per halfstep
-int current_halfstep_left_2=0;
-int current_halfstep_total_2=0;
-int clear_count_2=0;
-bool clear_flag_2=false;
+static std::atomic<int> current_speed_1(10);//1 for 0.1ms per halfstep
+static std::atomic<int> current_halfstep_left_1(0);
+static std::atomic<int> current_halfstep_total_1(0);
+static std::atomic<int> clear_count_1(0);
+static std::atomic<bool> clear_flag_1(false);
+static std::atomic<int> current_speed_2(10);//1 for 0.1ms per halfstep
+static std::atomic<int> current_halfstep_left_2(0);
+static std::atomic<int> current_halfstep_total_2(0);
+static std::atomic<int> clear_count_2(0);
+static std::atomic<bool> clear_flag_2(false);
 
 void stepper1_ISR(void)
 {
