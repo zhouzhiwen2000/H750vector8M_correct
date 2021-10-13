@@ -6,20 +6,19 @@
 #include <math.h>
 #include "FreeRTOS.h"
 #include "semphr.h"
-/*圈数和编码器数据对应关系：转一圈对应编码器数据改变32256，即编码器输出32256脉冲*/
-/*距离单位：脉冲，即1/32256.0圈*/
-/*速度单位：脉冲/5ms，即200*脉冲/s,0.0062003968253968圈/s*/
+/*圈数和编码器数据对应关系：转一圈对应编码器数据改变33690，即编码器输出33690脉冲*/
+/*距离单位：脉冲，即1/33690.0圈*/
+/*速度单位：脉冲/10ms，即100*脉冲/s,0.0029682398337786圈/s*/
 /*轮子直径6cm,周长18.849555555cm。*/
-/*故距离单位：1/32256.0*18.849555555cm,速度单位：0.1168747240823413cm/s*/
+/*故距离单位：1/33690.0*18.849555555cm,速度单位：0.0559500016490221/s*/
 u8 Run_Flag=0;  																//运行状态标志位 0为速度模式，1为位置模式
 int Encoder_A,Encoder_B,Encoder_C,Encoder_D;          //编码器的脉冲计数
 long int Position_A,Position_B,Position_C,Position_D,Rate_A,Rate_B,Rate_C,Rate_D; //PID控制相关变量
 long int Motor_A,Motor_B,Motor_C,Motor_D;        //电机PWM变量
 long int Target_A,Target_B,Target_C,Target_D;     //电机目标值
-//u16 PID_Parameter[10],Flash_Parameter[10];  //Flash相关数组
-float	Position_KP=1.8,Position_KI=0,Position_KD=38;  //位置控制PID参数
-float Velocity_KP=4,Velocity_KI=4              ;	          //速度控制PID参数
-double RC_Velocity=42.5;                             //位置模式速度，单位和目标速度单位相同
+float	Position_KP=25,Position_KI=4,Position_KD=15;  //位置控制PID参数
+float Velocity_KP=50,Velocity_KI=3;	          //速度控制PID参数
+double RC_Velocity=160;                             //位置模式速度，单位和目标速度单位相同
 float Move_X=0,Move_Y=0,Move_Z=0;   //XYZ轴目标速度
 uint8_t pending_flag=0;
 int flag_clear_i=0;
@@ -234,8 +233,8 @@ int Incremental_PI_A (int Encoder,int Target)
     static int Bias,Pwm,Last_bias;
     Bias=Encoder-Target;                //计算偏差
     Pwm+=Velocity_KP*(Bias-Last_bias)+Velocity_KI*Bias;   //增量式PI控制器
-    if(Pwm>8400)Pwm=8400;
-    if(Pwm<-8400)Pwm=-8400;
+    if(Pwm>11999)Pwm=11999;
+    if(Pwm<-11999)Pwm=-11999;
     Last_bias=Bias;	                   //保存上一次偏差
     return Pwm;                         //增量输出
 }
@@ -244,8 +243,8 @@ int Incremental_PI_B (int Encoder,int Target)
     static int Bias,Pwm,Last_bias;
     Bias=Encoder-Target;                //计算偏差
     Pwm+=Velocity_KP*(Bias-Last_bias)+Velocity_KI*Bias;   //增量式PI控制器
-    if(Pwm>8400)Pwm=8400;
-    if(Pwm<-8400)Pwm=-8400;
+    if(Pwm>11999)Pwm=11999;
+    if(Pwm<-11999)Pwm=-11999;
     Last_bias=Bias;	                   //保存上一次偏差
     return Pwm;                         //增量输出
 }
@@ -254,8 +253,8 @@ int Incremental_PI_C (int Encoder,int Target)
     static int Bias,Pwm,Last_bias;
     Bias=Encoder-Target;                                  //计算偏差
     Pwm+=Velocity_KP*(Bias-Last_bias)+Velocity_KI*Bias;   //增量式PI控制器
-    if(Pwm>8400)Pwm=8400;
-    if(Pwm<-8400)Pwm=-8400;
+    if(Pwm>11999)Pwm=11999;
+    if(Pwm<-11999)Pwm=-11999;
     Last_bias=Bias;	                   //保存上一次偏差
     return Pwm;                         //增量输出
 }
@@ -264,8 +263,8 @@ int Incremental_PI_D (int Encoder,int Target)
     static int Bias,Pwm,Last_bias;
     Bias=Encoder-Target;                                  //计算偏差
     Pwm+=Velocity_KP*(Bias-Last_bias)+Velocity_KI*Bias;   //增量式PI控制器
-    if(Pwm>8400)Pwm=8400;
-    if(Pwm<-8400)Pwm=-8400;
+    if(Pwm>11999)Pwm=11999;
+    if(Pwm<-11999)Pwm=-11999;
     Last_bias=Bias;	                   //保存上一次偏差
     return Pwm;                         //增量输出
 }

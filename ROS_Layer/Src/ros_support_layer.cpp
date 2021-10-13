@@ -203,15 +203,6 @@ void callback_mode(const std_msgs::UInt8& msg)// pos_mode 0:absolute 1:relative
 			Get_Position_NOW(&NOW_X,&NOW_Y,&NOW_Z);
 			Set_Last_Target(NOW_X,NOW_Y,NOW_Z);
 			Set_Move(NOW_X,NOW_Y,NOW_Z);
-            // NOW_X=(Position_B-Position_A)/2.0;
-            // NOW_Y=(Position_B+Position_C)/2.0;
-            // NOW_Z=(Position_C-Position_A+Position_D-Position_B)/4.0/(a_PARAMETER+b_PARAMETER);
-            // Last_Target_X=NOW_X;//����������״̬
-            // Last_Target_Y=NOW_Y;
-            // Last_Target_Z=NOW_Z;
-            // Move_X=NOW_X;//����Ŀ������
-            // Move_Y=NOW_Y;
-            // Move_Z=NOW_Z;
         }
 		Set_relative(msg.data);
         //relative=msg.data;
@@ -316,7 +307,7 @@ void callback_servo(const std_msgs::UInt8& msg)
 			last_mode_servo=0x13;
 			break;
 		case 0x14:
-			Servo_Camera_AdjPosLower();//Ԥ��ץ�²����ʱ����Ϊֹ�Ŀ�
+			Servo_Camera_AdjPosLower();
 			last_mode_servo = 0x14;
 			break;
 		

@@ -9,7 +9,6 @@ RM := rm -rf
 
 # All of the sources participating in the build are defined here
 -include sources.mk
--include Tuning_Utils/subdir.mk
 -include ROS2_Layer/extra_sources/subdir.mk
 -include Middlewares/Third_Party/FreeRTOS/Source/portable/MemMang/subdir.mk
 -include Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/subdir.mk
@@ -86,7 +85,7 @@ main-build: H750.elf secondary-outputs
 
 # Tool invocations
 H750.elf: $(OBJS) $(USER_OBJS) C:\Users\ZhouZhiwen\Desktop\H750vector8M_correct\H750vector8M_correct\STM32H750VBTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-g++ -o "H750.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m7 -T"C:\Users\ZhouZhiwen\Desktop\H750vector8M_correct\H750vector8M_correct\STM32H750VBTX_FLASH.ld" -Wl,-Map="H750.map" -Wl,--gc-sections -static -L"C:\Users\ZhouZhiwen\Desktop\H750vector8M_correct\H750vector8M_correct\ROS2_Layer\libmicroros" --specs=nano.specs -mfpu=fpv5-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -lstdc++ -lsupc++ -Wl,--end-group
+	arm-none-eabi-g++ -o "H750.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m7 -T"C:\Users\ZhouZhiwen\Desktop\H750vector8M_correct\H750vector8M_correct\STM32H750VBTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="H750.map" -Wl,--gc-sections -static -L"C:\Users\ZhouZhiwen\Desktop\H750vector8M_correct\H750vector8M_correct\ROS2_Layer\libmicroros" --specs=nano.specs -mfpu=fpv5-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -lstdc++ -lsupc++ -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

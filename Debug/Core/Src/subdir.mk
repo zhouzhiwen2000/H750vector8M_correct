@@ -18,6 +18,9 @@ C_SRCS += \
 ../Core/Src/tim.c \
 ../Core/Src/usart.c 
 
+CPP_SRCS += \
+../Core/Src/ros_task.cpp 
+
 C_DEPS += \
 ./Core/Src/dma.d \
 ./Core/Src/freertos.d \
@@ -37,6 +40,7 @@ OBJS += \
 ./Core/Src/freertos.o \
 ./Core/Src/gpio.o \
 ./Core/Src/main.o \
+./Core/Src/ros_task.o \
 ./Core/Src/stm32h7xx_hal_msp.o \
 ./Core/Src/stm32h7xx_hal_timebase_tim.o \
 ./Core/Src/stm32h7xx_it.o \
@@ -46,8 +50,13 @@ OBJS += \
 ./Core/Src/tim.o \
 ./Core/Src/usart.o 
 
+CPP_DEPS += \
+./Core/Src/ros_task.d 
+
 
 # Each subdirectory must supply rules for building sources it contributes
 Core/Src/%.o: ../Core/Src/%.c Core/Src/subdir.mk
-	arm-none-eabi-gcc "$<" -mcpu=cortex-m7 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32H750xx -DSTM32_THREAD_SAFE_STRATEGY=4 -DUSE_FULL_LL_DRIVER -c -I../Core/Inc -I../Drivers/STM32H7xx_HAL_Driver/Inc -I../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy -I../Middlewares/Third_Party/FreeRTOS/Source/include -I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F -I../Drivers/CMSIS/Device/ST/STM32H7xx/Include -I../Drivers/CMSIS/Include -I../Core/ThreadSafe -I"C:/Users/ZhouZhiwen/Desktop/H750vector8M_correct/H750vector8M_correct/Control" -I"C:/Users/ZhouZhiwen/Desktop/H750vector8M_correct/H750vector8M_correct/Hardware" -I"C:/Users/ZhouZhiwen/Desktop/H750vector8M_correct/H750vector8M_correct/Tuning_Utils" -I"C:/Users/ZhouZhiwen/Desktop/H750vector8M_correct/H750vector8M_correct/ROS2_Layer/libmicroros/microros_include" -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" --specs=nano.specs -mfpu=fpv5-d16 -mfloat-abi=hard -mthumb -o "$@"
+	arm-none-eabi-gcc "$<" -mcpu=cortex-m7 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32H750xx -DSTM32_THREAD_SAFE_STRATEGY=4 -DUSE_FULL_LL_DRIVER -c -I../Core/Inc -I../Drivers/STM32H7xx_HAL_Driver/Inc -I../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy -I../Middlewares/Third_Party/FreeRTOS/Source/include -I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F -I../Drivers/CMSIS/Device/ST/STM32H7xx/Include -I../Drivers/CMSIS/Include -I../Core/ThreadSafe -I"C:/Users/ZhouZhiwen/Desktop/H750vector8M_correct/H750vector8M_correct/Control" -I"C:/Users/ZhouZhiwen/Desktop/H750vector8M_correct/H750vector8M_correct/Hardware" -I"C:/Users/ZhouZhiwen/Desktop/H750vector8M_correct/H750vector8M_correct/Tuning_Utils" -I"C:/Users/ZhouZhiwen/Desktop/H750vector8M_correct/H750vector8M_correct/ROS2_Layer/libmicroros/microros_include" -Os -ffunction-sections -fdata-sections -Wall -fstack-usage -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" --specs=nano.specs -mfpu=fpv5-d16 -mfloat-abi=hard -mthumb -o "$@"
+Core/Src/%.o: ../Core/Src/%.cpp Core/Src/subdir.mk
+	arm-none-eabi-g++ "$<" -mcpu=cortex-m7 -std=gnu++14 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32H750xx -DSTM32_THREAD_SAFE_STRATEGY=4 -DUSE_FULL_LL_DRIVER -c -I../Core/Inc -I../Drivers/STM32H7xx_HAL_Driver/Inc -I../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy -I../Middlewares/Third_Party/FreeRTOS/Source/include -I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F -I../Drivers/CMSIS/Device/ST/STM32H7xx/Include -I../Drivers/CMSIS/Include -I../Core/ThreadSafe -I"C:/Users/ZhouZhiwen/Desktop/H750vector8M_correct/H750vector8M_correct/Control" -I"C:/Users/ZhouZhiwen/Desktop/H750vector8M_correct/H750vector8M_correct/Hardware" -I"C:/Users/ZhouZhiwen/Desktop/H750vector8M_correct/H750vector8M_correct/Tuning_Utils" -I"C:/Users/ZhouZhiwen/Desktop/H750vector8M_correct/H750vector8M_correct/ROS2_Layer/libmicroros/microros_include" -Os -ffunction-sections -fdata-sections -fno-exceptions -fno-rtti -fno-use-cxa-atexit -Wall -fstack-usage -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" --specs=nano.specs -mfpu=fpv5-d16 -mfloat-abi=hard -mthumb -o "$@"
 
