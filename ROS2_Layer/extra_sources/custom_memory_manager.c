@@ -220,6 +220,10 @@ void *pvReturn = NULL;
 	#endif
 
 	configASSERT( ( ( ( size_t ) pvReturn ) & ( size_t ) portBYTE_ALIGNMENT_MASK ) == 0 );
+	if(pvReturn==NULL)
+	{
+		while(1);
+	}
 	return pvReturn;
 }
 /*-----------------------------------------------------------*/

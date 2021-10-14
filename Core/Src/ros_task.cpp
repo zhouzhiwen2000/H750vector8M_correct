@@ -18,6 +18,10 @@
 #include <std_msgs/msg/string.h>
 #include "Screen_drv.h"
 #include "Servo.h"
+#include "FreeRTOS.h"
+#include "task.h"
+#include "main.h"
+#include "cmsis_os.h"
 
 #include <geometry_msgs/msg/Point.h>
 #include "usart.h"
@@ -340,11 +344,25 @@ void ros_init()
 	  		ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, String),
 	  		"/car/display");
 
-	  rclc_subscription_init_default(
+	  rcl_ret_t temp_rc1 = rclc_subscription_init_default(
 	  		&servo_speed_sub,
 	  		&node,
 	  		ROSIDL_GET_MSG_TYPE_SUPPORT(geometry_msgs, msg, Point),
 	  		"/car/servo_speed");
+
+//	  servo_speed_sub = rcl_get_zero_initialized_subscription();
+//	  rcl_subscription_options_t sub_opt = rcl_subscription_get_default_options();
+//	  sub_opt.qos = rmw_qos_profile_default;
+//	  rcl_ret_t rc = rcl_subscription_init(
+//		&servo_speed_sub,
+//	    &node,
+//		ROSIDL_GET_MSG_TYPE_SUPPORT(geometry_msgs, msg, Point),
+//		"/car/servo_speed",
+//		 &sub_opt);
+//	  //rc returned 1
+//	  if (rc != RCL_RET_OK) {
+//	    PRINT_RCLC_ERROR(rclc_subscription_init_best_effort, rcl_subscription_init);
+//	  }
 
 		// create timer,
 		rcl_timer_t timer;
@@ -355,8 +373,9 @@ void ros_init()
 			RCL_MS_TO_NS(timer_timeout),
 			timer_callback);
 		rclc_executor_t executor = rclc_executor_get_zero_initialized_executor();
-		rclc_executor_init(&executor, &support.context, 9, &allocator);//8subs+1timer
+		rclc_executor_init(&executor, &support.context, 10, &allocator);//8subs+1timer
 		rclc_executor_add_timer(&executor, &timer);
+
 		rclc_executor_add_subscription(&executor, &carpos_sub, &sub_msg_pos, &callback_pos, ON_NEW_DATA);
 		rclc_executor_add_subscription(&executor, &carspeed_sub, &sub_msg_speed, &callback_speed, ON_NEW_DATA);
 		rclc_executor_add_subscription(&executor, &carspeedlimit_sub, &sub_msg_speedlimit, &callback_speedlimit, ON_NEW_DATA);
@@ -365,10 +384,13 @@ void ros_init()
 		rclc_executor_add_subscription(&executor, &servo_sub, &sub_msg_servo, &callback_servo, ON_NEW_DATA);
 		rclc_executor_add_subscription(&executor, &xy_sub, &sub_msg_xy, &callback_xy, ON_NEW_DATA);
 		rclc_executor_add_subscription(&executor, &display_sub, &sub_msg_display, &callback_display, ON_NEW_DATA);
-
-
-	  	rclc_executor_spin(&executor);
-
+		while(1)
+		{
+		    TickType_t tcnt=xTaskGetTickCount();
+		    rcl_ret_t temp_rc = rclc_executor_spin_some(&executor,RCL_MS_TO_NS(100));
+		    if(temp_rc==RCL_RET_ERROR)break;
+		    osDelayUntil(tcnt+20);//100Hz
+		}
 		rcl_subscription_fini(&carpos_sub, &node);
 		rcl_subscription_fini(&carspeed_sub, &node);
 		rcl_subscription_fini(&carspeedlimit_sub, &node);
