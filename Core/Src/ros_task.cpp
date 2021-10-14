@@ -62,9 +62,9 @@ std_msgs__msg__UInt8 sub_msg_mode;
 std_msgs__msg__UInt8 sub_msg_servo;
 std_msgs__msg__String sub_msg_display;
 
-#define a_PARAMETER          (0.6472324f)
-#define b_PARAMETER          (0.7622959f)
-#define R 15
+#define a_PARAMETER          (0.7384854f)
+#define b_PARAMETER          (0.6742698f)
+#define R (15.5724)
 extern "C" {//functions&variables imported from C
 bool cubemx_transport_open(struct uxrCustomTransport * transport);
 bool cubemx_transport_close(struct uxrCustomTransport * transport);
@@ -85,9 +85,9 @@ void callback_speed(const void * msg)// cm/s
 	const geometry_msgs__msg__Point * msgin = (const geometry_msgs__msg__Point *)msg;
     Set_Run_Flag(0);
     Set_Move(\
-		msgin->x*8.556169931964706,\
-		msgin->y*8.556169931964706,\
-		(msgin->z*R)*8.556169931964706\
+		msgin->x*17.8731,\
+		msgin->y*17.8731,\
+		(msgin->z*R)*17.8731\
 		);
 }
 void callback_pos(const void * msg)// cm
@@ -104,9 +104,9 @@ void callback_pos(const void * msg)// cm
     }
 	Set_Run_Flag(1);
 	Set_Move(\
-	msgin->x*1711.23398,\
-	msgin->y*1711.23398,\
-	(msgin->z*R)*1711.23398\
+	msgin->x*1787.3100,\
+	msgin->y*1787.3100,\
+	(msgin->z*R)*1787.3100\
 	);
     if(Get_relative()==1)
 		Set_pending_flag(1);
@@ -116,7 +116,7 @@ void callback_pos(const void * msg)// cm
 void callback_speedlimit(const void * msg)// cm/s
 {
 	const std_msgs__msg__Float64  * msgin = (const std_msgs__msg__Float64 *)msg;
-	Set_RC_Velocity(msgin->data*8.556169931964706*2);
+	Set_RC_Velocity(msgin->data*17.8731);
 }
 
 void callback_servo_speed(const void * msg)// cm/s
@@ -419,9 +419,9 @@ void publish_pos()
 {
     double NOW_X,NOW_Y,NOW_Z;
 	Get_Position_NOW(&NOW_X,&NOW_Y,&NOW_Z);
-    pos_msg.x=NOW_X/1711.23398;
-    pos_msg.y=NOW_Y/1711.23398;
-    pos_msg.z=NOW_Z/1711.23398/R;//waiting
+    pos_msg.x=NOW_X/1787.3100;
+    pos_msg.y=NOW_Y/1787.3100;
+    pos_msg.z=NOW_Z/1787.3100/R;//waiting
 	rcl_publish(&current_pos, &pos_msg, NULL);
 }
 

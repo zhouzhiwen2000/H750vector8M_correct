@@ -24,8 +24,8 @@ uint8_t pending_flag=0;
 int flag_clear_i=0;
 extern SemaphoreHandle_t Control_Lock;
 uint8_t relative=1;
-#define a_PARAMETER          (0.6472324f)
-#define b_PARAMETER          (0.7622959f)
+#define a_PARAMETER          (0.7384854f)
+#define b_PARAMETER          (0.6742698f)
 void Control()//100Hz
 {
 //    Move_X=0;
