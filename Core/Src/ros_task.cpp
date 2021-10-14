@@ -275,10 +275,12 @@ void ros_init()
 	  rcl_node_t node;
 
 	  allocator = rcl_get_default_allocator();
-
+	  rcl_ret_t node_inited=RCL_RET_ERROR;
 	  //create init_options
-	  rclc_support_init(&support, 0, NULL, &allocator);
-
+	  while(node_inited!=RCL_RET_OK)
+	  {
+		  node_inited = rclc_support_init(&support, 0, NULL, &allocator);
+	  }
 	  // create node
 	  rclc_node_init_default(&node, "car_node", "", &support);
 
@@ -344,25 +346,11 @@ void ros_init()
 	  		ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, String),
 	  		"/car/display");
 
-	  rcl_ret_t temp_rc1 = rclc_subscription_init_default(
+	  rclc_subscription_init_default(
 	  		&servo_speed_sub,
 	  		&node,
 	  		ROSIDL_GET_MSG_TYPE_SUPPORT(geometry_msgs, msg, Point),
 	  		"/car/servo_speed");
-
-//	  servo_speed_sub = rcl_get_zero_initialized_subscription();
-//	  rcl_subscription_options_t sub_opt = rcl_subscription_get_default_options();
-//	  sub_opt.qos = rmw_qos_profile_default;
-//	  rcl_ret_t rc = rcl_subscription_init(
-//		&servo_speed_sub,
-//	    &node,
-//		ROSIDL_GET_MSG_TYPE_SUPPORT(geometry_msgs, msg, Point),
-//		"/car/servo_speed",
-//		 &sub_opt);
-//	  //rc returned 1
-//	  if (rc != RCL_RET_OK) {
-//	    PRINT_RCLC_ERROR(rclc_subscription_init_best_effort, rcl_subscription_init);
-//	  }
 
 		// create timer,
 		rcl_timer_t timer;
@@ -407,13 +395,13 @@ void ros_init()
 }
 void publish_servo_status()
 {
-		idle.data=Is_Servo_Idle();
-		rcl_publish(&servo_status, &idle, NULL);
+	idle.data=Is_Servo_Idle();
+	rcl_publish(&servo_status, &idle, NULL);
 }
 void publish_car_status()
 {
-		error_car.data = Get_Error();
-		rcl_publish(&car_status, &error_car, NULL);
+	error_car.data = Get_Error();
+	rcl_publish(&car_status, &error_car, NULL);
 }
 void publish_pos()
 {
