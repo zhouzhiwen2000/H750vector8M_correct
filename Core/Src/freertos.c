@@ -28,7 +28,7 @@
 /* USER CODE BEGIN Includes */
 #include "semphr.h"
 #include "Control.h"
-
+#include "StepperMotor.h"
 #include <rcl/rcl.h>
 #include <rcl/error_handling.h>
 #include <rclc/rclc.h>
@@ -178,7 +178,6 @@ void StartControlTask(void *argument)
   servoTaskHandle = osThreadNew(StartServoTask, NULL, &servoTask_attributes);
 //  Set_relative(0);
 //  Set_Run_Flag(1);
-  Set_Move(0,0,0);
   for(;;)
   {
     TickType_t tcnt=xTaskGetTickCount();
@@ -193,6 +192,10 @@ void StartServoTask(void *argument)
   Servo_Lock_Upper = xSemaphoreCreateRecursiveMutex();
   ROSTaskHandle = osThreadNew(StartROSTask, NULL, &ROSTask_attributes);
   LEDTaskHandle = osThreadNew(StartLEDTask, NULL, &LEDTask_attributes);
+  set_stepper_2(0xFFFF);
+  set_stepper_1(-0xFFFF);
+  Servo_InitPos();
+
   for(;;)
   {
     TickType_t tcnt=xTaskGetTickCount();

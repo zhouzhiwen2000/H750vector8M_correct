@@ -7,12 +7,12 @@ extern "C" {//functions&variables imported from C
 
 }
 using namespace std;
-static std::atomic<int> current_speed_1(1);//1 for 0.1ms per halfstep
+static std::atomic<int> current_speed_1(4);//1 for 0.1ms per halfstep
 static std::atomic<int> current_halfstep_left_1(0);
 static std::atomic<int> current_halfstep_total_1(0);
 static std::atomic<int> clear_count_1(0);
 static std::atomic<bool> clear_flag_1(false);
-static std::atomic<int> current_speed_2(1);//1 for 0.1ms per halfstep
+static std::atomic<int> current_speed_2(4);//1 for 0.1ms per halfstep
 static std::atomic<int> current_halfstep_left_2(0);
 static std::atomic<int> current_halfstep_total_2(0);
 static std::atomic<int> clear_count_2(0);
@@ -48,7 +48,7 @@ void stepper1_ISR(void)
         clear_count_1++;
         if(clear_count_1>=1)
         {
-            if(HAL_GPIO_ReadPin(SW_STEP1_GPIO_Port,SW_STEP1_Pin)!=0)
+            if(HAL_GPIO_ReadPin(SW_STEP1_GPIO_Port,SW_STEP1_Pin)==0)
             {
                 current_halfstep_left_1=0;
                 current_halfstep_total_1=0;
@@ -67,7 +67,7 @@ void stepper1_ISR(void)
 
 void set_stepper_1(int steps)
 {
-    current_halfstep_left_1=(2*steps-current_halfstep_total_1);
+    current_halfstep_left_1=-(2*steps-current_halfstep_total_1);
 }
 
 void set_speed_1(int speed)
@@ -116,13 +116,13 @@ void stepper2_ISR(void)
         clear_count_2++;
         if(clear_count_2>=1)
         {
-            if(HAL_GPIO_ReadPin(SW_STEP2_GPIO_Port,SW_STEP2_Pin)!=0)
+            if(HAL_GPIO_ReadPin(SW_STEP2_GPIO_Port,SW_STEP2_Pin)==0)
             {
                 current_halfstep_left_2=0;
                 current_halfstep_total_2=0;
                 clear_count_2=0;
                 clear_flag_2=false;
-                set_stepper_2(450);
+                set_stepper_2(-450);
             }
             else
             {

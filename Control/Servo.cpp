@@ -27,9 +27,10 @@ static action_servo * Current=0;
 static action_servo * Last=0;
 static _act * ptr_test;
 static uint32_t time_start;
-static int stepper_lastvalue=0;
+static int stepper_lastvalue1=0;
+static int stepper_lastvalue2=0;
 static int last_mode_servo=-1;
-static double servo_speed[10]={1.5,1,1,1,1,1,1,1,1,1};//{none,1,2,3,4,100,101,none....}
+static double servo_speed[10]={1.5,1,1,1,1,1,1,1,1,1};//{none,1,2,3,4,5,none,none....}
 static int servo_lastvalue[10]= {0};
 extern SemaphoreHandle_t Servo_Lock;
 extern SemaphoreHandle_t Servo_Lock_Upper;
@@ -59,7 +60,7 @@ void operator delete[]( void * ptr )
 
 uint32_t get_array_seq(uint32_t id)
 {
-	if(id>=100)id=id-95;
+//	if(id>=100)id=id-95;
 	return id;
 }
 
@@ -79,10 +80,11 @@ void Servo_Server()
                 {
                     _act  action=(Current->acts.front());;
                     ptr_test=&(Current->acts.front());
-                    if(action.id!=0xFFF0)
+                    if(action.id<0xFFF0)
                         WritePos(action.id,action.value,Current->time,0);
                     else
-                        set_stepper_1(action.value);
+                    	if(action.id==0xFFF0)set_stepper_1(action.value);
+                    	else if(action.id==0xFFF1) set_stepper_2(action.value);
                     Current->acts.erase(Current->acts.begin());
                 }
 //				WritePos(Current->id,Current->value,Current->time,0);
@@ -109,11 +111,21 @@ void Servo_Add_Action(uint32_t id,uint32_t value,int32_t time)
     {
         if(Current==0)
         {
-            stepper_lastvalue=get_steps_1();//update steps
+            stepper_lastvalue1=get_steps_1();//update steps
         }
-        int stepper_time=fabs((int)value-(int)stepper_lastvalue)*2.0*get_speed_1()/10;//in ms
+        int stepper_time=fabs((int)value-(int)stepper_lastvalue1)*2.0*get_speed_1()/10;//in ms
         New->time=stepper_time;
-        stepper_lastvalue=value;
+        stepper_lastvalue1=value;
+    }
+    else if (action1.id==0xFFF1)
+    {
+        if(Current==0)
+        {
+            stepper_lastvalue2=get_steps_2();//update steps
+        }
+        int stepper_time=fabs((int)value-(int)stepper_lastvalue2)*2.0*get_speed_2()/10;//in ms
+        New->time=stepper_time;
+        stepper_lastvalue2=value;
     }
     else
     {
@@ -136,11 +148,15 @@ void Servo_Add_Action(uint32_t id,uint32_t value,int32_t time)
         while(!Current->acts.empty())
         {
             _act  action=Current->acts.front();
-            if(action.id!=0xFFF0)
+            if(action.id<0xFFF0)
                 WritePos(action.id,action.value,Current->time,0);
-            else
+            else if(action.id==0xFFF0)
             {
                 set_stepper_1(action.value);
+            }
+            else if(action.id==0xFFF1)
+            {
+                set_stepper_2(action.value);
             }
             Current->acts.erase(Current->acts.begin());
         }
@@ -166,14 +182,27 @@ void Servo_Add_Action_bunch(std::vector<_act>  acts,int32_t time)
         {
             if(Current==0)
             {
-                stepper_lastvalue=get_steps_1();//update steps
+                stepper_lastvalue1=get_steps_1();//update steps
             }
-            int stepper_time=fabs(act.value-stepper_lastvalue)*2.0*get_speed_1()/10;//in ms
+            int stepper_time=fabs(act.value-stepper_lastvalue1)*2.0*get_speed_1()/10;//in ms
             if(stepper_time>time)
             {
                 New->time=stepper_time;
             }
-            stepper_lastvalue=act.value;
+            stepper_lastvalue1=act.value;
+        }
+        else if(act.id==0xFFF1)
+        {
+            if(Current==0)
+            {
+                stepper_lastvalue2=get_steps_1();//update steps
+            }
+            int stepper_time=fabs(act.value-stepper_lastvalue2)*2.0*get_speed_2()/10;//in ms
+            if(stepper_time>time)
+            {
+                New->time=stepper_time;
+            }
+            stepper_lastvalue2=act.value;
         }
         else
         {
@@ -198,10 +227,12 @@ void Servo_Add_Action_bunch(std::vector<_act>  acts,int32_t time)
         while(!Current->acts.empty())
         {
             _act & action=Current->acts.front();
-            if(action.id!=0xFFF0)
+            if(action.id<0xFFF0)
                 WritePos(action.id,action.value,Current->time,0);
-            else
+            else if (action.id==0xFFF0)
                 set_stepper_1(action.value);
+            else if (action.id==0xFFF1)
+            	set_stepper_2(action.value);
             Current->acts.erase(Current->acts.begin());
         }
         time_start=HAL_GetTick();
@@ -255,6 +286,17 @@ void All_Middle()//grab&to Middle
     xSemaphoreGiveRecursive(Servo_Lock_Upper);
 }
 
+void Servo_InitPos()
+{
+	xSemaphoreTakeRecursive(Servo_Lock_Upper, portMAX_DELAY);
+	Servo_Add_Action(1,3400,-1);//lower disk
+	Servo_Add_Action(3,3510,-1);//arm to middle
+	Servo_Add_Action(4,1330,-1);//lift arm to level
+	Servo_Add_Action(2,102,-1);//lift arm to level
+
+	last_mode_servo=0x15;
+    xSemaphoreGiveRecursive(Servo_Lock_Upper);
+}
 
 
 void Servo_PutLeft()
@@ -809,8 +851,10 @@ bool Is_Servo_Idle()
 void update_Servo_state(uint32_t id,int value)
 {
 	xSemaphoreTake(Servo_Lock, portMAX_DELAY);
-    if(id!=0xFFF0)
-        stepper_lastvalue=value;
+    if(id==0xFFF0)
+        stepper_lastvalue1=value;
+    else if(id==0xFFF1)
+        stepper_lastvalue2=value;
     else
     {
         servo_lastvalue[get_array_seq(id)]=value;

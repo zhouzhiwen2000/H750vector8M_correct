@@ -83,17 +83,17 @@ void Error_Handler(void);
 #define SW_STEP1_Pin GPIO_PIN_12
 #define SW_STEP1_GPIO_Port GPIOB
 #define SW_STEP1_EXTI_IRQn EXTI15_10_IRQn
-#define SW_STEP2_Pin GPIO_PIN_13
-#define SW_STEP2_GPIO_Port GPIOB
-#define SW_STEP2_EXTI_IRQn EXTI15_10_IRQn
+#define DIR_STEP1_Pin GPIO_PIN_13
+#define DIR_STEP1_GPIO_Port GPIOB
 #define STEP_STEP1_Pin GPIO_PIN_14
 #define STEP_STEP1_GPIO_Port GPIOB
 #define STEP_STEP2_Pin GPIO_PIN_15
 #define STEP_STEP2_GPIO_Port GPIOB
-#define DIR_STEP1_Pin GPIO_PIN_8
-#define DIR_STEP1_GPIO_Port GPIOD
-#define DIR_STEP2_Pin GPIO_PIN_9
+#define DIR_STEP2_Pin GPIO_PIN_8
 #define DIR_STEP2_GPIO_Port GPIOD
+#define SW_STEP2_Pin GPIO_PIN_9
+#define SW_STEP2_GPIO_Port GPIOD
+#define SW_STEP2_EXTI_IRQn EXTI9_5_IRQn
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */

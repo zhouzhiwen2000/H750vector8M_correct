@@ -249,7 +249,6 @@ void timer_callback(rcl_timer_t * timer, int64_t last_call_time)
 
 void ros_init()
 {
-	set_stepper_1(0xFFFF);
 	// micro-ROS configuration
 	rmw_uros_set_custom_transport(
 	true,
