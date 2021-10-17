@@ -34,6 +34,29 @@ static int servo_lastvalue[10]= {0};
 extern SemaphoreHandle_t Servo_Lock;
 extern SemaphoreHandle_t Servo_Lock_Upper;
 
+/***************freertos new() implementation**************/
+void * operator new( size_t size )
+{
+    return pvPortMalloc(size);
+}
+
+void * operator new[]( size_t size )
+{
+    return pvPortMalloc( size );
+}
+
+void operator delete( void * ptr )
+{
+    vPortFree( ptr );
+}
+
+void operator delete[]( void * ptr )
+{
+    vPortFree( ptr );
+}
+/***************freertos new() implementation**************/
+
+
 uint32_t get_array_seq(uint32_t id)
 {
 	if(id>=100)id=id-95;

@@ -23,6 +23,8 @@
 #include "stm32h7xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "Control.h"
+#include "StepperMotor.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -94,7 +96,8 @@ void HardFault_Handler(void)
   while (1)
   {
     /* USER CODE BEGIN W1_HardFault_IRQn 0 */
-    /* USER CODE END W1_HardFault_IRQn 0 */
+	  asm("bx lr");
+	/* USER CODE END W1_HardFault_IRQn 0 */
   }
 }
 
@@ -226,7 +229,11 @@ void EXTI15_10_IRQHandler(void)
 void TIM6_DAC_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM6_DAC_IRQn 0 */
-
+	if(LL_TIM_IsActiveFlag_UPDATE(TIM6) == SET)
+	{
+		LL_TIM_ClearFlag_UPDATE(TIM6);
+	  //Control();
+	}
   /* USER CODE END TIM6_DAC_IRQn 0 */
 
   /* USER CODE BEGIN TIM6_DAC_IRQn 1 */
