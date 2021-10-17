@@ -7,12 +7,12 @@ extern "C" {//functions&variables imported from C
 
 }
 using namespace std;
-static std::atomic<int> current_speed_1(10);//1 for 0.1ms per halfstep
+static std::atomic<int> current_speed_1(1);//1 for 0.1ms per halfstep
 static std::atomic<int> current_halfstep_left_1(0);
 static std::atomic<int> current_halfstep_total_1(0);
 static std::atomic<int> clear_count_1(0);
 static std::atomic<bool> clear_flag_1(false);
-static std::atomic<int> current_speed_2(10);//1 for 0.1ms per halfstep
+static std::atomic<int> current_speed_2(1);//1 for 0.1ms per halfstep
 static std::atomic<int> current_halfstep_left_2(0);
 static std::atomic<int> current_halfstep_total_2(0);
 static std::atomic<int> clear_count_2(0);

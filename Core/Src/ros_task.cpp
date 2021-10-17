@@ -22,7 +22,7 @@
 #include "task.h"
 #include "main.h"
 #include "cmsis_os.h"
-
+#include "StepperMotor.h"
 #include <geometry_msgs/msg/Point.h>
 #include "usart.h"
 #include "Servo.h"
@@ -249,149 +249,150 @@ void timer_callback(rcl_timer_t * timer, int64_t last_call_time)
 
 void ros_init()
 {
-	  // micro-ROS configuration
-	  rmw_uros_set_custom_transport(
-		true,
-		(void *) &huart1,
-		cubemx_transport_open,
-		cubemx_transport_close,
-		cubemx_transport_write,
-		cubemx_transport_read);
+	set_stepper_1(0xFFFF);
+	// micro-ROS configuration
+	rmw_uros_set_custom_transport(
+	true,
+	(void *) &huart1,
+	cubemx_transport_open,
+	cubemx_transport_close,
+	cubemx_transport_write,
+	cubemx_transport_read);
 
-	  rcl_allocator_t freeRTOS_allocator = rcutils_get_zero_initialized_allocator();
-	  freeRTOS_allocator.allocate = microros_allocate;
-	  freeRTOS_allocator.deallocate = microros_deallocate;
-	  freeRTOS_allocator.reallocate = microros_reallocate;
-	  freeRTOS_allocator.zero_allocate =  microros_zero_allocate;
+	rcl_allocator_t freeRTOS_allocator = rcutils_get_zero_initialized_allocator();
+	freeRTOS_allocator.allocate = microros_allocate;
+	freeRTOS_allocator.deallocate = microros_deallocate;
+	freeRTOS_allocator.reallocate = microros_reallocate;
+	freeRTOS_allocator.zero_allocate =  microros_zero_allocate;
 
-	  if (!rcutils_set_default_allocator(&freeRTOS_allocator)) {
-		  printf("Error on default allocators (line %d)\n", __LINE__);
-	  }
+	if (!rcutils_set_default_allocator(&freeRTOS_allocator)) {
+	  printf("Error on default allocators (line %d)\n", __LINE__);
+	}
 
-	  // micro-ROS app
+	// micro-ROS app
 
-	  rclc_support_t support;
-	  rcl_allocator_t allocator;
-	  rcl_node_t node;
+	rclc_support_t support;
+	rcl_allocator_t allocator;
+	rcl_node_t node;
 
-	  allocator = rcl_get_default_allocator();
-	  rcl_ret_t node_inited=RCL_RET_ERROR;
-	  //create init_options
-	  while(node_inited!=RCL_RET_OK)
-	  {
-		  node_inited = rclc_support_init(&support, 0, NULL, &allocator);
-	  }
-	  // create node
-	  rclc_node_init_default(&node, "car_node", "", &support);
+	allocator = rcl_get_default_allocator();
+	rcl_ret_t node_inited=RCL_RET_ERROR;
+	//create init_options
+	while(node_inited!=RCL_RET_OK)
+	{
+	  node_inited = rclc_support_init(&support, 0, NULL, &allocator);
+	}
+	// create node
+	rclc_node_init_default(&node, "car_node", "", &support);
 
-	  // create publisher
-	  /*rclc_publisher_init_best_effort*/
-	  rclc_publisher_init_best_effort(
-		&current_pos,
+	// create publisher
+	/*rclc_publisher_init_best_effort*/
+	rclc_publisher_init_best_effort(
+	&current_pos,
+	&node,
+	ROSIDL_GET_MSG_TYPE_SUPPORT(geometry_msgs, msg, Point),
+	"current_pos");
+
+	rclc_publisher_init_best_effort(
+	&servo_status,
+	&node,
+	ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Bool),
+	"servo_status");
+
+	rclc_publisher_init_best_effort(
+	&car_status,
+	&node,
+	ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Float64),
+	"car_status");
+
+	rclc_subscription_init_default(
+		&carpos_sub,
 		&node,
 		ROSIDL_GET_MSG_TYPE_SUPPORT(geometry_msgs, msg, Point),
-		"current_pos");
+		"/car/pos");
 
-	  rclc_publisher_init_best_effort(
-		&servo_status,
+	rclc_subscription_init_default(
+		&carspeed_sub,
 		&node,
-		ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Bool),
-		"servo_status");
+		ROSIDL_GET_MSG_TYPE_SUPPORT(geometry_msgs, msg, Point),
+		"/car/speed");
 
-	  rclc_publisher_init_best_effort(
-		&car_status,
+	rclc_subscription_init_default(
+		&carspeedlimit_sub,
 		&node,
 		ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Float64),
-		"car_status");
+		"/car/speedlimit");
 
-	  rclc_subscription_init_default(
-	  		&carpos_sub,
-	  		&node,
-	  		ROSIDL_GET_MSG_TYPE_SUPPORT(geometry_msgs, msg, Point),
-	  		"/car/pos");
+	rclc_subscription_init_default(
+		&carmode_sub,
+		&node,
+		ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, UInt8),
+		"/car/mode");
 
-	  rclc_subscription_init_default(
-	  		&carspeed_sub,
-	  		&node,
-	  		ROSIDL_GET_MSG_TYPE_SUPPORT(geometry_msgs, msg, Point),
-	  		"/car/speed");
+	rclc_subscription_init_default(
+		&servo_sub,
+		&node,
+		ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, UInt8),
+		"/car/servo");
 
-	  rclc_subscription_init_default(
-	  		&carspeedlimit_sub,
-	  		&node,
-	  		ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Float64),
-	  		"/car/speedlimit");
+	rclc_subscription_init_default(
+		&xy_sub,
+		&node,
+		ROSIDL_GET_MSG_TYPE_SUPPORT(geometry_msgs, msg, Point),
+		"/car/xy");
 
-	  rclc_subscription_init_default(
-	  		&carmode_sub,
-	  		&node,
-	  		ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, UInt8),
-	  		"/car/mode");
+	rclc_subscription_init_default(
+		&display_sub,
+		&node,
+		ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, String),
+		"/car/display");
 
-	  rclc_subscription_init_default(
-	  		&servo_sub,
-	  		&node,
-	  		ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, UInt8),
-	  		"/car/servo");
+	rclc_subscription_init_default(
+		&servo_speed_sub,
+		&node,
+		ROSIDL_GET_MSG_TYPE_SUPPORT(geometry_msgs, msg, Point),
+		"/car/servo_speed");
 
-	  rclc_subscription_init_default(
-	  		&xy_sub,
-	  		&node,
-	  		ROSIDL_GET_MSG_TYPE_SUPPORT(geometry_msgs, msg, Point),
-	  		"/car/xy");
+	// create timer,
+	rcl_timer_t timer;
+	const unsigned int timer_timeout = 100;//10hz
+	rclc_timer_init_default(
+		&timer,
+		&support,
+		RCL_MS_TO_NS(timer_timeout),
+		timer_callback);
+	rclc_executor_t executor = rclc_executor_get_zero_initialized_executor();
+	rclc_executor_init(&executor, &support.context, 10, &allocator);//8subs+1timer
+	rclc_executor_add_timer(&executor, &timer);
 
-	  rclc_subscription_init_default(
-	  		&display_sub,
-	  		&node,
-	  		ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, String),
-	  		"/car/display");
+	rclc_executor_add_subscription(&executor, &carpos_sub, &sub_msg_pos, &callback_pos, ON_NEW_DATA);
+	rclc_executor_add_subscription(&executor, &carspeed_sub, &sub_msg_speed, &callback_speed, ON_NEW_DATA);
+	rclc_executor_add_subscription(&executor, &carspeedlimit_sub, &sub_msg_speedlimit, &callback_speedlimit, ON_NEW_DATA);
+	rclc_executor_add_subscription(&executor, &servo_speed_sub, &sub_msg_servo_speed, &callback_servo_speed, ON_NEW_DATA);
+	rclc_executor_add_subscription(&executor, &carmode_sub, &sub_msg_mode, &callback_mode, ON_NEW_DATA);
+	rclc_executor_add_subscription(&executor, &servo_sub, &sub_msg_servo, &callback_servo, ON_NEW_DATA);
+	rclc_executor_add_subscription(&executor, &xy_sub, &sub_msg_xy, &callback_xy, ON_NEW_DATA);
+	rclc_executor_add_subscription(&executor, &display_sub, &sub_msg_display, &callback_display, ON_NEW_DATA);
+	while(1)
+	{
+		TickType_t tcnt=xTaskGetTickCount();
+		rcl_ret_t temp_rc = rclc_executor_spin_some(&executor,RCL_MS_TO_NS(100));
+		if(temp_rc==RCL_RET_ERROR)break;
+		osDelayUntil(tcnt+20);//100Hz
+	}
+	rcl_subscription_fini(&carpos_sub, &node);
+	rcl_subscription_fini(&carspeed_sub, &node);
+	rcl_subscription_fini(&carspeedlimit_sub, &node);
+	rcl_subscription_fini(&servo_speed_sub, &node);
+	rcl_subscription_fini(&carmode_sub, &node);
+	rcl_subscription_fini(&servo_sub, &node);
+	rcl_subscription_fini(&xy_sub, &node);
+	rcl_subscription_fini(&display_sub, &node);
 
-	  rclc_subscription_init_default(
-	  		&servo_speed_sub,
-	  		&node,
-	  		ROSIDL_GET_MSG_TYPE_SUPPORT(geometry_msgs, msg, Point),
-	  		"/car/servo_speed");
-
-		// create timer,
-		rcl_timer_t timer;
-		const unsigned int timer_timeout = 100;//10hz
-		rclc_timer_init_default(
-			&timer,
-			&support,
-			RCL_MS_TO_NS(timer_timeout),
-			timer_callback);
-		rclc_executor_t executor = rclc_executor_get_zero_initialized_executor();
-		rclc_executor_init(&executor, &support.context, 10, &allocator);//8subs+1timer
-		rclc_executor_add_timer(&executor, &timer);
-
-		rclc_executor_add_subscription(&executor, &carpos_sub, &sub_msg_pos, &callback_pos, ON_NEW_DATA);
-		rclc_executor_add_subscription(&executor, &carspeed_sub, &sub_msg_speed, &callback_speed, ON_NEW_DATA);
-		rclc_executor_add_subscription(&executor, &carspeedlimit_sub, &sub_msg_speedlimit, &callback_speedlimit, ON_NEW_DATA);
-		rclc_executor_add_subscription(&executor, &servo_speed_sub, &sub_msg_servo_speed, &callback_servo_speed, ON_NEW_DATA);
-		rclc_executor_add_subscription(&executor, &carmode_sub, &sub_msg_mode, &callback_mode, ON_NEW_DATA);
-		rclc_executor_add_subscription(&executor, &servo_sub, &sub_msg_servo, &callback_servo, ON_NEW_DATA);
-		rclc_executor_add_subscription(&executor, &xy_sub, &sub_msg_xy, &callback_xy, ON_NEW_DATA);
-		rclc_executor_add_subscription(&executor, &display_sub, &sub_msg_display, &callback_display, ON_NEW_DATA);
-		while(1)
-		{
-		    TickType_t tcnt=xTaskGetTickCount();
-		    rcl_ret_t temp_rc = rclc_executor_spin_some(&executor,RCL_MS_TO_NS(100));
-		    if(temp_rc==RCL_RET_ERROR)break;
-		    osDelayUntil(tcnt+20);//100Hz
-		}
-		rcl_subscription_fini(&carpos_sub, &node);
-		rcl_subscription_fini(&carspeed_sub, &node);
-		rcl_subscription_fini(&carspeedlimit_sub, &node);
-		rcl_subscription_fini(&servo_speed_sub, &node);
-		rcl_subscription_fini(&carmode_sub, &node);
-		rcl_subscription_fini(&servo_sub, &node);
-		rcl_subscription_fini(&xy_sub, &node);
-		rcl_subscription_fini(&display_sub, &node);
-
-		rcl_publisher_fini(&current_pos, &node);
-		rcl_publisher_fini(&servo_status, &node);
-		rcl_publisher_fini(&car_status, &node);
-		rcl_node_fini(&node);
+	rcl_publisher_fini(&current_pos, &node);
+	rcl_publisher_fini(&servo_status, &node);
+	rcl_publisher_fini(&car_status, &node);
+	rcl_node_fini(&node);
 }
 void publish_servo_status()
 {
