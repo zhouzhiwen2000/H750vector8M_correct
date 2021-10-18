@@ -1,5 +1,7 @@
 extern "C" {//functions&variables imported from C
-#include "SCSProtocol.h"
+#include "SCS.h"
+#include "SMSBCL.h"
+#include "SCSCL.h"
 #include "stm32h7xx_hal.h"
 }
 #include "Servo.h"
@@ -30,10 +32,33 @@ static uint32_t time_start;
 static int stepper_lastvalue1=0;
 static int stepper_lastvalue2=0;
 static int last_mode_servo=-1;
-static double servo_speed[10]={1.5,1,1,1,1,1,1,1,1,1};//{none,1,2,3,4,5,none,none....}
+static double servo_speed[10]={0,1,5,1,1,1,1,1,1,1};//{none,1,2,3,4,5,none,none....}
 static int servo_lastvalue[10]= {0};
 extern SemaphoreHandle_t Servo_Lock;
 extern SemaphoreHandle_t Servo_Lock_Upper;
+static const bool is_STS[10]={0,true,false,true,true,false};//{none,1,2,3,4,5,none}
+
+uint32_t get_array_seq(uint32_t id)
+{
+//	if(id>=100)id=id-95;
+	return id;
+}
+
+int WritePos(uint8_t ID, uint16_t Position, uint16_t Time, uint16_t Speed)
+{
+	if(!is_STS[get_array_seq(ID)])
+	{
+		return WritePosSCS(ID,Position,Time,Speed);
+	}
+	else
+	{
+		if(Speed!=0)
+			return WritePosSTS(ID,Position,Speed,50);
+		else
+			return WritePosSTS(ID,Position,servo_speed[get_array_seq(ID)]*1050,50);//multiply by 1050 instead of 1000 to ensure enough wait time.
+
+	}
+}
 
 /***************freertos new() implementation**************/
 void * operator new( size_t size )
@@ -58,11 +83,7 @@ void operator delete[]( void * ptr )
 /***************freertos new() implementation**************/
 
 
-uint32_t get_array_seq(uint32_t id)
-{
-//	if(id>=100)id=id-95;
-	return id;
-}
+
 
 void Servo_Server()
 {
@@ -289,10 +310,12 @@ void All_Middle()//grab&to Middle
 void Servo_InitPos()
 {
 	xSemaphoreTakeRecursive(Servo_Lock_Upper, portMAX_DELAY);
-	Servo_Add_Action(1,3400,-1);//lower disk
+//	Servo_Add_Action(1,3400,-1);//lower disk
 	Servo_Add_Action(3,3510,-1);//arm to middle
 	Servo_Add_Action(4,1330,-1);//lift arm to level
-	Servo_Add_Action(2,102,-1);//lift arm to level
+	Servo_Add_Action(2,102,-1);
+//	Servo_Add_Action(2,480,-1);
+//	Servo_Add_Action(2,877,-1);
 
 	last_mode_servo=0x15;
     xSemaphoreGiveRecursive(Servo_Lock_Upper);

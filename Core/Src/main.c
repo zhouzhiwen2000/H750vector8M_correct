@@ -27,7 +27,8 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "SCServo.h"
+#include "SCS.h"
+#include "SMSBCL.h"
 #include "Control.h"
 /* USER CODE END Includes */
 

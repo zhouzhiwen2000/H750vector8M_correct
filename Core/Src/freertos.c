@@ -70,7 +70,7 @@ SemaphoreHandle_t Control_Lock = NULL;
 osThreadId_t servoTaskHandle;
 const osThreadAttr_t servoTask_attributes = {
   .name = "servoTask",
-  .stack_size = 1000 * 4,
+  .stack_size = 2000 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
 SemaphoreHandle_t Servo_Lock = NULL;
@@ -165,7 +165,7 @@ void StartDefaultTask(void *argument)
   /* Infinite loop */
   for(;;)
   {
-    osDelay(1);
+    osDelay(10);
   }
   /* USER CODE END StartDefaultTask */
 }
@@ -194,6 +194,7 @@ void StartServoTask(void *argument)
   LEDTaskHandle = osThreadNew(StartLEDTask, NULL, &LEDTask_attributes);
   set_stepper_2(0xFFFF);
   set_stepper_1(-0xFFFF);
+  osDelay(1000);
   Servo_InitPos();
 
   for(;;)

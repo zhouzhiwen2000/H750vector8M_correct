@@ -5,20 +5,26 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
-../Hardware/SCSProtocol.c \
-../Hardware/SCServo.c 
+../Hardware/SCS.c \
+../Hardware/SCSCL.c \
+../Hardware/SCSerail.c \
+../Hardware/SMSBCL.c 
 
 CPP_SRCS += \
 ../Hardware/Screen_drv.cpp \
 ../Hardware/StepperMotor.cpp 
 
 C_DEPS += \
-./Hardware/SCSProtocol.d \
-./Hardware/SCServo.d 
+./Hardware/SCS.d \
+./Hardware/SCSCL.d \
+./Hardware/SCSerail.d \
+./Hardware/SMSBCL.d 
 
 OBJS += \
-./Hardware/SCSProtocol.o \
-./Hardware/SCServo.o \
+./Hardware/SCS.o \
+./Hardware/SCSCL.o \
+./Hardware/SCSerail.o \
+./Hardware/SMSBCL.o \
 ./Hardware/Screen_drv.o \
 ./Hardware/StepperMotor.o 
 
