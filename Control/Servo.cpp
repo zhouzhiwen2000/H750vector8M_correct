@@ -22,6 +22,7 @@ public:
     action_servo * Next;
     std::vector<_act>  acts;
     uint32_t time;
+    int32_t speed;
 };
 
 
@@ -32,7 +33,7 @@ static uint32_t time_start;
 static int stepper_lastvalue1=0;
 static int stepper_lastvalue2=0;
 static int last_mode_servo=-1;
-static double servo_speed[10]={0,1,5,1,1,1,1,1,1,1};//{none,1,2,3,4,5,none,none....}
+static double servo_speed[10]={0,1,1,1,1,1,1,1,1,1};//{none,1,2,3,4,5,none,none....}
 static int servo_lastvalue[10]= {0};
 extern SemaphoreHandle_t Servo_Lock;
 extern SemaphoreHandle_t Servo_Lock_Upper;
@@ -55,7 +56,7 @@ int WritePos(uint8_t ID, uint16_t Position, uint16_t Time, uint16_t Speed)
 		if(Speed!=0)
 			return WritePosSTS(ID,Position,Speed,50);
 		else
-			return WritePosSTS(ID,Position,servo_speed[get_array_seq(ID)]*1050,50);//multiply by 1050 instead of 1000 to ensure enough wait time.
+			return WritePosSTS(ID,Position,servo_speed[get_array_seq(ID)]*1250,50);//multiply by 1050 instead of 1000 to ensure enough wait time.
 
 	}
 }
@@ -94,6 +95,7 @@ void Servo_Server()
         {
             action_servo * del=Current;
             Current=Current->Next;
+            if(Current==0)Last=0;//queue is empty again
             delete(del);
             if(Current!=0)
             {
@@ -104,8 +106,16 @@ void Servo_Server()
                     if(action.id<0xFFF0)
                         WritePos(action.id,action.value,Current->time,0);
                     else
-                    	if(action.id==0xFFF0)set_stepper_1(action.value);
-                    	else if(action.id==0xFFF1) set_stepper_2(action.value);
+                    	if(action.id==0xFFF0)
+                    		{
+                    			set_speed_1(Current->speed);
+                    			set_stepper_1(action.value);
+                    		}
+                    	else if(action.id==0xFFF1)
+                    		{
+                    			set_speed_2(Current->speed);
+                    			set_stepper_2(action.value);
+                    		}
                     Current->acts.erase(Current->acts.begin());
                 }
 //				WritePos(Current->id,Current->value,Current->time,0);
@@ -128,23 +138,40 @@ void Servo_Add_Action(uint32_t id,uint32_t value,int32_t time)
     New->acts.push_back(action1);
     New->time=time;
     New->Next=0;
+    New->speed=-1;
     if(action1.id==0xFFF0)
     {
+    	if(New->speed==-1)
+    	{
+    		New->speed=2;//default speed =2
+    	}
+    	if(time!=-1)
+    	{
+    		New->speed=time;
+    	}
         if(Current==0)
         {
             stepper_lastvalue1=get_steps_1();//update steps
         }
-        int stepper_time=fabs((int)value-(int)stepper_lastvalue1)*2.0*get_speed_1()/10;//in ms
+        int stepper_time=fabs((int)value-(int)stepper_lastvalue1)*2.0*New->speed/20;//in ms
         New->time=stepper_time;
         stepper_lastvalue1=value;
     }
     else if (action1.id==0xFFF1)
     {
+    	if(New->speed==-1)
+    	{
+    		New->speed=2;//default speed =2
+    	}
+    	if(time!=-1)
+    	{
+    		New->speed=time;
+    	}
         if(Current==0)
         {
             stepper_lastvalue2=get_steps_2();//update steps
         }
-        int stepper_time=fabs((int)value-(int)stepper_lastvalue2)*2.0*get_speed_2()/10;//in ms
+        int stepper_time=fabs((int)value-(int)stepper_lastvalue2)*2.0*New->speed/20;//in ms
         New->time=stepper_time;
         stepper_lastvalue2=value;
     }
@@ -172,13 +199,15 @@ void Servo_Add_Action(uint32_t id,uint32_t value,int32_t time)
             if(action.id<0xFFF0)
                 WritePos(action.id,action.value,Current->time,0);
             else if(action.id==0xFFF0)
-            {
-                set_stepper_1(action.value);
-            }
+    		{
+    			set_speed_1(Current->speed);
+    			set_stepper_1(action.value);
+    		}
             else if(action.id==0xFFF1)
-            {
-                set_stepper_2(action.value);
-            }
+    		{
+    			set_speed_2(Current->speed);
+    			set_stepper_2(action.value);
+    		}
             Current->acts.erase(Current->acts.begin());
         }
 //		WritePos(Current->id,Current->value,Current->time,0);
@@ -194,18 +223,26 @@ void Servo_Add_Action_bunch(std::vector<_act>  acts,int32_t time)
     New->acts=acts;
     New->time=time;
     New->Next=0;
-
+    New->speed=-1;
     std::vector<_act>::iterator it = acts.begin();
     for(; it != acts.end(); ++it)
     {
         _act & act=*it;
         if(act.id==0xFFF0)
         {
+        	if(New->speed==-1)
+        	{
+        		New->speed=2;//default speed =2
+        	}
+        	if(time!=-1)
+        	{
+        		New->speed=time;
+        	}
             if(Current==0)
             {
                 stepper_lastvalue1=get_steps_1();//update steps
             }
-            int stepper_time=fabs(act.value-stepper_lastvalue1)*2.0*get_speed_1()/10;//in ms
+            int stepper_time=fabs(act.value-stepper_lastvalue1)*2.0*New->speed/10;//in ms
             if(stepper_time>time)
             {
                 New->time=stepper_time;
@@ -214,11 +251,19 @@ void Servo_Add_Action_bunch(std::vector<_act>  acts,int32_t time)
         }
         else if(act.id==0xFFF1)
         {
+        	if(New->speed==-1)
+        	{
+        		New->speed=2;//default speed =2
+        	}
+        	if(time!=-1)
+        	{
+        		New->speed=time;
+        	}
             if(Current==0)
             {
                 stepper_lastvalue2=get_steps_1();//update steps
             }
-            int stepper_time=fabs(act.value-stepper_lastvalue2)*2.0*get_speed_2()/10;//in ms
+            int stepper_time=fabs(act.value-stepper_lastvalue2)*2.0*New->speed/10;//in ms
             if(stepper_time>time)
             {
                 New->time=stepper_time;
@@ -250,11 +295,16 @@ void Servo_Add_Action_bunch(std::vector<_act>  acts,int32_t time)
             _act & action=Current->acts.front();
             if(action.id<0xFFF0)
                 WritePos(action.id,action.value,Current->time,0);
-            else if (action.id==0xFFF0)
-                set_stepper_1(action.value);
-            else if (action.id==0xFFF1)
-            	set_stepper_2(action.value);
-            Current->acts.erase(Current->acts.begin());
+            else if(action.id==0xFFF0)
+    		{
+    			set_speed_1(Current->speed);
+    			set_stepper_1(action.value);
+    		}
+            else if(action.id==0xFFF1)
+    		{
+    			set_speed_2(Current->speed);
+    			set_stepper_2(action.value);
+    		}
         }
         time_start=HAL_GetTick();
     }
@@ -264,36 +314,6 @@ void Servo_Add_Action_bunch(std::vector<_act>  acts,int32_t time)
 void Servo_TransPos()//grab&to Middle
 {
 	xSemaphoreTakeRecursive(Servo_Lock_Upper, portMAX_DELAY);
-	if(last_mode_servo == 16)
-	{
-		Servo_Add_Action(4,950,-1);		
-		Servo_Add_Action(3,717,-1);
-		Servo_Add_Action(2,266,-1);
-		
-		
-	}
-	else if(last_mode_servo == 0x14)
-	{
-		Servo_Add_Action(4,950,-1);
-		Servo_Add_Action(2,266,-1);
-		Servo_Add_Action(3,717,-1);
-	}
-	else if(last_mode_servo == 0x06)
-	{
-		Servo_Add_Action(2,266,-1);
-		Servo_Add_Action(4,950,-1);	
-		Servo_Add_Action(3,717,-1);
-	}
-	else
-	{
-		
-		Servo_Add_Action(1,529,-1);
-		Servo_Add_Action(2,266,-1);
-		Servo_Add_Action(3,717,-1);
-		Servo_Add_Action(4,950,-1);
-		Servo_Add_Action(100,765,-1);
-	}
-	
 	last_mode_servo = -1;
 	xSemaphoreGiveRecursive(Servo_Lock_Upper);
 }
@@ -301,8 +321,8 @@ void Servo_TransPos()//grab&to Middle
 void All_Middle()//grab&to Middle
 {
 	xSemaphoreTakeRecursive(Servo_Lock_Upper, portMAX_DELAY);
-    Servo_Add_Action(100,765,-1);
-    Servo_Add_Action(0xFFF0,462,-1);
+	Servo_Add_Action(3,470,-1);//旋转机械臂归中
+	Servo_Add_Action(4,1300,-1);//机械臂展平
 	last_mode_servo=0x0E;
     xSemaphoreGiveRecursive(Servo_Lock_Upper);
 }
@@ -310,200 +330,121 @@ void All_Middle()//grab&to Middle
 void Servo_InitPos()
 {
 	xSemaphoreTakeRecursive(Servo_Lock_Upper, portMAX_DELAY);
-//	Servo_Add_Action(1,3400,-1);//lower disk
-	Servo_Add_Action(3,3510,-1);//arm to middle
-	Servo_Add_Action(4,1330,-1);//lift arm to level
-	Servo_Add_Action(2,102,-1);
-//	Servo_Add_Action(2,480,-1);
-//	Servo_Add_Action(2,877,-1);
-
+	Servo_Add_Action(1,2200,-1);//lower disk
+	Servo_Add_Action(3,470,-1);//arm to middle
+	Servo_Add_Action(4,1300,-1);//lift arm to level
+	Servo_Add_Action(2,170,-1);//POS 01
+	Servo_Add_Action(5,580,-1);//合上爪子
 	last_mode_servo=0x15;
     xSemaphoreGiveRecursive(Servo_Lock_Upper);
 }
 
 
-void Servo_PutLeft()
+void Servo_Put3()
 {
 	xSemaphoreTakeRecursive(Servo_Lock_Upper, portMAX_DELAY);
-	if(last_mode_servo == 0x06)
-	{
-		
-		Servo_Add_Action(2,500,-1);
-		Servo_Add_Action(3,685,-1);
-		Servo_Add_Action(4,500,-1);Servo_Add_Action(1,385,-1);
-		Servo_Add_Action(4,200,-1);
-		Servo_Add_Action(2,415,500);
-	}
-	else
-	{
-		Servo_Add_Action(2,266,-1);
-		Servo_Add_Action(3,717,-1);//transion
-
-		
-
-		Servo_Add_Action(2,500,-1);
-		Servo_Add_Action(3,685,-1);
-		Servo_Add_Action(4,500,-1);Servo_Add_Action(1,385,-1);
-		Servo_Add_Action(4,200,-1);
-		Servo_Add_Action(2,415,500);
-	}
-    Servo_Add_Action(101,850,-1);
-	
-	Servo_Add_Action(2,500,-1);
-	Servo_Add_Action(4,950,-1);
-	Servo_Add_Action(3,717,-1);
-	Servo_Add_Action(2,266,-1);
-	Servo_Add_Action(1,529,-1);
+	Servo_Add_Action(3,940,-1);//1号盘子
+	Servo_Add_Action(0xFFF0,37/0.0038,-1);//stub:push stepper
+	Servo_Add_Action(0xFFF1,450,-1);//stub:lift stepper
+	Servo_Add_Action(4,1770,-1);//机械臂抬起
+	Servo_Add_Action(3,1500,-1);//机械臂旋转
+	Servo_Add_Action(4,1300,-1);//机械臂水平
+	Servo_Add_Action(0xFFF1,20/0.0038,-1);//stub:lower stepper
+	Servo_Add_Action(5,750,-1);//张开爪子
+	Servo_Add_Action(4,1770,-1);//机械臂抬起
+	Servo_Add_Action(0xFFF1,450,-1);//stub:lift stepper
 	last_mode_servo=0x02;
 	xSemaphoreGiveRecursive(Servo_Lock_Upper);
 
 }
 
 
-void Servo_PutMiddle()
+void Servo_Put2()
 {
 	xSemaphoreTakeRecursive(Servo_Lock_Upper, portMAX_DELAY);
-	if(last_mode_servo == 0x06)
-	{
-		Servo_Add_Action(0xFFF0,850,-1);
-	
-		Servo_Add_Action(2,460,-1);
-		
-		Servo_Add_Action(3,717,-1);
-		Servo_Add_Action(4,500,-1);
-		Servo_Add_Action(4,135,500);
-	}
-	else
-	{
-		Servo_Add_Action(0xFFF0,850,-1);
-	
-		Servo_Add_Action(100,765,-1);
-		Servo_Add_Action(2,460,-1);
-		Servo_Add_Action(1,529,-1);
-		Servo_Add_Action(3,717,-1);
-		Servo_Add_Action(4,500,-1);
-		Servo_Add_Action(4,135,500);
-	}
-	
-	
-	Servo_Add_Action(101,850,-1);
-	
-	Servo_Add_Action(4,950,-1);
-	Servo_Add_Action(0xFFF0,450,-1);//Stepper Middle
-	Servo_TransPos();
+	Servo_Add_Action(2,550,-1);//1号盘子
+	Servo_Add_Action(0xFFF0,37/0.0038,-1);//stub:push stepper
+	Servo_Add_Action(0xFFF1,450,-1);//stub:lift stepper
+	Servo_Add_Action(4,1770,-1);//机械臂抬起
+	Servo_Add_Action(3,1500,-1);//机械臂旋转
+	Servo_Add_Action(4,1300,-1);//机械臂水平
+	Servo_Add_Action(0xFFF1,20/0.0038,-1);//stub:lower stepper
+	Servo_Add_Action(5,750,-1);//张开爪子
+	Servo_Add_Action(4,1770,-1);//机械臂抬起
+	Servo_Add_Action(0xFFF1,450,-1);//stub:lift stepper
 	last_mode_servo=0x01;
 	xSemaphoreGiveRecursive(Servo_Lock_Upper);
 }
 
 //1:700 2:380 3: 685 4:190
-void Servo_PutRight()
+void Servo_Put1()
 {
 	xSemaphoreTakeRecursive(Servo_Lock_Upper, portMAX_DELAY);
-	if(last_mode_servo == 0x06)
-	{
-		
-		Servo_Add_Action(2,500,-1);
-		Servo_Add_Action(3,685,-1);
-		Servo_Add_Action(4,500,-1);Servo_Add_Action(1,700,-1);
-		Servo_Add_Action(4,200,-1);
-		Servo_Add_Action(2,415,500);
-	}
-	else
-	{
-		Servo_Add_Action(2,266,-1);
-		Servo_Add_Action(3,717,-1);//transion
-
-		
-
-		Servo_Add_Action(2,500,-1);
-		Servo_Add_Action(3,685,-1);
-		Servo_Add_Action(4,500,-1);Servo_Add_Action(1,700,-1);
-		Servo_Add_Action(4,200,-1);
-		Servo_Add_Action(2,415,500);
-	}
-
-    
-	
-    Servo_Add_Action(101,850,-1);
-	
-	Servo_Add_Action(2,500,-1);
-	Servo_Add_Action(4,950,-1);
-	Servo_Add_Action(3,717,-1);
-	Servo_Add_Action(2,266,-1);
-	Servo_Add_Action(1,529,-1);
+	Servo_Add_Action(2,170,-1);//1号盘子
+	Servo_Add_Action(0xFFF0,37/0.0038,-1);//stub:push stepper
+	Servo_Add_Action(0xFFF1,450,-1);//stub:lift stepper
+	Servo_Add_Action(4,1770,-1);//机械臂抬起
+	Servo_Add_Action(3,1500,-1);//机械臂旋转
+	Servo_Add_Action(4,1300,-1);//机械臂水平
+	Servo_Add_Action(0xFFF1,20/0.0038,-1);//stub:lower stepper
+	Servo_Add_Action(5,750,-1);//张开爪子
+	Servo_Add_Action(4,1770,-1);//机械臂抬起
+	Servo_Add_Action(0xFFF1,450,-1);//stub:lift stepper
 	last_mode_servo=0x00;
 	xSemaphoreGiveRecursive(Servo_Lock_Upper);
 }
 
-void Servo_GrabLeft()
+void Servo_Grab1()
 {
 	xSemaphoreTakeRecursive(Servo_Lock_Upper, portMAX_DELAY);
-//    Servo_Add_Action(2,266,-1);
-//    Servo_Add_Action(3,717,-1);//transion
-	Servo_Add_Action(100,765,-1); 
-	Servo_Add_Action(101,800,-1);
-
-    Servo_Add_Action(1,700,-1);
-	Servo_Add_Action(2,500,-1);
-    Servo_Add_Action(3,685,-1);
-	Servo_Add_Action(4,200,-1);
-    Servo_Add_Action(2,415,500);
-    Servo_Grab();
-	
-	Servo_Add_Action(2,500,-1);
-	Servo_Add_Action(4,950,-1);
-	Servo_Add_Action(3,717,-1);
-	Servo_Add_Action(2,266,-1);
-	Servo_Add_Action(1,529,-1);
+	Servo_Add_Action(2,170,-1);//1号盘子
+	Servo_Add_Action(0xFFF0,37/0.0038,-1);//stub:push stepper
+	Servo_Add_Action(0xFFF1,450,-1);//stub:lift stepper
+	Servo_Add_Action(5,750,-1);//张开爪子
+	Servo_Add_Action(4,1770,-1);//机械臂抬起
+	Servo_Add_Action(3,1500,-1);//机械臂旋转
+	Servo_Add_Action(4,1300,-1);//机械臂水平
+	Servo_Add_Action(0xFFF1,20/0.0038,-1);//stub:lower stepper
+	Servo_Add_Action(5,580,-1);//合上爪子
+	Servo_Add_Action(0xFFF1,450,-1);//stub:lower stepper
+	Servo_Add_Action(4,1770,-1);//机械臂抬起
 	last_mode_servo=0x03;
 	xSemaphoreGiveRecursive(Servo_Lock_Upper);
 }
-void Servo_GrabMiddle()
+void Servo_Grab2()
 {
 	xSemaphoreTakeRecursive(Servo_Lock_Upper, portMAX_DELAY);
-	Servo_Add_Action(100,765,-1);
-	Servo_Add_Action(101,800,-1);
-	Servo_Add_Action(0xFFF0,850,-1);
 	
-//	Servo_Add_Action(100,765,-1);
-//	Servo_Add_Action(101,850,-1);
+	Servo_Add_Action(2,550,-1);//1号盘子
+	Servo_Add_Action(0xFFF0,37/0.0038,-1);//stub:push stepper
+	Servo_Add_Action(5,750,-1);//张开爪子
+	Servo_Add_Action(4,1770,-1);//机械臂抬起
+	Servo_Add_Action(3,1500,-1);//机械臂旋转
+	Servo_Add_Action(4,1300,-1);//机械臂水平
+	Servo_Add_Action(0xFFF1,20/0.0038,-1);//stub:lower stepper
+	Servo_Add_Action(5,580,-1);//合上爪子
+	Servo_Add_Action(0xFFF1,450,-1);//stub:lower stepper
+	Servo_Add_Action(4,1770,-1);//机械臂抬起
 	
-	Servo_Add_Action(2,460,-1);
-    Servo_Add_Action(1,529,-1);
-    Servo_Add_Action(3,717,-1);
-	Servo_Add_Action(4,500,-1);
-    Servo_Add_Action(4,135,500);
-	
-	Servo_Grab();
-	
-	Servo_Add_Action(4,950,-1);
-	Servo_Add_Action(0xFFF0,450,-1);//Stepper Middle
-	Servo_TransPos();
 	last_mode_servo=0x04;
 	xSemaphoreGiveRecursive(Servo_Lock_Upper);
 	
 	
 }
-void Servo_GrabRight()
+void Servo_Grab3()
 {
 	xSemaphoreTakeRecursive(Servo_Lock_Upper, portMAX_DELAY);
-	//	Servo_Add_Action(2,266,-1);
-//    Servo_Add_Action(3,717,-1);//transion
-	Servo_Add_Action(100,765,-1);
-	Servo_Add_Action(101,800,-1);
 
-    Servo_Add_Action(1,385,-1);
-	Servo_Add_Action(2,500,-1);
-    Servo_Add_Action(3,685,-1);
-	Servo_Add_Action(4,200,-1);
-    Servo_Add_Action(2,415,500);
-    Servo_Grab();
-	
-	Servo_Add_Action(2,500,-1);
-	Servo_Add_Action(4,950,-1);
-	Servo_Add_Action(3,717,-1);
-	Servo_Add_Action(2,266,-1);
-	Servo_Add_Action(1,529,-1);
+	Servo_Add_Action(2,940,-1);//1号盘子
+	Servo_Add_Action(0xFFF0,37/0.0038,-1);//stub:push stepper
+	Servo_Add_Action(5,750,-1);//张开爪子
+	Servo_Add_Action(4,1770,-1);//机械臂抬起
+	Servo_Add_Action(3,1500,-1);//机械臂旋转
+	Servo_Add_Action(4,1300,-1);//机械臂水平
+	Servo_Add_Action(0xFFF1,20/0.0038,-1);//stub:lower stepper
+	Servo_Add_Action(5,580,-1);//合上爪子
+	Servo_Add_Action(0xFFF1,450,-1);//stub:lower stepper
+	Servo_Add_Action(4,1770,-1);//机械臂抬起
 	last_mode_servo=0x05;
 	xSemaphoreGiveRecursive(Servo_Lock_Upper);
 }
@@ -511,211 +452,47 @@ void Servo_GrabRight()
 
 
 
-void Servo_Grab_Upper()//done
+void Servo_Grab_Upper()//上层抓取的预备姿势 不含向前移动 不含爪子闭合 建议前移>=100
 {
 	xSemaphoreTakeRecursive(Servo_Lock_Upper, portMAX_DELAY);
-	if(last_mode_servo != -1)
-	{
-		Servo_Add_Action(1,529,-1);
-		Servo_Add_Action(2,266,-1);
-		Servo_Add_Action(3,717,-1);//transion
-	}
-	
-	
-    Servo_Add_Action(0xFFF0,450,-1);
-    Servo_Add_Action(101,850,-1);
-    Servo_Add_Action(100,765,-1);
-	
-    
-    Servo_Add_Action(3,660,-1);
-	Servo_Add_Action(4,888,-1);
-    Servo_Add_Action(2,572,-1);
-    Servo_Grab();
-	
+	Servo_Add_Action(0xFFF1,16/0.0038,-1);//抬高平台
+	Servo_Add_Action(3,470,-1);//机械臂旋转到中间
+	Servo_Add_Action(4,1300,-1);//机械臂水平
+	Servo_Add_Action(5,750,-1);//张开爪子
+
 	last_mode_servo=0x06;
-	
-	//Servo_TransPos();
 	xSemaphoreGiveRecursive(Servo_Lock_Upper);
 	
 }
 
-void Servo_Grab_Pose_Lower()//抓地上的物块
+void Servo_Grab_Lower()//下层抓取姿势 不含向前移动 建议前移>=100 不含爪子闭合 不含平台回升
 {
 	xSemaphoreTakeRecursive(Servo_Lock_Upper, portMAX_DELAY);
-	if(last_mode_servo == 0x0C)
-	{
-		Servo_Add_Action(100,765,-1);
-		Servo_Add_Action(101,850,-1);
-		
-		Servo_Add_Action(4,950,-1);
-		Servo_Add_Action(3,475,-1);
-		Servo_Add_Action(2,740,-1);
-		
-		Servo_Add_Action(3,400,-1);
-		Servo_Add_Action(2,790,-1);
-		Servo_Add_Action(2,840,-1);
-		Servo_Add_Action(4,980,-1);
-		Servo_Add_Action(3,320,-1);
-		
-	}
-	
-	else
-	{
-		
-		
-	Servo_Add_Action(100,765,-1);
-    Servo_Add_Action(101,850,-1);
-	
-	
-	Servo_Add_Action(3,717,-1);
-	Servo_Add_Action(4,950,-1);
-	Servo_Add_Action(2,266,-1);
-	
-	
-	Servo_Add_Action(3,475,-1);
-	Servo_Add_Action(2,740,-1);
-	Servo_Add_Action(3,400,-1);
-	Servo_Add_Action(2,790,-1);
-	Servo_Add_Action(2,840,-1);
-    Servo_Add_Action(4,980,-1);
-	Servo_Add_Action(3,320,-1);
-		
-	}
-	
-    Servo_Grab();
-	
-    Servo_Add_Action(2,266,-1);
-	Servo_Add_Action(4,950,-1);
-    Servo_Add_Action(3,717,-1);
+	Servo_Add_Action(3,470,-1);//机械臂旋转到中间
+	Servo_Add_Action(4,1300,-1);//机械臂水平
+	Servo_Add_Action(5,750,-1);//张开爪子
+	Servo_Add_Action(0xFFF1,150/0.0038,-1);//降低平台
 	last_mode_servo=0x07;
     xSemaphoreGiveRecursive(Servo_Lock_Upper);
 }
-void Servo_Grab_Pose2_Lower()//抓台子下的物块
+
+void Servo_Grab()
 {
 	xSemaphoreTakeRecursive(Servo_Lock_Upper, portMAX_DELAY);
-	//970 430 735
-	
-	Servo_Add_Action(0xFFF0,25,-1);
-	Servo_Add_Action(101,850,-1);
-	
-	//480 650 1000
-	Servo_Add_Action(2,480,-1);
-	Servo_Add_Action(4,1000,-1);
-    Servo_Add_Action(3,650,-1);
-	
-	
-	//520 670 1000
-	Servo_Add_Action(2,520,-1);
-    Servo_Add_Action(3,670,-1);
-
-	
-	//560 650 1000
-	Servo_Add_Action(2,560,-1);
-    Servo_Add_Action(3,650,-1);
-	
-	
-	//600 630 1000
-	Servo_Add_Action(2,600,-1);
-    Servo_Add_Action(3,630,-1);
-	
-	//640 640 1000
-	Servo_Add_Action(2,640,-1);
-    Servo_Add_Action(3,640,-1);
-	
-	//660 600 1000
-	Servo_Add_Action(2,660,-1);
-    Servo_Add_Action(3,600,-1);
-	
-	//700 520 1000
-	Servo_Add_Action(2,700,-1);
-    Servo_Add_Action(3,520,-1);
-	
-	//720 430 1000
-	Servo_Add_Action(3,430,-1);
-	Servo_Add_Action(2,720,-1);
-	
-	
-	Servo_Add_Action(0xFFF0,905,-1);
-    
-	
-	//740 430 940
-	Servo_Add_Action(2,740,-1);
-	Servo_Add_Action(4,940,-1);
-	
-	//800 430 860
-	Servo_Add_Action(2,800,-1);
-	Servo_Add_Action(4,860,-1);
-	
-	
-	//860 430 780
-	Servo_Add_Action(2,860,-1);
-	Servo_Add_Action(4,780,-1);
-	
-	//900 430 735
-	Servo_Add_Action(2,900,-1);
-	Servo_Add_Action(4,735,-1);
-	
-	//920 430 735
-	Servo_Add_Action(2,920,-1);
-
-	
-	Servo_Grab();
-	
-	Servo_Add_Action(2,900,-1);
-	Servo_Add_Action(4,780,-1);
-	Servo_Add_Action(2,860,-1);
-	Servo_Add_Action(4,860,-1);
-	Servo_Add_Action(2,800,-1);
-	Servo_Add_Action(4,940,-1);
-	Servo_Add_Action(2,740,-1);
-	Servo_Add_Action(0xFFF0,25,-1);
-	
-	
-	//***********************************************************
-	Servo_Add_Action(2,720,-1);
-	Servo_Add_Action(3,430,-1);
-    Servo_Add_Action(3,520,-1);
-	Servo_Add_Action(2,700,-1);
-    Servo_Add_Action(3,600,-1);
-	Servo_Add_Action(2,660,-1);
-    Servo_Add_Action(3,640,-1);
-	Servo_Add_Action(2,640,-1);
-    Servo_Add_Action(3,630,-1);
-	Servo_Add_Action(2,600,-1);
-    Servo_Add_Action(3,650,-1);
-	Servo_Add_Action(2,560,-1);
-    Servo_Add_Action(3,670,-1);
-	Servo_Add_Action(2,520,-1);
-    Servo_Add_Action(3,650,-1);
-	Servo_Add_Action(4,1000,-1);
-	Servo_Add_Action(2,480,-1);
-	
-	Servo_Add_Action(0xFFF0,450,-1);
-	last_mode_servo=0x08;
-	xSemaphoreGiveRecursive(Servo_Lock_Upper);
-	
-}
-void Servo_Grab()//done
-{
-	xSemaphoreTakeRecursive(Servo_Lock_Upper, portMAX_DELAY);
-    Servo_Add_Action(101,580,-1);
-	last_mode_servo=0x09;
+    Servo_Add_Action(5,580,-1);
 	xSemaphoreGiveRecursive(Servo_Lock_Upper);
 }
 
+void Servo_Release()
+{
+	xSemaphoreTakeRecursive(Servo_Lock_Upper, portMAX_DELAY);
+    Servo_Add_Action(5,750,-1);
+	xSemaphoreGiveRecursive(Servo_Lock_Upper);
+}
 //2:700 3:450 4:1000
-void Servo_Put_Upper()//码垛
+void Servo_Put_Upper()
 {
 	xSemaphoreTakeRecursive(Servo_Lock_Upper, portMAX_DELAY);
-	Servo_Add_Action(4,1000,-1);
-    Servo_Add_Action(3,450,-1);
-    Servo_Add_Action(2,700,500);
-    Servo_Add_Action(101,850,-1);
-
-	Servo_Add_Action(3,600,-1);
-    Servo_Add_Action(2,266,-1);
-	Servo_Add_Action(3,717,-1);
-	Servo_Add_Action(4,950,-1);
 	last_mode_servo=0x0A;
 	xSemaphoreGiveRecursive(Servo_Lock_Upper);
 }
@@ -726,92 +503,41 @@ void Servo_Put_Upper()//码垛
 //2: 740  3: 475  4:950  起来的中间状态
 
 //2: 560 3: 140  4: 1000 100: 850  观察圈圈
-void Servo_Put_Lower()
+void Servo_Put_Lower()//地面放置 不含向前移动 建议前移>=100
 {
 	xSemaphoreTakeRecursive(Servo_Lock_Upper, portMAX_DELAY);
-	if(last_mode_servo == 0x0C)
-	{	
-		Servo_Add_Action(4,980,100);
-		Servo_Add_Action(3,320,300);
-		Servo_Add_Action(2,840,500);
-		
-	}
-	
-	else
-	{
-	
-//    Servo_Add_Action(2,266,-1);
-//    Servo_Add_Action(3,717,-1);//transion
-	
-//    Servo_Add_Action(0xFFF0,700,-1);
-//    Servo_Add_Action(100,765,-1);
-		Servo_Add_Action(1,529,-1);
-		
-		Servo_Add_Action(3,320,300);
-		Servo_Add_Action(4,980,500);
-		Servo_Add_Action(2,840,800);
-		
-		
-	}
-				
-	Servo_Add_Action(101,765,-1);
-
-	Servo_Add_Action(2,790,300);
-	Servo_Add_Action(3,400,300);
-	Servo_Add_Action(2,740,300);
-	Servo_Add_Action(3,475,300);
-	
-	Servo_Add_Action(2,266,300);
-	Servo_Add_Action(4,950,300);
-	Servo_Add_Action(3,717,300);
+	Servo_Add_Action(3,470,-1);//机械臂旋转到中间
+	Servo_Add_Action(4,1300,-1);//机械臂水平
+//	Servo_Add_Action(5,750,-1);//张开爪子
+	Servo_Add_Action(0xFFF1,185/0.0038,1);//降低平台
+	Servo_Add_Action(5,750,-1);//张开爪子
+	Servo_Add_Action(0xFFF1,450,-1);//回升平台
 	last_mode_servo=0x0B;
-
 	xSemaphoreGiveRecursive(Servo_Lock_Upper);
 }
 
 //2: 500 3: 140  4: 1000 100: 850
-void Servo_Camera()//观察圈圈
+void Servo_Camera()//转向摄像头
 {
 	xSemaphoreTakeRecursive(Servo_Lock_Upper, portMAX_DELAY);
-	if(last_mode_servo != -1)
-	{
-		Servo_Add_Action(2,266,-1);
-		Servo_Add_Action(3,717,-1);//transion
-	}
-    
+	Servo_Add_Action(4,1770,-1);//机械臂抬起
+	Servo_Add_Action(3,1500,-1);//机械臂右转
+	Servo_Add_Action(0xFFF0,127/0.0038,1);//push forward
 
-//    Servo_Add_Action(0xFFF0,100,-1);
-//    Servo_Add_Action(101,765,-1);
-//    Servo_Add_Action(100,765,-1);
-	
-	Servo_Add_Action(4,1000,-1);
-	Servo_Add_Action(3,420,-1);
-	Servo_Add_Action(2,500,-1);
-    Servo_Add_Action(3,140,-1);
-    
-	Servo_Add_Action(100,765,-1);
-	
+
 	last_mode_servo=0x0C;
 	xSemaphoreGiveRecursive(Servo_Lock_Upper);
 }
 //2: 500 3: 295 4: 870
 
-void Servo_Camera1()//看台子上面的物块
+void Servo_Camera1()//转回来
 {
 	xSemaphoreTakeRecursive(Servo_Lock_Upper, portMAX_DELAY);
-//    Servo_Add_Action(2,266,-1);
-//    Servo_Add_Action(3,717,-1);//transion
-	
-	
-//    Servo_Add_Action(0xFFF0,100,-1);
-//    Servo_Add_Action(101,850,-1);
-//    Servo_Add_Action(100,765,-1);
-//    Servo_Add_Action(1,529,-1);
-	Servo_Add_Action(4,870,-1);
-    Servo_Add_Action(3,295,-1);
-	Servo_Add_Action(2,500,-1);
-	
-	Servo_Add_Action(100,765,-1);
+	Servo_Add_Action(4,1770,-1);//机械臂抬起
+	Servo_Add_Action(3,470,-1);//机械臂左转
+//	Servo_Add_Action(0xFFF0,127/0.0038,1);//push backward
+
+
 	last_mode_servo=0x0F;
 	xSemaphoreGiveRecursive(Servo_Lock_Upper);
 }
@@ -820,10 +546,7 @@ void Servo_Camera1()//看台子上面的物块
 void Servo_Camera2()//看二维码
 {
 	xSemaphoreTakeRecursive(Servo_Lock_Upper, portMAX_DELAY);
-	Servo_Add_Action(2,670,-1);
-	
-	Servo_Add_Action(3,700,-1);
-	Servo_Add_Action(4,80,-1);
+
 	last_mode_servo=0x10;
 	xSemaphoreGiveRecursive(Servo_Lock_Upper);
 }
@@ -831,14 +554,14 @@ void Servo_Camera2()//看二维码
 void Servo_Put_Upper_Storage()
 {
 	xSemaphoreTakeRecursive(Servo_Lock_Upper, portMAX_DELAY);
-	last_mode_servo=0x12;
+
 	xSemaphoreGiveRecursive(Servo_Lock_Upper);
 
 }
 void Servo_Put_Lower_Storage()
 {
 	xSemaphoreTakeRecursive(Servo_Lock_Upper, portMAX_DELAY);
-	last_mode_servo=0x13;
+
 	xSemaphoreGiveRecursive(Servo_Lock_Upper);
 }
 
@@ -846,9 +569,7 @@ void Servo_Put_Lower_Storage()
 void Servo_Camera_AdjPosLower()
 {
 	xSemaphoreTakeRecursive(Servo_Lock_Upper, portMAX_DELAY);
-	Servo_Add_Action(3,160,-1);
-	Servo_Add_Action(2,500,-1);
-	Servo_Add_Action(4,900,-1);
+
 	last_mode_servo = 0x14;
 	xSemaphoreGiveRecursive(Servo_Lock_Upper);
 }
@@ -856,10 +577,7 @@ void Servo_Camera_AdjPosLower()
 void Servo_Camera3()//看六个物块
 {
 	xSemaphoreTakeRecursive(Servo_Lock_Upper, portMAX_DELAY);
-	Servo_Add_Action(2,500,-1);
-	Servo_Add_Action(3,15,-1);
-	Servo_Add_Action(2,920,-1);
-	Servo_Add_Action(4,500,-1);
+
 	last_mode_servo=0x11;
 	xSemaphoreGiveRecursive(Servo_Lock_Upper);
 }
@@ -887,7 +605,7 @@ void update_Servo_state(uint32_t id,int value)
 void change_servo_speed(uint32_t id, double speed)
 {
 	xSemaphoreTake(Servo_Lock, portMAX_DELAY);
-	servo_speed[id]=speed;
+	servo_speed[get_array_seq(id)]=speed;
 	xSemaphoreGive(Servo_Lock);
 }
 

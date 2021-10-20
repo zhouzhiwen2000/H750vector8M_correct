@@ -31,7 +31,7 @@
 rcl_publisher_t current_pos;
 rcl_publisher_t servo_status;
 rcl_publisher_t car_status;
-
+rcl_publisher_t car_start;
 rcl_subscription_t carpos_sub;
 rcl_subscription_t carspeed_sub;
 rcl_subscription_t carspeedlimit_sub;
@@ -61,10 +61,12 @@ std_msgs__msg__Float64 sub_msg_speedlimit;
 std_msgs__msg__UInt8 sub_msg_mode;
 std_msgs__msg__UInt8 sub_msg_servo;
 std_msgs__msg__String sub_msg_display;
+bool started=false;
 
 #define a_PARAMETER          (0.7384854f)
 #define b_PARAMETER          (0.6742698f)
 #define R (15.5724)
+#define MM_PER_STEP 		(0.0038)
 extern "C" {//functions&variables imported from C
 bool cubemx_transport_open(struct uxrCustomTransport * transport);
 bool cubemx_transport_close(struct uxrCustomTransport * transport);
@@ -148,53 +150,52 @@ void callback_servo(const void * msg)
 	switch(msgin->data)
 	{
 		case 0x00:
-			Servo_PutRight();
+			Servo_Put1();
 			break;
 		case 0x01:
-			Servo_PutMiddle();
+			Servo_Put2();
 			break;
 		case 0x02:
-			Servo_PutLeft();
+			Servo_Put3();
 			break;
 		case 0x03:
-			Servo_GrabLeft();
+			Servo_Grab1();
 			break;
 		case 0x04:
-			Servo_GrabMiddle();
+			Servo_Grab2();
 			break;
 		case 0x05:
-			Servo_GrabRight();
+			Servo_Grab3();
 			break;
 		case 0x06:
-			Servo_Grab_Upper();
+			Servo_Camera();//右转
 			break;
 		case 0x07:
-			Servo_Grab_Pose_Lower();
+			Servo_Camera1();//转回
 			break;
 		case 0x08:
-			Servo_Grab_Pose2_Lower();
+			Servo_Grab();//爪子闭合
 			break;
 		case 0x09:
-			Servo_Grab();
+			Servo_Release();//爪子张开
 			break;
-
 		case 0x0A:
-			Servo_Put_Upper();
+			Servo_Put_Upper();//抓取上层姿势
 			break;
 		case 0x0B:
-			Servo_Put_Lower();
+			Servo_Put_Lower();//抓取下层姿势
 			break;
 		case 0x0C:
-			Servo_Camera();
+			Servo_InitPos();//初始姿态
 			break;
 		case 0x0D:
-			Servo_TransPos();
+			Servo_InitPos();
 			break;
 		case 0x0E:
 			All_Middle();
 			break;
 		case 0x0F:
-			Servo_Camera1();
+			Servo_Camera1();//转回
 			break;
 		case 0x10:
 			Servo_Camera2();
@@ -223,18 +224,20 @@ void callback_display(const void * msg)
 void callback_xy(const void * msg)
 {
 	const geometry_msgs__msg__Point * msgin = (const geometry_msgs__msg__Point *)msg;
-	if(msgin->y!=0)
+	int32_t speed=-1;
+	if(msgin->z>0.00001)
 	{
-//			set_stepper(msg.y);//25-900
-//			update_Servo_state(0xFFF0,msg.y);
-			Servo_Add_Action(0xFFF0,msgin->y,-1);
+		speed=msgin->z;
 	}
-	if(msgin->x!=0)
+	if(msgin->y>0.00001)
 	{
-//			WritePos(100,1024-msg.x,100,50);//200-370 259middle
-//			update_Servo_state(100,msg.y);
-			Servo_Add_Action(100,1024-msgin->x,-1);
+			Servo_Add_Action(0xFFF0,msgin->y/0.0038,speed);
 	}
+	if(msgin->x>0.00001)
+	{
+			Servo_Add_Action(0xFFF1,msgin->x/0.0038,speed);
+	}
+
 	publish_servo_status();
 }
 
@@ -304,13 +307,20 @@ void ros_init()
 	ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Float64),
 	"car_status");
 
+	rclc_publisher_init_default(
+	&car_start,
+	&node,
+	ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Bool),
+	"car_start");
+
+
 	rclc_subscription_init_default(
 		&carpos_sub,
 		&node,
 		ROSIDL_GET_MSG_TYPE_SUPPORT(geometry_msgs, msg, Point),
 		"/car/pos");
 
-	rclc_subscription_init_default(
+	rclc_subscription_init_best_effort(
 		&carspeed_sub,
 		&node,
 		ROSIDL_GET_MSG_TYPE_SUPPORT(geometry_msgs, msg, Point),
@@ -372,11 +382,20 @@ void ros_init()
 	rclc_executor_add_subscription(&executor, &servo_sub, &sub_msg_servo, &callback_servo, ON_NEW_DATA);
 	rclc_executor_add_subscription(&executor, &xy_sub, &sub_msg_xy, &callback_xy, ON_NEW_DATA);
 	rclc_executor_add_subscription(&executor, &display_sub, &sub_msg_display, &callback_display, ON_NEW_DATA);
+
 	while(1)
 	{
 		TickType_t tcnt=xTaskGetTickCount();
 		rcl_ret_t temp_rc = rclc_executor_spin_some(&executor,RCL_MS_TO_NS(100));
 		if(temp_rc==RCL_RET_ERROR)break;
+		if(HAL_GPIO_ReadPin(KEY1_GPIO_Port,KEY1_Pin)==0&&!started)
+		{
+			std_msgs__msg__Bool start;
+			start.data=true;
+			rcl_publish(&car_start, &start, NULL);
+			Servo_InitPos();
+			started=true;
+		}
 		osDelayUntil(tcnt+20);//100Hz
 	}
 	rcl_subscription_fini(&carpos_sub, &node);

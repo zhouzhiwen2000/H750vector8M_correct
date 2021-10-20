@@ -20,9 +20,9 @@ int WritePosSTS(uint8_t ID, int16_t Position, uint16_t Speed, uint8_t ACC)
 	}
 
 	bBuf[0] = ACC;
-	Host2SCS(bBuf+1, bBuf+2, Position);
-	Host2SCS(bBuf+3, bBuf+4, 0);
-	Host2SCS(bBuf+5, bBuf+6, Speed);
+	Host2SCS(bBuf+1, bBuf+2, Position, 0);
+	Host2SCS(bBuf+3, bBuf+4, 0, 0);
+	Host2SCS(bBuf+5, bBuf+6, Speed, 0);
 	
 	return genWrite(ID, SMSBCL_ACC, bBuf, 7);
 }

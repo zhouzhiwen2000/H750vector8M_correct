@@ -192,11 +192,19 @@ void StartServoTask(void *argument)
   Servo_Lock_Upper = xSemaphoreCreateRecursiveMutex();
   ROSTaskHandle = osThreadNew(StartROSTask, NULL, &ROSTask_attributes);
   LEDTaskHandle = osThreadNew(StartLEDTask, NULL, &LEDTask_attributes);
-  set_stepper_2(0xFFFF);
+  set_stepper_2(-0xFFFF);
   set_stepper_1(-0xFFFF);
   osDelay(1000);
+  update_Servo_state(1,3300);
+  update_Servo_state(2,170);
+  update_Servo_state(3,470);
+  update_Servo_state(4,300);
+  update_Servo_state(5,580);//set default inital positions to save time
+  WritePosSCS(100,0,0,0);//dummy info to flush serial
+  WritePosSTS(100,0,1000,50);//dummy info to flush serial
   Servo_InitPos();
-
+//  Servo_Add_Action(0xFFF0,110/0.0038,1);//push out
+//  Servo_Camera();
   for(;;)
   {
     TickType_t tcnt=xTaskGetTickCount();

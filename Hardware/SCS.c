@@ -9,11 +9,10 @@
 #include "SCS.h"
 
 static uint8_t Level =1;//舵机返回等级
-static uint8_t End = 0;//处理器大小端结构
 
 //1个16位数拆分为2个8位数
 //DataL为低位，DataH为高位
-void Host2SCS(uint8_t *DataL, uint8_t* DataH, int Data)
+void Host2SCS(uint8_t *DataL, uint8_t* DataH, int Data, uint8_t End)
 {
 	if(End){
 		*DataL = (Data>>8);
@@ -26,7 +25,7 @@ void Host2SCS(uint8_t *DataL, uint8_t* DataH, int Data)
 
 //2个8位数组合为1个16位数
 //DataL为低位，DataH为高位
-int SCS2Host(uint8_t DataL, uint8_t DataH)
+int SCS2Host(uint8_t DataL, uint8_t DataH, uint8_t End)
 {
 	int Data;
 	if(End){
@@ -144,10 +143,10 @@ int writeByte(uint8_t ID, uint8_t MemAddr, uint8_t bDat)
 	return Ack(ID);
 }
 
-int writeWord(uint8_t ID, uint8_t MemAddr, uint16_t wDat)
+int writeWord(uint8_t ID, uint8_t MemAddr, uint16_t wDat, uint8_t End)
 {
 	uint8_t buf[2];
-	Host2SCS(buf+0, buf+1, wDat);
+	Host2SCS(buf+0, buf+1, wDat, End);
 	rFlushSCS();
 	writeBuf(ID, MemAddr, buf, 2, INST_WRITE);
 	wFlushSCS();
@@ -204,7 +203,7 @@ int readByte(uint8_t ID, uint8_t MemAddr)
 }
 
 //读2字节，超时返回-1
-int readWord(uint8_t ID, uint8_t MemAddr)
+int readWord(uint8_t ID, uint8_t MemAddr, uint8_t End)
 {	
 	uint8_t nDat[2];
 	int Size;
@@ -212,7 +211,7 @@ int readWord(uint8_t ID, uint8_t MemAddr)
 	Size = Read(ID, MemAddr, nDat, 2);
 	if(Size!=2)
 		return -1;
-	wDat = SCS2Host(nDat[0], nDat[1]);
+	wDat = SCS2Host(nDat[0], nDat[1], End);
 	return wDat;
 }
 
