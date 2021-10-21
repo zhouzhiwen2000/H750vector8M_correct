@@ -82,7 +82,7 @@ int get_speed_1(void)
 
 int get_steps_1(void)
 {
-    return current_halfstep_total_1/2;
+    return -current_halfstep_total_1/2;
 }
 
 
@@ -150,7 +150,7 @@ int get_speed_2(void)
 
 int get_steps_2(void)
 {
-    return current_halfstep_total_2/2;
+    return -current_halfstep_total_2/2;
 }
 
 

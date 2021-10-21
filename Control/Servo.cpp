@@ -243,10 +243,7 @@ void Servo_Add_Action_bunch(std::vector<_act>  acts,int32_t time)
                 stepper_lastvalue1=get_steps_1();//update steps
             }
             int stepper_time=fabs(act.value-stepper_lastvalue1)*2.0*New->speed/10;//in ms
-            if(stepper_time>time)
-            {
-                New->time=stepper_time;
-            }
+            New->time=stepper_time;
             stepper_lastvalue1=act.value;
         }
         else if(act.id==0xFFF1)
@@ -261,13 +258,10 @@ void Servo_Add_Action_bunch(std::vector<_act>  acts,int32_t time)
         	}
             if(Current==0)
             {
-                stepper_lastvalue2=get_steps_1();//update steps
+                stepper_lastvalue2=get_steps_2();//update steps
             }
             int stepper_time=fabs(act.value-stepper_lastvalue2)*2.0*New->speed/10;//in ms
-            if(stepper_time>time)
-            {
-                New->time=stepper_time;
-            }
+            New->time=stepper_time;
             stepper_lastvalue2=act.value;
         }
         else
@@ -452,26 +446,41 @@ void Servo_Grab3()
 
 
 
-void Servo_Grab_Upper()//上层抓取的预备姿势 不含向前移动 不含爪子闭合 建议前移>=100
+void Servo_Grab_Upper()//上层抓取的预备姿势
 {
 	xSemaphoreTakeRecursive(Servo_Lock_Upper, portMAX_DELAY);
-	Servo_Add_Action(0xFFF1,16/0.0038,-1);//抬高平台
+	Servo_Add_Action(4,1770,-1);//机械臂抬起
 	Servo_Add_Action(3,470,-1);//机械臂旋转到中间
-	Servo_Add_Action(4,1300,-1);//机械臂水平
+	Servo_Add_Action(0xFFF0,127/0.0038,-1);//伸出平台
 	Servo_Add_Action(5,750,-1);//张开爪子
-
+	Servo_Add_Action(0xFFF1,25/0.0038,-1);//降低平台
+	Servo_Add_Action(4,1300,-1);//机械臂水平
+	Servo_Add_Action(5,580,-1);//合上爪子
 	last_mode_servo=0x06;
 	xSemaphoreGiveRecursive(Servo_Lock_Upper);
 	
 }
 
-void Servo_Grab_Lower()//下层抓取姿势 不含向前移动 建议前移>=100 不含爪子闭合 不含平台回升
+void Servo_Grab_Lower()//下层抓取姿势 不含爪子闭合 不含平台回升
 {
 	xSemaphoreTakeRecursive(Servo_Lock_Upper, portMAX_DELAY);
+	Servo_Add_Action(0xFFF0,127/0.0038,-1);//伸出平台
 	Servo_Add_Action(3,470,-1);//机械臂旋转到中间
 	Servo_Add_Action(4,1300,-1);//机械臂水平
 	Servo_Add_Action(5,750,-1);//张开爪子
 	Servo_Add_Action(0xFFF1,150/0.0038,-1);//降低平台
+	last_mode_servo=0x07;
+    xSemaphoreGiveRecursive(Servo_Lock_Upper);
+}
+
+void Servo_Grab_Ground()//地面抓取
+{
+	xSemaphoreTakeRecursive(Servo_Lock_Upper, portMAX_DELAY);
+	Servo_Add_Action(4,1300,-1);//机械臂水平
+	Servo_Add_Action(5,750,-1);//张开爪子
+	Servo_Add_Action(0xFFF1,150/0.0038,-1);//降低平台
+	Servo_Add_Action(5,580,-1);//合上爪子
+	Servo_Add_Action(0xFFF1,16/0.0038,-1);//抬高平台
 	last_mode_servo=0x07;
     xSemaphoreGiveRecursive(Servo_Lock_Upper);
 }

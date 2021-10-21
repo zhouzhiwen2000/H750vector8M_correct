@@ -180,37 +180,32 @@ void callback_servo(const void * msg)
 			Servo_Release();//爪子张开
 			break;
 		case 0x0A:
-			Servo_Put_Upper();//抓取上层姿势
+			Servo_Put_Upper();//放置上层
 			break;
 		case 0x0B:
-			Servo_Put_Lower();//抓取下层姿势
+			Servo_Put_Lower();//地面放置 不含向前移动 建议前移>=100mm
 			break;
 		case 0x0C:
 			Servo_InitPos();//初始姿态
 			break;
 		case 0x0D:
-			Servo_InitPos();
+			Servo_Grab_Upper();//上层抓取的预备姿势 不含向前移动 不含爪子闭合 建议前移>=100mm
 			break;
 		case 0x0E:
-			All_Middle();
+			Servo_Grab_Lower();//下层抓取姿势 不含向前移动 建议前移>=100 不含爪子闭合 不含平台回升
 			break;
 		case 0x0F:
-			Servo_Camera1();//转回
+			All_Middle();//机械臂旋转到中间+水平
 			break;
 		case 0x10:
-			Servo_Camera2();
 			break;
 		case 0x11:
-			Servo_Camera3();
 			break;
 		case 0x12:
-			Servo_Put_Upper_Storage();
 			break;
 		case 0x13:
-			Servo_Put_Lower_Storage();
 			break;
 		case 0x14:
-			Servo_Camera_AdjPosLower();
 			break;
 	}
 
@@ -229,13 +224,13 @@ void callback_xy(const void * msg)
 	{
 		speed=msgin->z;
 	}
-	if(msgin->y>0.00001)
-	{
-			Servo_Add_Action(0xFFF0,msgin->y/0.0038,speed);
-	}
 	if(msgin->x>0.00001)
 	{
-			Servo_Add_Action(0xFFF1,msgin->x/0.0038,speed);
+			Servo_Add_Action(0xFFF0,msgin->x/0.0038,speed);
+	}
+	if(msgin->y>0.00001)
+	{
+			Servo_Add_Action(0xFFF1,msgin->y/0.0038,speed);
 	}
 
 	publish_servo_status();
