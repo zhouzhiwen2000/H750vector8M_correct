@@ -30,6 +30,7 @@ bool Is_Servo_Idle();
 void update_Servo_state(uint32_t id,int value);
 void change_servo_speed(uint32_t id, double speed);
 void Servo_InitPos();
+void Servo_Grab_Ground();
 #ifdef __cplusplus
 }
 #endif

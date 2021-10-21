@@ -40,7 +40,9 @@ rcl_subscription_t servo_sub;
 rcl_subscription_t xy_sub;
 rcl_subscription_t display_sub;
 rcl_subscription_t servo_speed_sub;
+rcl_subscription_t car_stop_sub;
 
+char test_array[200];
 geometry_msgs__msg__Point pos_msg;
 std_msgs__msg__Bool idle;
 std_msgs__msg__Float64 error_car;
@@ -61,6 +63,7 @@ std_msgs__msg__Float64 sub_msg_speedlimit;
 std_msgs__msg__UInt8 sub_msg_mode;
 std_msgs__msg__UInt8 sub_msg_servo;
 std_msgs__msg__String sub_msg_display;
+std_msgs__msg__Bool sub_msg_stop;
 bool started=false;
 
 #define a_PARAMETER          (0.7384854f)
@@ -189,15 +192,16 @@ void callback_servo(const void * msg)
 			Servo_InitPos();//初始姿态
 			break;
 		case 0x0D:
-			Servo_Grab_Upper();//上层抓取的预备姿势 不含向前移动 不含爪子闭合 建议前移>=100mm
+			Servo_Grab_Upper();//上层抓取的预备姿势
 			break;
 		case 0x0E:
-			Servo_Grab_Lower();//下层抓取姿势 不含向前移动 建议前移>=100 不含爪子闭合 不含平台回升
+			Servo_Grab_Lower();//下层抓取姿势 不含爪子闭合 不含平台回升
 			break;
 		case 0x0F:
 			All_Middle();//机械臂旋转到中间+水平
 			break;
 		case 0x10:
+			Servo_Grab_Ground();//地面抓取
 			break;
 		case 0x11:
 			break;
@@ -214,7 +218,16 @@ void callback_servo(const void * msg)
 void callback_display(const void * msg)
 {
 	const std_msgs__msg__String  * msgin = (const std_msgs__msg__String *)msg;
-	Screen_printString(std::string(msgin->data.data));
+	Screen_printString(std::string(msgin->data.data,msgin->data.size));
+}
+void callback_stop(const void * msg)
+{
+	const std_msgs__msg__Bool  * msgin = (const std_msgs__msg__Bool *)msg;
+	if(msgin->data)
+	{
+	    Set_Run_Flag(0);
+	    Set_Move(0,0,0);
+	}
 }
 void callback_xy(const void * msg)
 {
@@ -247,6 +260,7 @@ void timer_callback(rcl_timer_t * timer, int64_t last_call_time)
 
 void ros_init()
 {
+	Screen_printString("helloworld");
 	// micro-ROS configuration
 	rmw_uros_set_custom_transport(
 	true,
@@ -281,6 +295,10 @@ void ros_init()
 	}
 	// create node
 	rclc_node_init_default(&node, "car_node", "", &support);
+
+	sub_msg_display.data.data = test_array;
+	sub_msg_display.data.size = 0;
+	sub_msg_display.data.capacity = 200;
 
 	// create publisher
 	/*rclc_publisher_init_best_effort*/
@@ -357,6 +375,11 @@ void ros_init()
 		ROSIDL_GET_MSG_TYPE_SUPPORT(geometry_msgs, msg, Point),
 		"/car/servo_speed");
 
+	rclc_subscription_init_default(
+		&car_stop_sub,
+		&node,
+		ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Bool),
+		"/car/stop");
 	// create timer,
 	rcl_timer_t timer;
 	const unsigned int timer_timeout = 100;//10hz
@@ -377,7 +400,7 @@ void ros_init()
 	rclc_executor_add_subscription(&executor, &servo_sub, &sub_msg_servo, &callback_servo, ON_NEW_DATA);
 	rclc_executor_add_subscription(&executor, &xy_sub, &sub_msg_xy, &callback_xy, ON_NEW_DATA);
 	rclc_executor_add_subscription(&executor, &display_sub, &sub_msg_display, &callback_display, ON_NEW_DATA);
-
+	rclc_executor_add_subscription(&executor, &car_stop_sub, &sub_msg_stop, &callback_stop, ON_NEW_DATA);
 	while(1)
 	{
 		TickType_t tcnt=xTaskGetTickCount();
@@ -390,6 +413,11 @@ void ros_init()
 			rcl_publish(&car_start, &start, NULL);
 			Servo_InitPos();
 			started=true;
+		}
+		if(HAL_GPIO_ReadPin(KEY2_GPIO_Port,KEY2_Pin)==0)
+		{
+			 __set_FAULTMASK(1); //关闭所有中断
+			 NVIC_SystemReset(); //复位
 		}
 		osDelayUntil(tcnt+20);//100Hz
 	}
