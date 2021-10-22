@@ -337,8 +337,8 @@ void Servo_InitPos()
 void Servo_Put3()
 {
 	xSemaphoreTakeRecursive(Servo_Lock_Upper, portMAX_DELAY);
-	Servo_Add_Action(3,940,-1);//1号盘子
-	Servo_Add_Action(0xFFF0,37/0.0038,-1);//stub:push stepper
+	Servo_Add_Action(2,940,-1);//3号盘子
+	Servo_Add_Action(0xFFF0,37/0.0038,1);//stub:push stepper
 	Servo_Add_Action(0xFFF1,450,-1);//stub:lift stepper
 	Servo_Add_Action(4,1770,-1);//机械臂抬起
 	Servo_Add_Action(3,1500,-1);//机械臂旋转
@@ -356,8 +356,8 @@ void Servo_Put3()
 void Servo_Put2()
 {
 	xSemaphoreTakeRecursive(Servo_Lock_Upper, portMAX_DELAY);
-	Servo_Add_Action(2,550,-1);//1号盘子
-	Servo_Add_Action(0xFFF0,37/0.0038,-1);//stub:push stepper
+	Servo_Add_Action(2,550,-1);//2号盘子
+	Servo_Add_Action(0xFFF0,37/0.0038,1);//stub:push stepper
 	Servo_Add_Action(0xFFF1,450,-1);//stub:lift stepper
 	Servo_Add_Action(4,1770,-1);//机械臂抬起
 	Servo_Add_Action(3,1500,-1);//机械臂旋转
@@ -375,7 +375,7 @@ void Servo_Put1()
 {
 	xSemaphoreTakeRecursive(Servo_Lock_Upper, portMAX_DELAY);
 	Servo_Add_Action(2,170,-1);//1号盘子
-	Servo_Add_Action(0xFFF0,37/0.0038,-1);//stub:push stepper
+	Servo_Add_Action(0xFFF0,37/0.0038,1);//stub:push stepper
 	Servo_Add_Action(0xFFF1,450,-1);//stub:lift stepper
 	Servo_Add_Action(4,1770,-1);//机械臂抬起
 	Servo_Add_Action(3,1500,-1);//机械臂旋转
@@ -392,13 +392,13 @@ void Servo_Grab1()
 {
 	xSemaphoreTakeRecursive(Servo_Lock_Upper, portMAX_DELAY);
 	Servo_Add_Action(2,170,-1);//1号盘子
-	Servo_Add_Action(0xFFF0,37/0.0038,-1);//stub:push stepper
+	Servo_Add_Action(0xFFF0,37/0.0038,1);//stub:push stepper
 	Servo_Add_Action(0xFFF1,450,-1);//stub:lift stepper
 	Servo_Add_Action(5,750,-1);//张开爪子
 	Servo_Add_Action(4,1770,-1);//机械臂抬起
 	Servo_Add_Action(3,1500,-1);//机械臂旋转
 	Servo_Add_Action(4,1300,-1);//机械臂水平
-	Servo_Add_Action(0xFFF1,20/0.0038,-1);//stub:lower stepper
+	Servo_Add_Action(0xFFF1,25/0.0038,-1);//stub:lower stepper
 	Servo_Add_Action(5,580,-1);//合上爪子
 	Servo_Add_Action(0xFFF1,450,-1);//stub:lower stepper
 	Servo_Add_Action(4,1770,-1);//机械臂抬起
@@ -410,12 +410,13 @@ void Servo_Grab2()
 	xSemaphoreTakeRecursive(Servo_Lock_Upper, portMAX_DELAY);
 	
 	Servo_Add_Action(2,550,-1);//1号盘子
-	Servo_Add_Action(0xFFF0,37/0.0038,-1);//stub:push stepper
+	Servo_Add_Action(0xFFF0,37/0.0038,1);//stub:push stepper
+	Servo_Add_Action(0xFFF1,450,-1);//stub:lift stepper
 	Servo_Add_Action(5,750,-1);//张开爪子
 	Servo_Add_Action(4,1770,-1);//机械臂抬起
 	Servo_Add_Action(3,1500,-1);//机械臂旋转
 	Servo_Add_Action(4,1300,-1);//机械臂水平
-	Servo_Add_Action(0xFFF1,20/0.0038,-1);//stub:lower stepper
+	Servo_Add_Action(0xFFF1,25/0.0038,-1);//stub:lower stepper
 	Servo_Add_Action(5,580,-1);//合上爪子
 	Servo_Add_Action(0xFFF1,450,-1);//stub:lower stepper
 	Servo_Add_Action(4,1770,-1);//机械臂抬起
@@ -430,12 +431,13 @@ void Servo_Grab3()
 	xSemaphoreTakeRecursive(Servo_Lock_Upper, portMAX_DELAY);
 
 	Servo_Add_Action(2,940,-1);//1号盘子
-	Servo_Add_Action(0xFFF0,37/0.0038,-1);//stub:push stepper
+	Servo_Add_Action(0xFFF0,37/0.0038,1);//stub:push stepper
+	Servo_Add_Action(0xFFF1,450,-1);//stub:lift stepper
 	Servo_Add_Action(5,750,-1);//张开爪子
 	Servo_Add_Action(4,1770,-1);//机械臂抬起
 	Servo_Add_Action(3,1500,-1);//机械臂旋转
 	Servo_Add_Action(4,1300,-1);//机械臂水平
-	Servo_Add_Action(0xFFF1,20/0.0038,-1);//stub:lower stepper
+	Servo_Add_Action(0xFFF1,25/0.0038,-1);//stub:lower stepper
 	Servo_Add_Action(5,580,-1);//合上爪子
 	Servo_Add_Action(0xFFF1,450,-1);//stub:lower stepper
 	Servo_Add_Action(4,1770,-1);//机械臂抬起
@@ -476,9 +478,10 @@ void Servo_Grab_Lower()//下层抓取姿势 不含爪子闭合 不含平台回�
 void Servo_Grab_Ground()//地面抓取
 {
 	xSemaphoreTakeRecursive(Servo_Lock_Upper, portMAX_DELAY);
+	Servo_Add_Action(3,470,-1);//机械臂旋转到中间
 	Servo_Add_Action(4,1300,-1);//机械臂水平
 	Servo_Add_Action(5,750,-1);//张开爪子
-	Servo_Add_Action(0xFFF1,150/0.0038,-1);//降低平台
+	Servo_Add_Action(0xFFF1,185/0.0038,-1);//降低平台
 	Servo_Add_Action(5,580,-1);//合上爪子
 	Servo_Add_Action(0xFFF1,16/0.0038,-1);//抬高平台
 	last_mode_servo=0x07;
