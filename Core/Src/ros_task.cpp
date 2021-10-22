@@ -41,12 +41,12 @@ rcl_subscription_t xy_sub;
 rcl_subscription_t display_sub;
 rcl_subscription_t servo_speed_sub;
 rcl_subscription_t car_stop_sub;
-
+rcl_subscription_t ros_ok_sub;
 char test_array[200];
 geometry_msgs__msg__Point pos_msg;
 std_msgs__msg__Bool idle;
 std_msgs__msg__Float64 error_car;
-
+bool ros_ok=false;
 void callback_pos(const void * msg);
 void callback_speed(const void * msg);
 void callback_speedlimit(const void * msg);
@@ -64,6 +64,23 @@ std_msgs__msg__UInt8 sub_msg_mode;
 std_msgs__msg__UInt8 sub_msg_servo;
 std_msgs__msg__String sub_msg_display;
 std_msgs__msg__Bool sub_msg_stop;
+std_msgs__msg__Bool sub_msg_rosok;
+osThreadId_t LEDTaskHandle;
+const osThreadAttr_t LEDTask_attributes = {
+  .name = "LEDTask",
+  .stack_size = 64 * 4,
+  .priority = (osPriority_t) osPriorityLow,
+};
+void StartLEDTask(void *argument)
+{
+	static bool ledstate=false;
+	while(1)
+	{
+		HAL_GPIO_WritePin(LED_GPIO_Port,LED_Pin,(GPIO_PinState)ledstate);
+		ledstate=!ledstate;
+		osDelay(500);
+	}
+}
 bool started=false;
 
 #define a_PARAMETER          (0.7384854f)
@@ -92,7 +109,7 @@ void callback_speed(const void * msg)// cm/s
     Set_Move(\
 		msgin->x*17.8731,\
 		msgin->y*17.8731,\
-		(msgin->z*R)*17.8731\
+		(msgin->z*R)*17.8731/1.16667\
 		);
 }
 void callback_pos(const void * msg)// cm
@@ -111,7 +128,7 @@ void callback_pos(const void * msg)// cm
 	Set_Move(\
 	msgin->x*1787.3100,\
 	msgin->y*1787.3100,\
-	(msgin->z*R)*1787.3100\
+	(msgin->z*R)*1787.3100/1.16667\
 	);
     if(Get_relative()==1)
 		Set_pending_flag(1);
@@ -227,6 +244,15 @@ void callback_stop(const void * msg)
 	{
 	    Set_Run_Flag(0);
 	    Set_Move(0,0,0);
+	}
+}
+void callback_ros_ok(const void * msg)
+{
+	const std_msgs__msg__Bool  * msgin = (const std_msgs__msg__Bool *)msg;
+	if(msgin->data&&!ros_ok)
+	{
+		  LEDTaskHandle = osThreadNew(StartLEDTask, NULL, &LEDTask_attributes);
+		  ros_ok=true;
 	}
 }
 void callback_xy(const void * msg)
@@ -380,6 +406,12 @@ void ros_init()
 		&node,
 		ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Bool),
 		"/car/stop");
+
+	rclc_subscription_init_default(
+		&ros_ok_sub,
+		&node,
+		ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Bool),
+		"/car/ros_ok");
 	// create timer,
 	rcl_timer_t timer;
 	const unsigned int timer_timeout = 100;//10hz
@@ -389,7 +421,7 @@ void ros_init()
 		RCL_MS_TO_NS(timer_timeout),
 		timer_callback);
 	rclc_executor_t executor = rclc_executor_get_zero_initialized_executor();
-	rclc_executor_init(&executor, &support.context, 10, &allocator);//8subs+1timer
+	rclc_executor_init(&executor, &support.context, 12, &allocator);//8subs+1timer
 	rclc_executor_add_timer(&executor, &timer);
 
 	rclc_executor_add_subscription(&executor, &carpos_sub, &sub_msg_pos, &callback_pos, ON_NEW_DATA);
@@ -401,6 +433,8 @@ void ros_init()
 	rclc_executor_add_subscription(&executor, &xy_sub, &sub_msg_xy, &callback_xy, ON_NEW_DATA);
 	rclc_executor_add_subscription(&executor, &display_sub, &sub_msg_display, &callback_display, ON_NEW_DATA);
 	rclc_executor_add_subscription(&executor, &car_stop_sub, &sub_msg_stop, &callback_stop, ON_NEW_DATA);
+	rclc_executor_add_subscription(&executor, &ros_ok_sub, &sub_msg_rosok, &callback_ros_ok, ON_NEW_DATA);
+
 	while(1)
 	{
 		TickType_t tcnt=xTaskGetTickCount();

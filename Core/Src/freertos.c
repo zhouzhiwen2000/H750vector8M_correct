@@ -81,12 +81,7 @@ const osThreadAttr_t ROSTask_attributes = {
   .stack_size = 1000 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
-osThreadId_t LEDTaskHandle;
-const osThreadAttr_t LEDTask_attributes = {
-  .name = "LEDTask",
-  .stack_size = 64 * 4,
-  .priority = (osPriority_t) osPriorityLow,
-};
+
 /* USER CODE END Variables */
 /* Definitions for defaultTask */
 osThreadId_t defaultTaskHandle;
@@ -101,7 +96,7 @@ const osThreadAttr_t defaultTask_attributes = {
 void StartControlTask(void *argument);
 void StartServoTask(void *argument);
 void StartROSTask(void *argument);
-void StartLEDTask(void *argument);
+//void StartLEDTask(void *argument);
 /* USER CODE END FunctionPrototypes */
 
 void StartDefaultTask(void *argument);
@@ -191,7 +186,6 @@ void StartServoTask(void *argument)
   Servo_Lock = xSemaphoreCreateMutex();//create lock used for control loop
   Servo_Lock_Upper = xSemaphoreCreateRecursiveMutex();
   ROSTaskHandle = osThreadNew(StartROSTask, NULL, &ROSTask_attributes);
-  LEDTaskHandle = osThreadNew(StartLEDTask, NULL, &LEDTask_attributes);
   set_stepper_2(-0xFFFF);
   set_stepper_1(-0xFFFF);
   osDelay(1000);
@@ -202,7 +196,7 @@ void StartServoTask(void *argument)
   update_Servo_state(5,580);//set default inital positions to save time
   WritePosSCS(100,0,0,0);//dummy info to flush serial
   WritePosSTS(100,0,1000,50);//dummy info to flush serial
-  Servo_InitPos();
+//  Servo_InitPos();
 //  Servo_Add_Action(0xFFF0,110/0.0038,1);//push out
 //  Servo_Camera();
   for(;;)
@@ -222,16 +216,7 @@ void StartROSTask(void *argument)
 	}
 }
 
-void StartLEDTask(void *argument)
-{
-	static bool ledstate=false;
-	while(1)
-	{
-		HAL_GPIO_WritePin(LED_GPIO_Port,LED_Pin,ledstate);
-		ledstate=!ledstate;
-		osDelay(500);
-	}
-}
+
 /* USER CODE END Application */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
